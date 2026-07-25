@@ -1,26 +1,152 @@
 @import "tailwindcss";
+@import "tw-animate-css";
 
+/*
+ * Orbit design tokens — from the approved UI/UX Design System doc.
+ * Raw values live here (:root / .dark); @theme inline maps them to
+ * Tailwind utilities (bg-accent, text-status-done, etc.) so the same
+ * class works in both themes without conditional logic in components.
+ */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: #f5f6f5;
+  --surface: #ffffff;
+  --border: #e1e4e2;
+  --foreground: #1a1d1f;
+  --muted: #ececea;
+  --muted-foreground: #62696c;
+  --faint: #9aa0a3;
+
+  --accent: #b2551e;
+  --accent-hover: #9a481a;
+  --accent-foreground: #ffffff;
+
+  /* shadcn/ui component tokens — mapped onto Orbit's own palette above,
+     not shadcn's defaults, so generated components match the design
+     system instead of a generic neutral theme. */
+  --primary: var(--accent);
+  --primary-foreground: var(--accent-foreground);
+  --secondary: var(--surface);
+  --secondary-foreground: var(--foreground);
+  --destructive: #a5382b;
+  --destructive-foreground: #ffffff;
+  --card: var(--surface);
+  --card-foreground: var(--foreground);
+  --popover: var(--surface);
+  --popover-foreground: var(--foreground);
+  --input: var(--border);
+  --ring: var(--accent);
+
+  --status-backlog: #9aa0a3;
+  --status-todo: #5b7a99;
+  --status-in-progress: #d9a62e;
+  --status-in-review: #2c7fa6;
+  --status-done: #1e7a6e;
+  --status-cancelled: #a65d5d;
+
+  --priority-urgent: #c0392b;
+  --priority-high: #b2551e;
+  --priority-medium: #c9a227;
+  --priority-low: #8b9296;
+  --priority-none: #c7cbc9;
+
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --radius-lg: 10px;
+}
+
+.dark {
+  --background: #14171a;
+  --surface: #1b1f23;
+  --border: #2c3236;
+  --foreground: #e6e8e6;
+  --muted: #242a2f;
+  --muted-foreground: #9aa3a6;
+  --faint: #6f797c;
+
+  --accent: #e08a4c;
+  --accent-hover: #c97a3f;
+  --accent-foreground: #14171a;
+
+  --primary: var(--accent);
+  --primary-foreground: var(--accent-foreground);
+  --secondary: var(--surface);
+  --secondary-foreground: var(--foreground);
+  --destructive: #d97361;
+  --destructive-foreground: #ffffff;
+  --card: var(--surface);
+  --card-foreground: var(--foreground);
+  --popover: var(--surface);
+  --popover-foreground: var(--foreground);
+  --input: var(--border);
+  --ring: var(--accent);
+
+  --status-backlog: #a7acae;
+  --status-todo: #7a9bc0;
+  --status-in-progress: #e6bb52;
+  --status-in-review: #4b9dc7;
+  --status-done: #3fb6a4;
+  --status-cancelled: #c07f7f;
+
+  --priority-urgent: #d9584a;
+  --priority-high: #e08a4c;
+  --priority-medium: #dbb949;
+  --priority-low: #9aa0a3;
+  --priority-none: #4a5155;
 }
 
 @theme inline {
   --color-background: var(--background);
+  --color-surface: var(--surface);
+  --color-border: var(--border);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
+  --color-muted-foreground: var(--muted-foreground);
+  --color-faint: var(--faint);
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  --color-accent: var(--accent);
+  --color-accent-hover: var(--accent-hover);
+  --color-accent-foreground: var(--accent-foreground);
+
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+
+  --color-status-backlog: var(--status-backlog);
+  --color-status-todo: var(--status-todo);
+  --color-status-in-progress: var(--status-in-progress);
+  --color-status-in-review: var(--status-in-review);
+  --color-status-done: var(--status-done);
+  --color-status-cancelled: var(--status-cancelled);
+
+  --color-priority-urgent: var(--priority-urgent);
+  --color-priority-high: var(--priority-high);
+  --color-priority-medium: var(--priority-medium);
+  --color-priority-low: var(--priority-low);
+  --color-priority-none: var(--priority-none);
+
+  --radius-sm: var(--radius-sm);
+  --radius-md: var(--radius-md);
+  --radius-lg: var(--radius-lg);
+
+  --font-sans: var(--font-inter);
+  --font-mono: var(--font-jetbrains-mono);
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--color-background);
+  color: var(--color-foreground);
+  font-family:
+    var(--font-sans),
+    -apple-system,
+    "Segoe UI",
+    sans-serif;
 }

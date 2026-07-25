@@ -1,0 +1,20 @@
+// Foundation phase: connection wiring only. No models yet — those are
+// added in the Database milestone once the ERD from System Design is
+// implemented.
+//
+// Prisma 7: the connection URL is no longer set here — it lives in
+// `prisma.config.ts` (CLI operations) and is passed explicitly to the
+// Neon driver adapter at runtime (see src/lib/prisma.ts). A separate
+// `directUrl` is no longer needed either: the Neon adapter queries over
+// HTTP, which bypasses the prepared-statement limitation that made a
+// non-pooled connection necessary for migrations under the old
+// classic-TCP setup.
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
