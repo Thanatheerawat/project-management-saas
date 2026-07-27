@@ -1,12 +1,8 @@
-// Foundation phase: connection wiring only. No models yet — those are
-// added in the Database milestone once the ERD from System Design is
-// implemented.
-//
-// Prisma 7: the connection URL is no longer set here — it lives in
+// Prisma 7: the connection URL is not set here — it lives in
 // `prisma.config.ts` (CLI operations) and is passed explicitly to the
 // Neon driver adapter at runtime (see src/lib/prisma.ts). A separate
-// `directUrl` is no longer needed either: the Neon adapter queries over
-// HTTP, which bypasses the prepared-statement limitation that made a
+// `directUrl` is not needed either: the Neon adapter queries over HTTP,
+// which bypasses the prepared-statement limitation that made a
 // non-pooled connection necessary for migrations under the old
 // classic-TCP setup.
 
@@ -17,4 +13,127 @@ generator client {
 
 datasource db {
   provider = "postgresql"
+}
+
+// --- Milestone 2: Identity & Access Management -----------------------
+
+// Platform-level role only (SUPER_ADMIN > ADMIN > USER). This is distinct
+// from the per-organization RBAC (Owner/Admin/Member/Viewer) designed in
+// System Design — that requires an Organization/Membership model that
+// doesn't exist until the Workspace milestone. See docs/adr for the
+// scope note if one is added.
+enum PlatformRole {
+  USER
+  ADMIN
+  SUPER_ADMIN
+}
+
+enum AuditAction {
+  REGISTER
+  LOGIN_SUCCESS
+  LOGIN_FAILED
+  LOGOUT
+  PASSWORD_RESET_REQUESTED
+  PASSWORD_RESET_COMPLETED
+  EMAIL_VERIFIED
+  PROFILE_UPDATED
+}
+
+model User {
+  id                  String    @id @default(uuid())
+  name                String?
+  email               String    @unique
+  emailVerified       DateTime?
+  image               String?
+  passwordHash        String?
+  role                PlatformRole @default(USER)
+  isActive            Boolean   @default(true)
+  lastLoginAt         DateTime?
+  failedLoginAttempts Int       @default(0)
+  lockedUntil         DateTime?
+  createdAt           DateTime  @default(now())
+  updatedAt           DateTime  @updatedAt
+
+  accounts            Account[]
+  sessions            Session[]
+  passwordResetTokens PasswordResetToken[]
+  auditLogs           AuditLog[]
+}
+
+// Auth.js Adapter contract — required shape even though only the
+// Credentials provider is wired up in Milestone 2. Keeping this now avoids
+// a schema migration when GitHub OAuth is added later.
+model Account {
+  id                String  @id @default(uuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+// Auth.js Adapter contract. Not the active session mechanism in
+// Milestone 2 (which uses the JWT strategy, per docs/security.md) — kept
+// for adapter compatibility and to allow switching strategies later
+// without a schema change.
+model Session {
+  id           String   @id @default(uuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+// Auth.js Adapter's standard shape (identifier+token+expires) — also
+// exactly what our own mock email-verification flow needs, so it's reused
+// directly rather than adding a near-duplicate model. `token` stores a
+// hash (see PasswordResetToken below for the same reasoning); the row is
+// deleted once consumed rather than flagged, matching how Auth.js's own
+// adapters treat this table.
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+// Deliberately separate from VerificationToken (an Auth.js Adapter table
+// we don't otherwise control) so our own password-reset flow isn't
+// coupled to Auth.js's internal contract. Stores a hash of the token, not
+// the raw value — see docs/security.md (A02).
+model PasswordResetToken {
+  id        String    @id @default(uuid())
+  userId    String
+  tokenHash String    @unique
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime  @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+// See docs/security.md (A09). userId is nullable so failed-login attempts
+// against an email with no matching account are still recorded for
+// monitoring; onDelete: SetNull keeps the audit trail intact even if the
+// user is later removed.
+model AuditLog {
+  id        String      @id @default(uuid())
+  userId    String?
+  action    AuditAction
+  metadata  Json?
+  createdAt DateTime    @default(now())
+
+  user User? @relation(fields: [userId], references: [id], onDelete: SetNull)
 }

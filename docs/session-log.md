@@ -6,6 +6,31 @@
 
 ---
 
+## TL;DR — ถ้าเปิดแชทใหม่ อ่านตรงนี้ก่อน
+
+**Orbit** = SaaS ติดตามงาน/issue สำหรับทีม dev (แนว Linear/Jira) + AI copilot ฟรี
+ทำเป็นผลงานสมัครงานสาย Full Stack ทำงานแบบ "ออกแบบก่อน อนุมัติทีละขั้น ห้ามข้าม" เสมอ
+(กติกาเต็มอยู่ท้ายไฟล์นี้ หัวข้อ "Standing Rules")
+
+**Tech stack ที่ล็อกไว้แล้ว (ห้ามเปลี่ยนโดยไม่ถาม)**: Next.js App Router + TypeScript +
+Tailwind v4 + shadcn/ui (Radix) + Prisma 7 (ผ่าน `@prisma/adapter-neon`, ไม่ใช้ url/directUrl
+แบบเดิม) + Neon Postgres + next-auth **v4** (ไม่ใช่ v5 — ดู ADR-006) + TanStack Query
+(server state) + Zustand (client/UI state เท่านั้น) + Vercel — รายละเอียดเหตุผลทั้งหมดอยู่ใน
+`docs/adr/`
+
+**สถานะตอนนี้ (ล่าสุด)**: Foundation (v0.1.0) commit+tag แล้ว (`73f6e4a`) Milestone 2
+(Identity & Access Management) **เสร็จสมบูรณ์ 100%** — migrate บน Neon จริงสำเร็จ, integration
+test (29 test), Playwright e2e test (11 test), manual verification ครบ 10 flow, security/DB/
+cleanup validation ผ่านหมด, quality gate เขียวทั้ง 8 ข้อ — รายละเอียดทั้งหมดอยู่ในหัวข้อ
+"Milestone 2 — Database Migration & Test Suites" และ "Milestone 2 — Manual Verification"
+ด้านล่าง กำลังรอการอนุมัติ commit/tag เป็น `v0.2.0`
+
+**ถ้าจะทำงานต่อ**: เช็ค `git status`/`git log` จริงก่อนเชื่อไฟล์นี้ทั้งหมดเสมอ — ถ้า `v0.2.0`
+ถูก tag ไปแล้ว Milestone 2 ปิดแล้ว ให้เริ่ม Milestone 3 (Workspace) ตามแผนเดิมได้เลย โดยยังต้อง
+อธิบายแผน+เหตุผล+โครงสร้างก่อนเขียนโค้ดเสมอตามกติกาเดิม
+
+---
+
 ## ภาพรวมโปรเจกต์
 
 **Orbit** คือ SaaS สำหรับติดตามงาน/issue ของทีมพัฒนาซอฟต์แวร์ แนวเดียวกับ Linear/Jira
@@ -316,8 +341,287 @@ Architecture/Stack/Dependency/Business Logic ใดๆ):
 
 ---
 
+## Foundation Committed: v0.1.0
+
+Commit `73f6e4a` ("feat(core): complete project foundation") + annotated tag `v0.1.0`
+— working tree clean หลัง commit (pre-commit hook รัน Prettier reformat ให้อัตโนมัติ
+รวมอยู่ใน commit เดียวกัน)
+
+## Milestone 2 Development Plan — ปรับก่อนเริ่ม Implementation
+
+อนุมัติแผน Milestone 2 (Identity & Access Management) โดยรวม พร้อมขอปรับ 5 จุดก่อนเริ่มเขียนโค้ด
+(ยังคง Architecture/Stack เดิมทั้งหมด):
+
+1. **Platform Role ขยายเป็น 3 ระดับ**: `SUPER_ADMIN` > `ADMIN` > `USER` (จากเดิม 2 ระดับ)
+2. **เพิ่มฟิลด์ใน `User`** (แผนเท่านั้น ยังไม่สร้างจริง): `isActive`, `lastLoginAt`,
+   `failedLoginAttempts`, `lockedUntil`
+3. **เพิ่ม `AuditLog` เข้า domain model** (ยังไม่ implement) — บันทึก LOGIN_SUCCESS/FAILED,
+   LOGOUT, PASSWORD_RESET_REQUESTED/COMPLETED, PROFILE_UPDATED พร้อม `userId` (nullable),
+   `action`, `metadata` (jsonb)
+4. **เพิ่ม `GET /api/auth/session`** ใน API design — ชี้แจงว่านี่คือ endpoint ที่ Auth.js
+   มีให้อยู่แล้วในตัว (ผ่าน catch-all route) ไม่ใช่โค้ดที่ต้องเขียนเอง
+5. **เพิ่มเอกสาร 2 ไฟล์** (สร้างจริงแล้วตอนนี้ เพราะเป็นเอกสารไม่ใช่โค้ด):
+   - [`docs/auth-flow.md`](./auth-flow.md) — Mermaid sequence/flow diagram ครบ 5 flow
+     (Register+Mock Verify, Login, Route Protection, Forgot/Reset Password, Logout)
+   - [`docs/security.md`](./security.md) — สรุปแนวทางตาม OWASP Top 10 (2021) ที่เกี่ยวข้อง
+     (A01, A02, A03, A04, A05, A07, A09) + หัวข้อที่ยังไม่อยู่ใน scope (rate limiting กระจาย,
+     CSP, 2FA)
+
+ยังไม่เขียนโค้ด ไม่ติดตั้ง package ใดๆ — รอการอนุมัติแผนที่ปรับแล้วก่อนเริ่ม Implementation จริง
+
+---
+
+## Milestone 2 — Implementation
+
+อนุมัติให้เริ่มเขียนโค้ดจริงแบบ incremental รายงานทุกช่วง ห้าม commit/tag/push จนกว่าจะสั่ง
+ทำ 6 increment ตามลำดับ:
+
+### Increment 1 — Prisma Schema + Dependencies
+
+ติดตั้ง `next-auth` + `bcryptjs`, เพิ่ม 6 model (`PlatformRole`/`AuditAction` enum,
+`User` ขยาย, `Account`, `Session`, `VerificationToken`, `PasswordResetToken`, `AuditLog`)
+`prisma generate` ผ่าน **ค้นพบสำคัญ**: `next-auth` resolve เป็น **v4.24.15 ไม่ใช่ v5**
+(v5 ยัง beta) — ไม่กระทบ Dependency/Schema/Folder Structure ใดๆ แค่วิธีเขียนโค้ดภายในเปลี่ยน
+(ดู ADR-006) ลบ `@types/bcryptjs` ที่ deprecated ออกทันที (bcryptjs 3.x มี type ในตัวแล้ว)
+**เจอ blocker**: `.env` ยังเป็น placeholder localhost — `prisma migrate dev` ต้องการ
+`DATABASE_URL` จริงจาก Neon ที่ยังไม่ได้รับ
+
+### Increment 2 — Auth Core + Repositories + Session Provider
+
+`lib/auth/{password,rbac,auth.config,auth,tokens}.ts`, module augmentation
+`types/next-auth.d.ts`, repositories (`user`, `password-reset-token`, `audit-log`,
+`verification-token`), mock `email.service.ts`, zod schema 6 ตัว, `SessionProvider`
+ต่อเข้า `AppProviders` **ค้นพบ**: ไม่ต้องใช้ `PrismaAdapter` เลย เพราะ Credentials+JWT
+ไม่พึ่ง adapter (ประหยัด dependency ไปอีกตัว) เพิ่ม `NEXTAUTH_SECRET` เข้า env validation
+
+- generate ค่า dev ไว้ใน `.env`
+
+### Increment 3 — API Route Handlers
+
+6 endpoint ครบ (`register`, `forgot-password`, `reset-password`, `verify-email`,
+`users/me`, `users/profile`) + `lib/api-error.ts` (shared error envelope) แก้ comment
+`VerificationToken` ใน schema ให้ตรงกับการใช้งานจริง (ใช้เก็บ mock email-verification
+token โดยตรง ไม่ใช่ "สำรองไว้เฉยๆ" ตามที่เข้าใจผิดตอนวางแผน)
+
+### Increment 4 — Middleware
+
+`middleware.ts` เปลี่ยนจาก pass-through เป็น route protection จริงด้วย `getToken()`
+จาก `next-auth/jwt` (คนละตัวกับ `auth()` wrapper เพราะรันบน Edge runtime)
+
+### Increment 5 — UI (ใหญ่ที่สุด)
+
+Hooks (TanStack Query) ครบทุก flow, Form component ด้วย `useState` + zod ธรรมดา
+(**ไม่ใช้ form library** เพื่อไม่เพิ่ม dependency), pages ครบ 6 หน้า + layout 2 ชุด
+`register/route.ts` คืน `mockVerifyUrl` ในผลลัพธ์ (ปลอดภัยเพราะ 201 เองก็ยืนยันมีบัญชีอยู่แล้ว
+ต่างจาก forgot-password ที่ไม่คืน token ใดๆ) เจอ `react-hooks/set-state-in-effect` ใน
+`ProfileForm` (เหมือนที่เจอกับ `ThemeToggle` ตอน Foundation) แก้ด้วยการแยก
+component ย่อยที่ initialize state จากข้อมูลที่โหลดเสร็จแล้วโดยตรง `pnpm build` ผ่านสมบูรณ์
+
+### Increment 6 — Unit Tests
+
+`password.test.ts`, `rbac.test.ts`, `register.schema.test.ts` — 14 test ผ่านหมด
+**Integration/E2E test เลื่อนออกไป** — ต้องมี DB จริงถึงจะเขียนแล้วรันได้จริง (ไม่ใช่แค่โค้ดลอยๆ)
+
+### สถานะปัจจุบัน: รอ DATABASE_URL จริงจาก Neon
+
+`pnpm lint` ✅ / `pnpm typecheck` ✅ / `pnpm build` ✅ / `pnpm test` ✅ (14 unit test)
+**ค้างอยู่**: `pnpm prisma migrate dev` (ต้องต่อ DB จริง), integration test, e2e test,
+และการทดสอบ flow จริงด้วยมือ (สมัคร/login/reset password จริง)
+
+**เอกสารที่อัปเดต**: README.md, CHANGELOG.md (เพิ่ม `[Unreleased]` section),
+`docs/security.md` (แก้ `AUTH_SECRET`→`NEXTAUTH_SECRET`), `docs/folder-structure.md`
+(อัปเดต note ที่ล้าสมัยเรื่อง middleware/(auth)/(dashboard)), `docs/setup-guide.md`,
+เพิ่ม **ADR-006** (next-auth v4 + no adapter)
+
+ยังไม่ commit/tag ใดๆ ตามคำสั่ง
+
+---
+
+## Final Report ที่ส่งให้ผู้ใช้ (Milestone 2 — ยังไม่ปิดจ๊อบ)
+
+### Progress
+
+**~90% เสร็จ** — โค้ดทั้งหมดเขียนเสร็จและผ่าน Quality Gate ที่ไม่ต้องพึ่ง DB จริงครบทุกข้อ
+ค้างอยู่จุดเดียว: ต้องมี `DATABASE_URL` จริงจาก Neon เพื่อรัน `pnpm prisma migrate dev`
+และเขียน integration/e2e test ให้จบ
+
+### Completed
+
+Authentication (register/login/logout), Authorization พื้นฐาน, RBAC 3 ระดับ,
+Session Management (JWT), Route Protection (middleware จริง), User Profile,
+Forgot/Reset Password, Email Verification (Mock) — ครบทุก Feature ตามแผน
+
+### Files Added (~40 ไฟล์)
+
+`prisma/schema.prisma` (แก้), `docs/adr/006-*.md`, `docs/auth-flow.md`, `docs/security.md`,
+`src/lib/auth/{password,rbac,auth.config,auth,tokens}.ts`, `src/lib/{api-client,api-error}.ts`,
+`src/types/next-auth.d.ts`, `src/repositories/auth/{user,password-reset-token,audit-log,
+verification-token}.repository.ts`, `src/services/auth/email.service.ts`,
+`src/features/auth/{schemas×5, hooks×5, components×5}`,
+`src/features/user/{schemas×1, hooks×2, components×2}`,
+`src/app/api/auth/{[...nextauth],register,forgot-password,reset-password,verify-email}/route.ts`,
+`src/app/api/users/{me,profile}/route.ts`, `src/app/(auth)/layout.tsx` + 5 pages,
+`src/app/(dashboard)/layout.tsx` + profile page, `src/providers/session-provider.tsx`,
+unit tests × 3
+
+### Files Modified
+
+`package.json`/`pnpm-lock.yaml`, `src/config/env.ts` (+`NEXTAUTH_SECRET`),
+`.env`/`.env.example` (−`DIRECT_URL`, +`NEXTAUTH_SECRET`), `src/middleware.ts`,
+`src/providers/index.tsx` (+SessionProvider), `README.md`, `CHANGELOG.md`,
+`docs/{security,setup-guide,folder-structure,adr/README}.md`
+
+### Packages Installed
+
+`next-auth` (4.24.15 — อยู่ในสต็อกเดิม แค่ยังไม่เคยติดตั้ง), `bcryptjs` (3.0.3 — ตัวใหม่ตัวเดียว
+ที่อนุมัติ) — ติดตั้ง `@types/bcryptjs` แล้วลบทิ้งทันทีเมื่อพบว่า deprecated/ไม่จำเป็น
+
+### Problems Found (ไม่กระทบ Architecture/Stack ที่อนุมัติ)
+
+1. `next-auth` เป็น v4.24.15 ไม่ใช่ v5 (บันทึกเป็น ADR-006)
+2. ไม่ต้องใช้ `PrismaAdapter` — Credentials+JWT ไม่พึ่ง adapter
+3. 🔴 บล็อกอยู่: ไม่มี `DATABASE_URL` จริง → migrate/integration test/e2e test/ทดสอบมือ
+   ยังทำไม่ได้
+
+### Verification Result
+
+| คำสั่ง                    | ผล                 |
+| ------------------------- | ------------------ |
+| `pnpm prisma generate`    | ✅                 |
+| `pnpm prisma migrate dev` | ❌ ต้องการ DB จริง |
+| `pnpm lint`               | ✅                 |
+| `pnpm typecheck`          | ✅                 |
+| `pnpm build`              | ✅                 |
+| `pnpm test`               | ✅ (14 unit test)  |
+
+### Next Step
+
+ต้องการ Neon `DATABASE_URL` จริงจากผู้ใช้ เพื่อรัน migration + เขียน/รัน integration
+และ e2e test + ทดสอบ flow เต็มด้วยมือ 1 รอบ จากนั้นจะรายงาน Final Milestone 2 Report
+ฉบับสมบูรณ์และรอการอนุมัติก่อน commit/tag — **ยังไม่ Commit/Tag/Push ใดๆ**
+
+---
+
+## Milestone 2 — Database Migration & Test Suites
+
+ผู้ใช้ตั้งค่า `DATABASE_URL` จริงจาก Neon ใน `.env` แล้ว อนุมัติให้ทำงานที่ค้างต่อ
+
+### Migration
+
+`pnpm prisma migrate dev --name init_identity_access` สำเร็จ สร้าง migration แรก
+(`prisma/migrations/20260727002815_init_identity_access/`) ยืนยันด้วย `pnpm prisma migrate status`
+("Database schema is up to date!") และ query ตรงกับ Neon จริงเพื่อยืนยันว่าตารางถูกสร้างครบทั้ง 6:
+`User`, `Account`, `Session`, `VerificationToken`, `PasswordResetToken`, `AuditLog`
+
+### Integration Test Suite (29 test, 7 ไฟล์, `pnpm test:integration`)
+
+รันกับ Neon จริงตัวเดียวกับ dev (ไม่มี test DB แยกใน Locked Stack) แต่ละ test สร้างข้อมูลด้วย
+unique email แล้ว cleanup ตัวเองใน `afterEach` — ยืนยันแล้วว่า DB สะอาด 100% หลังรัน
+ครอบคลุม Register/Login (รวม lockout)/Forgot-Reset Password/Verify Email/Profile API/AuditLog
+repository ใช้ config แยก (`vitest.integration.config.ts`, environment "node", ไม่ใช่ jsdom)
+route ที่ต้องมี session (`users/me`, `users/profile`) mock เฉพาะ `auth()` wrapper เพราะ
+`getServerSession` ต้องพึ่ง request context จริงที่จำลองตรงๆ ใน Vitest ไม่ได้ — cookie/session
+flow จริงทดสอบแยกที่ e2e
+
+**บั๊กที่พบระหว่างเขียน (ไม่ใช่บั๊กโค้ด production)**: next-auth v4's `CredentialsProvider()`
+คืนค่า default `authorize: () => null` ไว้ที่ top-level เสมอ ฟังก์ชันจริงซ่อนอยู่ใน
+`.options.authorize` (next-auth merge เองตอน runtime) — แก้จุดดึงฟังก์ชันใน test เท่านั้น
+
+### Playwright E2E Suite (11 test, 2 ไฟล์, `pnpm test:e2e`)
+
+ใช้ระบบจริงทั้งหมด (`next dev` จริง ผ่าน Playwright's `webServer`, Neon จริง, ไม่ mock)
+`auth-flow.spec.ts` (journey ต่อเนื่อง 8 ขั้นด้วย `test.describe.serial` + shared page: register →
+verify → protected route → logout → blocked → login → profile update → logout → blocked อีกครั้ง)
+`redirects.spec.ts` (3 test: unauth→login, auth→profile จาก /login และ /register)
+
+**บั๊กที่พบระหว่างเขียน (ทั้งหมดเป็น test infrastructure ไม่ใช่โค้ด production)**:
+
+1. Playwright คอมไพล์ test file เป็น CommonJS แต่ helper มี top-level `await import(...)` →
+   ย้าย dynamic import เข้าฟังก์ชัน async แทน
+2. **Prisma 7's `prisma-client` generator เป็น ESM-only** ชนกับ Playwright's CJS transform
+   (`ReferenceError: exports is not defined`) เมื่อ import `@/lib/prisma` ตรงๆ ใน spec file —
+   แก้โดยแยก cleanup ไปรันใน subprocess ผ่าน `tsx` (`tests/e2e/scripts/delete-test-user.ts`,
+   เรียกผ่าน `tests/e2e/db-helpers.ts`) ซึ่งรองรับ ESM เต็มรูปแบบอยู่แล้ว ไม่ต้องเพิ่ม dependency
+   ใหม่ ไม่กระทบ Tech Stack — เพิ่ม `tests/e2e/global-setup.ts` (Playwright's built-in
+   `globalSetup`) เพื่อโหลด `.env` ครั้งเดียวก่อน spawn worker
+3. Windows shell quoting: `execFile`+`shell:true` ไม่ auto-quote path ที่มีเว้นวรรค
+   ("Project Management SaaS") → เปลี่ยนไปใช้ `exec` พร้อม quote เอง
+
+ระหว่างแก้บั๊ก #2 การรันรอบที่ยังมีบั๊กทำให้ cleanup ล้มเหลว เหลือ user ตกค้าง 6 คนใน Neon —
+ตรวจพบและลบล้างด้วยมือเรียบร้อย ก่อนยืนยันด้วยการรัน suite ซ้ำอีก 2 รอบว่า DB กลับสู่ 0 แถวทุกตาราง
+ทุกครั้งหลังรัน
+
+ผลสุดท้าย: `pnpm lint` ✅ `pnpm typecheck` ✅ `pnpm test:integration` ✅ (29/29)
+`pnpm test:e2e` ✅ (11/11 ×2 รอบ) ยังไม่ commit ใดๆ ตามคำสั่ง
+
+---
+
+## Milestone 2 — Manual Verification
+
+อนุมัติให้ทำ manual verification รอบสุดท้ายก่อนปิด milestone เปิดระบบจริง (`next dev`) +
+browser จริง (ผ่าน Claude Browser tool) เชื่อมต่อ Neon จริง ไม่ mock อะไรเลย
+
+### 10 Flow — ผ่านครบทุกข้อ
+
+Landing→Register→Verify(Mock)→Auto Login→Protected Route / Logout→blocked / Login→callback→
+Profile / Edit Profile→Refresh→persist / Forgot→Reset→login รหัสใหม่→รหัสเดิมใช้ไม่ได้ /
+Verify ซ้ำ→handle ได้ (แสดง error สวยงาม ไม่ crash) / Invalid-Expired-Random token (reset+verify,
+6 กรณี) / RBAC `hasRole`/`requireRole` (เรียกฟังก์ชันจริงตรงๆ เพราะยังไม่มี route ใดที่ gate
+ด้วย role ใน Milestone 2 — org-level RBAC เป็น milestone ถัดไป) / Session (cookie httpOnly+
+SameSite=Lax ยืนยันด้วย raw curl header, JWT tamper ถูกปฏิเสธ 307 ไม่ crash) / Middleware
+(protected/public/callbackUrl/ไม่มี redirect loop แม้ craft callbackUrl=/login เอง)
+
+### Security Validation — ผ่านครบ
+
+Password เป็น bcrypt (`$2b$12$...`) ไม่ใช่ plaintext / Token เป็น SHA-256 hex 64 ตัวใน DB
+ไม่ใช่ raw / Cookie httpOnly+SameSite=Lax ยืนยันด้วย `curl -i` จริง / JWT เป็น JWE
+(`alg=dir enc=A256GCM`) ถูกต้อง / AuditLog ครบ 12 แถวตรงกับทุก action ที่เกิดขึ้นจริง /
+ไม่มี Account Enumeration (forgot-password ตอบข้อความเดียวกันเสมอ)
+
+### Database Validation — ผ่านครบ
+
+ไม่มี duplicate email/id, ไม่มี orphan AuditLog/PasswordResetToken, ไม่มี duplicate token hash
+**ทดสอบ cascade จริง**: ลบ User โดยไม่ลบ PasswordResetToken เอง → หายอัตโนมัติ (`onDelete: Cascade`
+ทำงานถูก) ส่วน VerificationToken ไม่หายอัตโนมัติ (ไม่มี FK ไป User ตามที่ออกแบบ) ต้องลบแยกเสมอ —
+ตรงกับ schema.prisma ทุกประการ
+
+### Cleanup Validation
+
+Row count หลัง cleanup ทุกตาราง: `User:0 Account:0 Session:0 VerificationToken:0
+PasswordResetToken:0 AuditLog:0` ตรวจซ้ำ 2 ครั้ง (หลัง manual flow และหลัง quality gate รอบสุดท้าย)
+
+### Bug ที่พบระหว่าง Manual Verification
+
+1. **Turbopack + OneDrive-synced folder**: `next dev` (Turbopack) ล้มเหลวเป็นระยะด้วย
+   `failed to create junction point ... The file exists / Access is denied` ตอนพยายาม link
+   `@prisma/client` เข้า `.next/dev/node_modules` — เกิดเฉพาะตอน stop/start/`rm -rf .next` ซ้ำๆ
+   เร็วๆ (ชน OneDrive sync lock) **ไม่ใช่โค้ดแอป** — ยืนยันแล้วว่า `pnpm build` (production) และ
+   `pnpm dev` ที่รันต่อเนื่องไม่สะดุด (ทั้ง Playwright e2e และ quality gate รอบสุดท้ายพิสูจน์แล้ว)
+   ใช้ `next dev --webpack` ชั่วคราวเป็น workaround สำหรับ session ตรวจสอบนี้เท่านั้น ไม่แก้โค้ดใดๆ
+2. Port 3000 ค้างจาก process manual browser session เก่า ทำให้ Playwright ชน port — kill
+   process ค้างแล้วรันใหม่ผ่านครบ
+3. **พบแต่ไม่ใช่ scope Milestone 2**: React Hydration Mismatch ใน `ThemeToggle`
+   (หน้า Landing, Foundation-era code จาก commit `73f6e4a`) — React auto-recover เอง ไม่กระทบ
+   การทำงาน แค่ warning ใน console **ยังไม่แก้** เพราะไม่เกี่ยวกับ Auth/Milestone 2 เลย
+   รอผู้ใช้ตัดสินใจว่าจะแก้ตอนไหน
+
+### Quality Gate สุดท้าย (รันหลัง manual verification)
+
+`pnpm prisma generate` ✅ `pnpm prisma migrate status` ✅ `pnpm lint` ✅ `pnpm typecheck` ✅
+`pnpm build` ✅ (Turbopack production build ไม่เจอปัญหา junction ใดๆ) `pnpm test` ✅ (14/14)
+`pnpm test:integration` ✅ (29/29) `pnpm test:e2e` ✅ (11/11)
+
+ยังไม่ commit/tag/push ใดๆ ตามคำสั่ง — รอการอนุมัติ
+
+---
+
 ## Next Steps (เมื่อได้รับอนุมัติ)
 
-1. Commit งานทั้งหมดของ Foundation (รวม CHANGELOG + ADR) เป็น milestone เดียว
-   (รอคำสั่งให้ commit ก่อน)
-2. เริ่ม Milestone 2 (Authentication) — ต้องอธิบายแผน+เหตุผล+โครงสร้างก่อนเขียนโค้ด ตามกติกาเดิม
+Milestone 2 เสร็จสมบูรณ์ 100% ตามขอบเขตที่อนุมัติ ไม่มีสิ่งใดค้างทางเทคนิค
+
+1. Repository audit (secret scan, ไฟล์ที่ไม่ควรอยู่ใน repo, docs sync) ก่อน commit
+2. Commit เป็น milestone เดียว + tag `v0.2.0` (รอคำสั่งอนุมัติ)
+3. Push branch + tag ไป remote (รอคำสั่งอนุมัติ)
+4. เริ่ม Milestone 3 (Workspace) — ต้องอธิบายแผน+เหตุผล+โครงสร้างก่อนเขียนโค้ดเสมอตามกติกาเดิม
+5. (นอกขอบเขต Milestone 2 — พิจารณาแยกทีหลัง) ThemeToggle hydration mismatch ที่พบระหว่าง manual
+   verification

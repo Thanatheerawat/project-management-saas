@@ -36,20 +36,19 @@ src/
 | `config/`                             | Distinct from `constants/`: this is "how the app is wired" (env validation, nav structure), not "fixed domain values."                                                                                                                                                                                       |
 | `providers/`                          | Every app-wide Context provider composed once, in one file, so `layout.tsx` stays readable and each provider can be tested/swapped independently.                                                                                                                                                            |
 | `styles/`                             | Reserved for styles that must be truly global (font-face, base resets) — component styling stays as inline Tailwind classes, not here.                                                                                                                                                                       |
-| `middleware.ts`                       | Next.js requires this exact location. Currently a pass-through only (see [architecture.md](./architecture.md)).                                                                                                                                                                                              |
+| `middleware.ts`                       | Next.js requires this exact location. Real route protection as of Milestone 2 (see [architecture.md](./architecture.md)) — no longer a pass-through.                                                                                                                                                         |
 | `docs/` (repo root, not under `src/`) | Documents the whole repo, not runtime code — doesn't belong inside the app source tree.                                                                                                                                                                                                                      |
 
-## `(auth)` / `(dashboard)` route groups: deferred, not skipped
+## `(auth)` / `(dashboard)` route groups
 
-Foundation does not include `src/app/(auth)/layout.tsx` or
-`src/app/(dashboard)/layout.tsx`. A Next.js `layout.tsx` only ever renders
-if a `page.tsx` exists somewhere under it — with no login/register/board
-pages yet, those layout files would be unreachable dead code today. The
-Navbar/Sidebar/Footer/Breadcrumb/PageContainer components they'll use
-already exist in `components/layout/` (Sidebar included, even though
-nothing mounts it yet — it's reusable infrastructure, not routing). The
-Authentication milestone adds `(auth)/layout.tsx` alongside its first real
-page; Workspace does the same for `(dashboard)/layout.tsx`.
+Foundation deliberately did not include `src/app/(auth)/layout.tsx` or
+`src/app/(dashboard)/layout.tsx` — a Next.js `layout.tsx` only ever renders
+if a `page.tsx` exists somewhere under it, and neither existed yet. Both
+were added in Milestone 2 alongside their first real pages (login/register/
+forgot-password/reset-password/verify-email under `(auth)`, profile under
+`(dashboard)`), reusing the Navbar/Footer/PageContainer/ThemeToggle
+components that already existed in `components/layout/`. `Sidebar` still
+has no route mounting it — that's Workspace's job.
 
 ## Not a monorepo
 

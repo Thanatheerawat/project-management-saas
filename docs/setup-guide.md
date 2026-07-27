@@ -6,17 +6,19 @@
   available from Node 20.6/21.7, but 22+ is what this project is verified
   against)
 - pnpm (`corepack enable` or `npm install -g pnpm`)
-- A Neon Postgres project (free tier) — only needed from the Database
-  milestone onward, but `DATABASE_URL` must exist for `prisma generate`
-  to run today.
+- A Neon Postgres project (free tier) — `DATABASE_URL` must point to a
+  real, reachable database as of Milestone 2 (`prisma migrate dev` needs
+  to connect; `prisma generate` alone does not).
 
 ## First-time setup
 
 ```bash
 pnpm install
 cp .env.example .env
-# fill in DATABASE_URL from your Neon project
+# fill in DATABASE_URL from your Neon project, and generate a
+# NEXTAUTH_SECRET with `openssl rand -base64 32`
 pnpm prisma generate
+pnpm prisma migrate dev
 pnpm dev
 ```
 
@@ -24,9 +26,9 @@ Open http://localhost:3000.
 
 ## Environment variables
 
-See `.env.example` for the current full list with comments. As of the
-Foundation phase, only `DATABASE_URL` is required — Auth/AI/Storage
-variables are introduced in their own milestones.
+See `.env.example` for the current full list with comments. As of
+Milestone 2, `DATABASE_URL` and `NEXTAUTH_SECRET` are required —
+AI/Storage variables are introduced in their own milestones.
 
 Note: `prisma.config.ts` reads `.env` (not `.env.local`) via
 `process.loadEnvFile()`, so connection strings must live there even
