@@ -5,7 +5,17 @@ import { getToken } from "next-auth/jwt";
 // `getToken` (not our `auth()` wrapper) is deliberate here: middleware
 // runs on the Edge runtime with a raw NextRequest, not the
 // cookies()-based context getServerSession expects.
-const PROTECTED_PREFIXES = ["/profile"];
+//
+// `/workspaces` and `/w` (Milestone 3) only extend *which paths* require
+// a session — the check itself is still just "is there a valid token."
+// Whether the caller is actually a member of the specific workspace at
+// `/w/[slug]/...` is a DB lookup (resolveWorkspaceMembership), which
+// can't happen here: middleware must stay Edge-compatible and query-free.
+// That authorization step lives in the Server Component layout for
+// `/w/[slug]` (Increment 5) and already lives in every workspace/project
+// Route Handler (Increment 3) — this file only ever answers "logged in
+// or not."
+const PROTECTED_PREFIXES = ["/profile", "/workspaces", "/w"];
 const AUTH_PAGES = ["/login", "/register"];
 
 function isProtectedPath(pathname: string): boolean {
@@ -32,5 +42,5 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/profile/:path*", "/login", "/register"],
+  matcher: ["/profile/:path*", "/workspaces/:path*", "/w/:path*", "/login", "/register"],
 };

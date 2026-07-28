@@ -47,8 +47,39 @@ if a `page.tsx` exists somewhere under it, and neither existed yet. Both
 were added in Milestone 2 alongside their first real pages (login/register/
 forgot-password/reset-password/verify-email under `(auth)`, profile under
 `(dashboard)`), reusing the Navbar/Footer/PageContainer/ThemeToggle
-components that already existed in `components/layout/`. `Sidebar` still
-has no route mounting it — that's Workspace's job.
+components that already existed in `components/layout/`.
+
+## `app/w/[slug]/` — a top-level segment, not nested under `(dashboard)`
+
+Added in Milestone 3. `(dashboard)/layout.tsx` renders its own Navbar (used
+by `/profile` and `/workspaces`); `w/[slug]/layout.tsx` renders a different
+one (workspace switcher + `Sidebar`, now actually mounted via
+`WorkspaceSidebar`). Nesting `w/` under `(dashboard)` would render two
+Navbars, so it's a sibling top-level segment instead — route groups don't
+affect the URL, so this doesn't change `/w/[slug]` itself. The layout does
+the membership check once per request (`resolveWorkspaceForRequest`,
+wrapped in React's `cache()` so the layout and page don't double-query for
+the same request) and calls `notFound()` — not `redirect()` — for both a
+nonexistent slug and one the caller isn't a member of.
+
+Pages under this segment: `page.tsx` (dashboard shell), `settings/page.tsx`,
+`members/page.tsx`, `projects/page.tsx` (list), `projects/new/page.tsx`,
+`projects/[projectId]/page.tsx` (detail), `projects/[projectId]/edit/page.tsx`.
+Each of the ADMIN+-gated pages (settings edit, project create/edit) does its
+own page-level role check for UX (showing a read-only view or a message
+instead of a form that would 403 on submit) — the actual enforcement is
+server-side in the Route Handler either way.
+
+## `features/workspace/` and `features/project/`
+
+Milestone 3's domain modules, following the same shape as `features/auth/`
+and `features/user/`: `schemas/` (zod, shared between client forms and
+Route Handlers), `hooks/` (TanStack Query, one file per query/mutation),
+`components/` (client-side forms and lists), plus a `*-response.ts` per
+resource (`toWorkspaceResponse`/`toProjectResponse`/
+`toWorkspaceMemberResponse`) — the single mapper every Route Handler for
+that resource uses, so list/create/detail/update endpoints can't drift into
+returning different field sets for the same resource.
 
 ## Not a monorepo
 

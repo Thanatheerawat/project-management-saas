@@ -64,8 +64,38 @@ Route Handlers stay thin (parse request → call a feature/service/repository
 function → return response). Business logic does not live in `app/`. See
 [folder-structure.md](./folder-structure.md) for where it does live and why.
 
+## Two independent RBAC tiers (Milestone 2 + Milestone 3)
+
+`PlatformRole` (`USER`/`ADMIN`/`SUPER_ADMIN`, `src/lib/auth/rbac.ts`) and
+`WorkspaceRole` (`MEMBER`/`ADMIN`/`OWNER`, `src/lib/auth/workspace-rbac.ts`)
+are deliberately separate checks, not a hierarchy — a platform `SUPER_ADMIN`
+does **not** automatically gain access to a workspace's resources. Platform
+role governs platform administration; workspace role governs access to a
+specific `Workspace`'s data via the `WorkspaceMember` join row. Every
+workspace/project Route Handler resolves membership first
+(`resolveWorkspaceMembership`/`resolveWorkspaceForRequest`,
+`src/lib/auth/workspace-membership.ts`) and returns 404 — never 403 — when
+the caller isn't a member, so a non-member can't distinguish a workspace
+that exists from one that doesn't (the same enumeration-safe pattern as
+Milestone 2's forgot-password flow). A caller who **is** a member but lacks
+the role for an action gets a normal 403, since they've already proven they
+can see the resource.
+
+## Workspace as the tenancy boundary (Milestone 3)
+
+`Workspace` is the multi-tenancy unit; `Project` belongs to exactly one
+workspace. Every workspace Member can see every project in that workspace
+(no per-project membership model in this milestone — approved as Decision
+Point 1 of the Milestone 3 proposal, see `docs/session-log.md`). Creating,
+editing, or deleting a project requires `ADMIN`+ workspace role (Decision
+Point 2). `Workspace.slug` is the public URL identifier
+(`/w/[slug]`) — internal foreign keys always use the `id`, never the slug.
+
 ## Current state
 
-Foundation phase only: no database models, no auth, no business logic yet.
-See the root [README.md](../README.md) for what's actually implemented today
-versus what's designed-but-not-built.
+Milestone 2 (Identity & Access Management) and Milestone 3 (Workspace &
+Project Management Core) are both implemented and covered by unit,
+integration, and e2e tests. See the root [README.md](../README.md) and
+[session-log.md](./session-log.md) for exact scope and what's still
+designed-but-not-built (task/issue tracking, AI copilot, GitHub
+integration — later milestones per the Development Plan).

@@ -40,24 +40,26 @@ enum AuditAction {
 }
 
 model User {
-  id                  String    @id @default(uuid())
+  id                  String       @id @default(uuid())
   name                String?
-  email               String    @unique
+  email               String       @unique
   emailVerified       DateTime?
   image               String?
   passwordHash        String?
   role                PlatformRole @default(USER)
-  isActive            Boolean   @default(true)
+  isActive            Boolean      @default(true)
   lastLoginAt         DateTime?
-  failedLoginAttempts Int       @default(0)
+  failedLoginAttempts Int          @default(0)
   lockedUntil         DateTime?
-  createdAt           DateTime  @default(now())
-  updatedAt           DateTime  @updatedAt
+  createdAt           DateTime     @default(now())
+  updatedAt           DateTime     @updatedAt
 
-  accounts            Account[]
-  sessions            Session[]
-  passwordResetTokens PasswordResetToken[]
-  auditLogs           AuditLog[]
+  accounts             Account[]
+  sessions             Session[]
+  passwordResetTokens  PasswordResetToken[]
+  auditLogs            AuditLog[]
+  workspaceMemberships WorkspaceMember[]
+  ownedProjects        Project[]
 }
 
 // Auth.js Adapter contract — required shape even though only the
@@ -136,4 +138,76 @@ model AuditLog {
   createdAt DateTime    @default(now())
 
   user User? @relation(fields: [userId], references: [id], onDelete: SetNull)
+}
+
+// --- Milestone 3: Workspace & Project Management Core -----------------
+
+// Workspace-level RBAC (Owner > Admin > Member) — distinct from
+// PlatformRole (M2), which governs platform administration, not access to
+// a specific workspace's resources. The two are deliberately independent:
+// a platform SUPER_ADMIN does not automatically gain workspace access.
+enum WorkspaceRole {
+  MEMBER
+  ADMIN
+  OWNER
+}
+
+enum ProjectStatus {
+  ACTIVE
+  ON_HOLD
+  COMPLETED
+  ARCHIVED
+}
+
+model Workspace {
+  id          String   @id @default(uuid())
+  name        String
+  slug        String   @unique
+  description String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  members  WorkspaceMember[]
+  projects Project[]
+}
+
+// Exactly one OWNER per workspace is an application-level invariant (see
+// the workspace repository in a later increment), not a DB constraint —
+// Postgres partial unique indexes aren't expressible in Prisma's schema
+// DSL without a raw-SQL migration edit, and this is a documented MVP
+// trade-off rather than an oversight.
+model WorkspaceMember {
+  id          String        @id @default(uuid())
+  workspaceId String
+  userId      String
+  role        WorkspaceRole @default(MEMBER)
+  createdAt   DateTime      @default(now())
+
+  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([workspaceId, userId])
+  @@index([userId])
+}
+
+// onDelete: Restrict on owner (not Cascade) — blocks deleting a user while
+// they still own projects, forcing explicit reassignment first. No hard
+// user-delete feature exists yet (M2 only built soft-deactivation via
+// User.isActive), so this is a safety rail more than an active concern
+// today.
+model Project {
+  id          String        @id @default(uuid())
+  workspaceId String
+  name        String
+  description String?
+  status      ProjectStatus @default(ACTIVE)
+  ownerId     String
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+
+  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  owner     User      @relation(fields: [ownerId], references: [id], onDelete: Restrict)
+
+  @@unique([workspaceId, name])
+  @@index([workspaceId])
 }

@@ -1,8 +1,8 @@
 import type { PlatformRole } from "@/generated/prisma/client";
 
 // Platform-level role only — see the scope note in schema.prisma and
-// docs/session-log.md. Org-level RBAC (Owner/Admin/Member/Viewer) is a
-// separate helper introduced in the Workspace milestone.
+// docs/session-log.md. Workspace-level RBAC (Owner/Admin/Member) is the
+// separate helper in workspace-rbac.ts, introduced in Milestone 3.
 const ROLE_RANK: Record<PlatformRole, number> = {
   USER: 0,
   ADMIN: 1,
