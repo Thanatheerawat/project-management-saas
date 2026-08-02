@@ -91,11 +91,79 @@ editing, or deleting a project requires `ADMIN`+ workspace role (Decision
 Point 2). `Workspace.slug` is the public URL identifier
 (`/w/[slug]`) — internal foreign keys always use the `id`, never the slug.
 
+## Issue tracking core (Milestone 4)
+
+`Issue`, `Label`, `IssueLabel`, and `Comment` extend the Workspace/Project
+model from Milestone 3 — see the Milestone 4 Decision Points (A–H) in
+`docs/session-log.md` for the approved shape. A few points worth calling
+out because they introduce patterns Milestone 2/3 didn't need:
+
+- **`Project.key`** is a short uppercase prefix (e.g. `"ORB"`), derived
+  from the project name by `deriveIssueKey()` (`src/lib/issue-key.ts`,
+  pure function, same shape as `slugify()`) and unique **per workspace**
+  (Decision Point B) — checked the same way `slug`/`name` collisions are
+  (`findByWorkspaceAndKey` → `409 key_taken`), no auto-retry-with-suffix.
+- **`Issue.number`** is a per-project sequence backed by
+  `Project.issueCounter`, incremented inside the same
+  `prisma.$transaction` that inserts the `Issue` row
+  (`issueRepository.create`) — a single Postgres row-level
+  `UPDATE x = x + 1` is what actually makes this safe under concurrent
+  creates; the transaction only prevents a crash between the two
+  statements from permanently skipping a number. The display key
+  (`"ORB-123"`) is computed at the response layer
+  (`toIssueResponse(issue, project.key)`) from `project.key` + `number`,
+  never stored — same single-source-of-truth rule as every other response
+  mapper.
+- **`Issue.position`** is a `Float`, not an `Int`, so a future drag-and-drop
+  increment can insert a card between two neighbors by computing a
+  midpoint instead of renumbering the whole column. New issues are
+  appended to the end of `BACKLOG` with a large constant gap (1000)
+  computed server-side (`findMaxPositionInStatus` + gap) — drag-and-drop
+  itself is deferred (Decision Point C); a status select/button is the
+  interim status-change UI (Decision Point D covers the issue detail page
+  being a full route, not a slide-over).
+- **Labels are workspace-scoped, not project-scoped** (Decision Point F) —
+  reusable across every project in the workspace, mirroring Linear's
+  team-level label model. Creating a label definition is `ADMIN`+;
+  attaching/detaching an existing label to an issue is `MEMBER`+ (it's
+  triage work, not workspace structure). `IssueLabel` is a plain
+  many-to-many join row with a composite primary key — no surrogate `id`,
+  no separate response mapper (callers map through `label` →
+  `toLabelResponse`).
+- **Any `MEMBER`+ can edit any issue** (Decision Point G) — not gated to
+  the reporter, the assignee, or `ADMIN`+; deleting an issue is still
+  `ADMIN`+ only, matching Project delete's bar.
+- **Comments**: the author can edit their own comment; the author or any
+  `ADMIN`+ can delete it (Decision Point H, moderation without full edit
+  rights).
+- **Assignee validation has no FK to lean on** — `assigneeId` must be a
+  member of the issue's workspace, which Prisma can't express as a
+  foreign-key constraint (it would need to reference `WorkspaceMember`,
+  not `User`, and only conditionally). `validateAssignee()`
+  (`src/lib/auth/workspace-membership.ts`) checks it explicitly in both
+  the issue-create and issue-update routes.
+- **`resolveIssueContext(issueId, userId)`** (same file) is the Issue
+  equivalent of `resolveWorkspaceMembership`/`resolveWorkspaceForRequest`:
+  resolves issue → project → workspace membership in one call, returning
+  `null` (→ 404, not 403) if any link is broken — extracted during the
+  Milestone 4 cleanup pass after the same three-step block was duplicated
+  across 8 route handlers.
+- **Kanban board embeds labels in the Issue response** (Milestone 4
+  Increment 5B) so the board loads with a single `GET
+.../issues` request instead of one label fetch per card — every issue
+  repository method includes the `labels` relation
+  (`issueRepository`'s `WITH_LABELS` constant), and mutation hooks that
+  touch labels (`useAttachLabel`/`useDetachLabel`) invalidate both
+  `["issue", issueId]` and `["issues", projectId]`, not just
+  `["issue-labels", issueId]`, so the board doesn't show stale labels
+  after an attach/detach from the detail page.
+
 ## Current state
 
-Milestone 2 (Identity & Access Management) and Milestone 3 (Workspace &
-Project Management Core) are both implemented and covered by unit,
-integration, and e2e tests. See the root [README.md](../README.md) and
-[session-log.md](./session-log.md) for exact scope and what's still
-designed-but-not-built (task/issue tracking, AI copilot, GitHub
-integration — later milestones per the Development Plan).
+Milestone 2 (Identity & Access Management), Milestone 3 (Workspace &
+Project Management Core), and Milestone 4 (Issue Tracking Core) are all
+implemented and covered by unit, integration, and e2e tests. See the root
+[README.md](../README.md) and [session-log.md](./session-log.md) for exact
+scope and what's still designed-but-not-built (AI copilot, GitHub
+integration, drag-and-drop, activity feed — later milestones/deferred
+decisions per the Development Plan).

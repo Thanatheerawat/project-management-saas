@@ -6,6 +6,8 @@ import type {
   WorkspaceRole,
 } from "@/generated/prisma/client";
 import { requireWorkspaceRole } from "@/lib/auth/workspace-rbac";
+import { issueRepository } from "@/repositories/issue/issue.repository";
+import { projectRepository } from "@/repositories/workspace/project.repository";
 import { workspaceRepository } from "@/repositories/workspace/workspace.repository";
 import { workspaceMemberRepository } from "@/repositories/workspace/workspace-member.repository";
 
@@ -65,3 +67,43 @@ export const resolveWorkspaceForRequest = cache(
     return { workspace, membership };
   },
 );
+
+// Resolves an issue to its parent project and the caller's workspace
+// membership in one call — same "resolve child, derive parent, check
+// membership" shape as resolveCommentContext (comments/[commentId]/route.ts),
+// promoted to a shared helper because the issue -> project -> membership
+// chain was previously duplicated across every issue-scoped route (detail/
+// update/delete, label attach/detach, comment list/create) — Milestone 4
+// cleanup pass, see docs/session-log.md. Returns null on any broken link
+// (issue missing, its project missing, or caller not a workspace member) —
+// callers should treat that as 404, same enumeration-safe pattern as
+// everywhere else in this codebase.
+export async function resolveIssueContext(issueId: string, userId: string) {
+  const issue = await issueRepository.findById(issueId);
+  if (!issue) return null;
+
+  const project = await projectRepository.findById(issue.projectId);
+  if (!project) return null;
+
+  const membership = await resolveWorkspaceMembership(project.workspaceId, userId);
+  if (!membership) return null;
+
+  return { issue, project, membership };
+}
+
+// Backs the "assignee must be a workspace member" check shared by issue
+// create (POST /api/projects/[projectId]/issues) and update
+// (PATCH /api/issues/[issueId]) — no FK can express this cross-table
+// constraint (Milestone 4 Architecture Review, Risk 5), so both routes used
+// to enforce it with an identical inline block; this is that block,
+// extracted. Returns true when there's nothing to validate (assigneeId is
+// null/undefined) so callers can write `if (!(await validateAssignee(...)))`
+// without a separate falsy check first.
+export async function validateAssignee(
+  workspaceId: string,
+  assigneeId: string | null | undefined,
+): Promise<boolean> {
+  if (!assigneeId) return true;
+  const membership = await resolveWorkspaceMembership(workspaceId, assigneeId);
+  return membership !== null;
+}

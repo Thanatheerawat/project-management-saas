@@ -10,6 +10,7 @@ export function toProjectResponse(project: Project) {
     description: project.description,
     status: project.status,
     ownerId: project.ownerId,
+    key: project.key,
     createdAt: project.createdAt,
     updatedAt: project.updatedAt,
   };

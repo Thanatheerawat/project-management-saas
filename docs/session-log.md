@@ -18,17 +18,40 @@ Tailwind v4 + shadcn/ui (Radix) + Prisma 7 (ผ่าน `@prisma/adapter-neon`,
 (server state) + Zustand (client/UI state เท่านั้น) + Vercel — รายละเอียดเหตุผลทั้งหมดอยู่ใน
 `docs/adr/`
 
-**สถานะตอนนี้ (ล่าสุด)**: Foundation (v0.1.0) และ Milestone 2 (v0.2.0, commit `1e9393b`)
-commit+tag+push ขึ้น GitHub สำเร็จแล้ว (`https://github.com/Thanatheerawat/project-management-saas`,
-branch `main`) — ปิด Milestone 2 สมบูรณ์ 100% **Milestone 3 (Workspace & Project Management
-Core) เขียนโค้ดเสร็จครบตาม Architecture Proposal แล้ว** ทั้ง 9 ส่วน (Schema+Migration,
-Repositories+RBAC+Schemas, API, Middleware, Workspace/Settings/Members/Projects UI ครบ,
-Unit+Integration+E2E test ครบ, Docs อัปเดตแล้ว) ผ่าน Quality Gate ทุกข้อ (ดูหัวข้อ "Milestone 3
-Final Quality Gate") — **ยังไม่ commit ใดๆ เลย** รอการอนุมัติ Final Review Report ก่อน
-commit+tag `v0.3.0`+push
+**สถานะตอนนี้ (ล่าสุด)**: Foundation (v0.1.0), Milestone 2 (v0.2.0, commit `1e9393b`), และ
+**Milestone 3 (v0.3.0, commit `83808bf`)** commit+tag+push ขึ้น GitHub สำเร็จแล้วทั้ง 3 ตัว
+(`https://github.com/Thanatheerawat/project-management-saas`, branch `main`) — `git log --oneline`
+ล่าสุด: `83808bf`(M3) → `1e9393b`(M2) → `73f6e4a`(Foundation) → `e568cb0`(scaffold)
 
-**ถ้าจะทำงานต่อ**: เช็ค `git status`/`git log` จริงก่อนเชื่อไฟล์นี้ทั้งหมดเสมอ — ขั้นต่อไปคือรอคำสั่ง
-อนุมัติให้ทำ audit+commit+tag+push (หัวข้อ "Next Steps" ท้ายไฟล์)
+**กำลังทำ Milestone 4 (Task Management Core / Issue tracking)** แบบ incremental เข้มงวดกว่า M2/M3
+เดิม — ผู้ใช้สั่งทำทีละ increment เล็กๆ ชัดเจน "proceed with Increment N only... stop immediately...
+do NOT continue to Increment N+1" ทุกรอบ (ต่างจาก M3 ที่บางช่วงอนุมัติหลาย increment รวดเดียว)
+ทำเสร็จแล้ว **6 increment** (นับ 5A+5B แยกกัน): (1) Prisma schema + migration
+(`Issue`/`Label`/`IssueLabel`/`Comment` + `Project.key`/`issueCounter`), (2) Repository + zod
+schema + response mapper, (3) Issue API (5 endpoint), (4) Label API + Comment API +
+`IssueLabel` repository (10 endpoint), (5A) TanStack Query hooks (16 ไฟล์), (5B) Kanban board
+shell + columns + issue card (mount บนหน้า project detail เดิม ไม่สร้าง route ใหม่), (6) Create
+Issue dialog + Edit Issue UI + Status change UI + Label assignment UI + Comment UI + หน้า Issue
+detail เต็มรูปแบบ (route ใหม่ `.../issues/[issueId]`, **ไม่มี API endpoint ใหม่เลย** — ต่อกับของเดิม
+ทั้งหมด) จากนั้นทำ **Architecture & Code Audit** แบบ read-only (9 findings, ไม่มี correctness bug)
+ตามด้วย **Cleanup Pass เล็กๆ** ตามคำแนะนำของ audit: extract `resolveIssueContext()`/
+`validateAssignee()` (ลดโค้ดซ้ำ ~70 บรรทัดข้าม 8 handler) + แก้ TanStack Query cache invalidation
+ของ label attach/detach (Kanban board เคยค้าง label เก่าจนกว่า staleTime จะหมด ตอนนี้ invalidate
+ถูก query key แล้ว) จากนั้นทำ **Increment 7 (Tests)**: integration test ใหม่ 4 ไฟล์ (55 test) ครอบ
+Issue/Label/Comment/IssueLabel API ครบ + RBAC + workspace isolation + invalid assignee + duplicate
+project key + concurrency test สำหรับ atomic issue numbering (เรียก `issueRepository.create()`
+ตรงๆ พร้อมกัน 10 ครั้ง ยืนยัน `number` ไม่ซ้ำ) รวม unit 62 + integration 125 ผ่านหมด จากนั้นทำ
+**Increment 8 (Playwright e2e)**: 2 ไฟล์ใหม่ (`issue-flow.spec.ts` session เดียวครบทุก CRUD/
+status/label/comment/delete, `issue-permissions.spec.ts` 3 browser context ครอบ member invite/
+RBAC/cross-workspace) เจอบั๊กใน test เอง (URL regex match คำว่า "new" โดยไม่ตั้งใจ) แก้แล้ว
+ยืนยันเสถียรด้วย production build (`pnpm build && pnpm start`) ผ่าน **59/59 สองรอบติดกัน** —
+**ยังไม่ commit ใดๆ ของ M4 เลย** (`git status` ล่าสุดมีแต่ modified/untracked ทั้งหมด) รอการอนุมัติ
+Increment 8 ก่อนเริ่ม Increment 9 (docs)
+
+**ถ้าจะทำงานต่อ**: เช็ค `git status`/`git log` จริงก่อนเชื่อไฟล์นี้ทั้งหมดเสมอ — M4 ทำแบบ
+increment-ต่อ-increment เข้มงวด (**ห้ามข้ามขั้นตอน ห้ามเริ่ม increment ถัดไปเองโดยไม่รอคำสั่ง แม้
+increment ก่อนหน้าจะผ่าน quality gate ครบก็ตาม**) ดูหัวข้อ "Milestone 4" ด้านล่างสำหรับรายละเอียด
+ทุก increment ที่ทำไปแล้ว และหัวข้อ "Next Steps" ท้ายไฟล์สำหรับสถานะล่าสุดสุด
 
 ---
 
@@ -962,6 +985,34 @@ smoke script เป็นของชั่วคราว ไม่ใช่ au
 `folder-structure.md` ยังไม่อัปเดต **สรุป: Milestone 3 ยังไม่ complete ห้าม commit/tag
 v0.3.0** — รายงานแล้วรอคำสั่ง
 
+**รายละเอียดผลการตรวจทั้ง 12 หัวข้อที่สั่งให้ตรวจ**:
+
+1. **Feature ที่อนุมัติ vs โค้ดจริง** — ตรวจทีละหัวข้อจาก proposal เดิม (DB/RBAC/membership
+   resolution/API workspace+member+project/middleware/UI พื้นฐาน) ทำครบ ยกเว้น 3 ส่วน UI
+2. **Feature ที่ขาด** — Workspace Settings UI, Member Management UI, Project UI (list/create/
+   edit/detail) ทั้งหมด
+3. **Deferred vs พลาดทำ** — ตรวจแล้วว่า**ไม่มีอะไรพลาดโดยไม่ตั้งใจ** ทั้งหมดถูก flag ไว้ชัดเจนใน
+   รายงาน Increment 5 แล้วว่าตีความสโคปแคบ แต่ไม่เคยได้รับ confirm ว่าใช่ตามต้องการหรือไม่
+4. **Folder structure** — ตรงตาม proposal ทุกจุด ไม่มี deviation
+5. **Database schema** — ตรง proposal เป๊ะ อ่าน `migration.sql` ยืนยันเองว่ามีแต่
+   `CREATE TYPE`/`CREATE TABLE`/`CREATE INDEX`/`ADD FOREIGN KEY` ไม่มี `ALTER`/`DROP` แตะตาราง M2
+   เดิมแม้แต่บรรทัดเดียว
+6. **API coverage** — ครบ 14 handler ตาม design (404-not-403 ทุกจุด, cross-workspace tampering
+   guard, owner-immutable) — ปัญหาอยู่ที่ไม่มี UI เรียกใช้ endpoint บางตัว (settings PATCH, member
+   endpoints ทั้งหมด) ไม่ใช่ API เอง
+7. **UI coverage** — มีแค่ picker/switcher/create/dashboard shell (read-only) ตามที่ระบุไว้ในข้อ 2
+8. **Authorization flow** — สอดคล้องทุกจุดที่ตรวจ (server-side enforce เสมอ, ไม่มี client-only
+   permission check ที่ไหนเลย)
+9. **Navigation flow** — สะอาด ไม่มี dead link (Sidebar มีแค่ item เดียวที่มีหน้าจริงรองรับ)
+10. **Testing coverage** — unit 42/42 (7 ไฟล์) แต่ integration 29/29 กับ e2e 11/11 **เป็นของ M2
+    ทั้งหมด** ไม่มี test ของ workspace/project แม้แต่ตัวเดียว
+11. **Temp files/debug code** — ไม่พบ `console.log`/`TODO`/`FIXME`, ไม่มี smoke-test script
+    หลงเหลือ, ไม่มี `.claude/launch.json` หลุดมาซ้ำ (ปัญหาที่เจอตอน M2), ยืนยัน
+    `countByWorkspaceAndRole` (dead code จาก Increment 2) ถูกลบจริงตามที่ Increment 3 review บอก
+12. **Quality Gate รันซ้ำ** — `prisma generate`/`migrate status`/`lint`/`typecheck`/`build`/
+    `test`/`test:integration`/`test:e2e` ผ่านหมด (clean `.next` ก่อน build, ตรวจ port 3000 ว่าง
+    ก่อน e2e)
+
 ## Milestone 3 — งานที่เหลือทั้งหมด (Settings/Members/Projects UI + Tests + Docs)
 
 ผู้ใช้อนุมัติให้ทำ Milestone 3 ต่อจนเสร็จสมบูรณ์ในรอบเดียว (ไม่แบ่ง increment แยกอนุมัติทีละ
@@ -990,9 +1041,10 @@ Foundation แต่ไม่เคยถูกเรียกใช้จริ
 - hooks 4 ตัว (`use-workspace-members`, `use-add-member`, `use-update-member-role`,
   `use-remove-member`) ใช้ API เดิมทั้งหมด (list/add/PATCH role/DELETE) เพิ่ม `apiClient.delete`
   ใน `lib/api-client.ts` (มีแค่ get/post/patch มาก่อน — ส่วนขยายของ client wrapper เดิม ไม่ใช่ API
-  ใหม่) Role select ใช้ native `<select>` ธรรมดา (ไม่เพิ่ม UI primitive ใหม่) ปุ่มลบมี confirm ผ่าน
-  `Dialog` เดิมจาก `components/ui/dialog.tsx` OWNER row ล็อกเสมอ (badge อย่างเดียว ไม่มี select/ปุ่ม
-  ลบ) ไม่ว่าคนดูจะมี role อะไร ตรงกับ API ที่บล็อกแก้ role=OWNER เสมอ
+  ใหม่) Role select ใช้ native `<select>` ธรรมดา (ไม่เพิ่ม UI primitive ใหม่) ใส่ `aria-label`
+  ให้ select นี้เพิ่ม (เผื่อ e2e เลือก element ได้ตรง ไม่ปนกับ select ของฟอร์ม add-member) ปุ่มลบมี
+  confirm ผ่าน `Dialog` เดิมจาก `components/ui/dialog.tsx` OWNER row ล็อกเสมอ (badge อย่างเดียว
+  ไม่มี select/ปุ่มลบ) ไม่ว่าคนดูจะมี role อะไร ตรงกับ API ที่บล็อกแก้ role=OWNER เสมอ
 
 ### 3) Project UI
 
@@ -1005,9 +1057,33 @@ mismatch ผ่าน URL, edit — client form พร้อม status dropdown)
 ว่า "ยังไม่มีหน้า detail" — ตอนนี้มีแล้ว) อัปเดต `WorkspaceSidebar` เพิ่ม nav item โปรเจกต์/สมาชิก/
 ตั้งค่า (เดิม comment บอกไว้ว่า "เพิ่มทีหลังตอนมีหน้า" — ตอนนี้มีแล้วเช่นกัน)
 
-**ยืนยันทั้ง 3 ส่วนด้วย browser จริง** (สมัคร user จริง 2 คน, สร้าง workspace/project จริง, ทดสอบ
-add/promote/remove member, edit workspace settings, edit project status) ผ่านครบทุก flow ก่อน
-เขียน automated test
+**ยืนยันทั้ง 3 ส่วนด้วย browser จริง** ก่อนเขียน automated test (สมัคร user จริง 2 คนผ่าน Claude
+Browser tool, ต่อ Neon จริง ไม่ mock): สมัคร owner→สร้าง workspace "M3 Review Co"→แก้ description
+ใน Settings→บันทึก (เห็นข้อความ toast)→สร้าง project "Design System"→เห็นหน้า detail สถานะ
+ACTIVE→แก้เป็น ON_HOLD ผ่านหน้า edit→สมัคร user คนที่ 2→owner เพิ่มเป็น MEMBER ผ่านหน้า Members
+(เห็นแถวใหม่ทันที)→เปลี่ยน role เป็น ADMIN ผ่าน dropdown→สลับไปดูมุมมองของ user คนที่ 2 (เห็นตัวเอง
+เป็น ADMIN, เห็นฟอร์ม add-member ที่ MEMBER ธรรมดาไม่เห็น, เห็นปุ่ม "ออกจาก Workspace")→กลับมาที่
+owner ลบสมาชิกผ่าน Dialog confirm→ยืนยันแถวหายจาก list
+
+**บทเรียนเรื่อง tooling ระหว่างทำ manual verification**: `mcp__Claude_Browser__tabs_create`
+สร้างแท็บใหม่แต่ **ใช้ cookie jar เดียวกับแท็บอื่นในเบราว์เซอร์เดียวกัน** (session ของ user คนแรก
+หลุดมาที่แท็บของ user คนที่สองโดยไม่ตั้งใจตอนแรก ทำให้ต้อง logout/login สลับกันเป็นลำดับแทนที่จะเปิด
+สอง session พร้อมกันจริงๆ) — คนละพฤติกรรมกับ Playwright's `browser.newPage()` ที่สร้าง
+BrowserContext ใหม่แยก cookie jar ให้อัตโนมัติทุกครั้ง (ใช้ประโยชน์จากจุดนี้ใน
+`member-management.spec.ts` เพื่อให้ Owner กับ Member เป็น session จริงพร้อมกันสองอันในเทสเดียว)
+จดไว้เผื่อ debug bug ลักษณะ "อยู่ดีๆ เห็น session ผิดคน" ในอนาคตกับ Claude Browser tool
+
+**เกร็ดความรู้อีกจุด (สคริปต์ cleanup ชั่วคราว)**: เขียนสคริปต์ `_manual-cleanup.ts`/
+`_check-clean.ts` ที่ root (ลบทิ้งทันทีหลังใช้ ไม่เคย commit) เพื่อล้างข้อมูล manual-test ออกจาก
+Neon ครั้งแรกเจอ error `Invalid environment variables` ทั้งที่เขียน `process.loadEnvFile()`
+ไว้บรรทัดบนสุดแล้ว — สาเหตุคือไฟล์ `.ts` รันแบบ ESM จริง (`tsx`) ทำให้ `import { prisma } from
+"./src/lib/prisma"` แบบ static ถูก hoist ขึ้นไปรันก่อน `process.loadEnvFile()` เสมอ (import
+hoisting เป็นพฤติกรรมมาตรฐานของ ES module ไม่ใช่บั๊ก) ทำให้ `src/config/env.ts` validate ก่อนที่
+`.env` จะถูกโหลด แก้ด้วยการเปลี่ยนเป็น `const { prisma } = await import(...)` แบบ dynamic
+(ไม่ถูก hoist) ไว้ในบรรทัดหลัง `process.loadEnvFile()` แทน — จดไว้เผื่อเขียนสคริปต์ one-off ทำนอง
+นี้อีกในอนาคต (ไฟล์ที่มีอยู่แล้วในโปรเจกต์อย่าง `prisma/seed.ts`/`tests/integration/setup.ts`/
+`tests/e2e/global-setup.ts` ไม่เจอปัญหานี้เพราะเป็น setup file แยกที่ runner เรียกก่อน import
+อื่นเสมออยู่แล้ว ไม่ใช่ static import ในไฟล์เดียวกัน)
 
 ### 4) Integration Tests (41 test ใหม่ รวมเป็น 70)
 
@@ -1049,6 +1125,38 @@ tenancy boundary" + แก้ "Current state" ที่ค้างมาตั�
 (เพิ่มหัวข้อ `app/w/[slug]/` เป็น top-level segment และ `features/workspace|project/`),
 `docs/session-log.md` (ไฟล์นี้)
 
+### รายการไฟล์ทั้งหมดของรอบนี้ (จาก `git status` ณ ตอนที่รายงาน)
+
+**Modified (9 ไฟล์ตาม `git status`)**: `prisma/schema.prisma`, `src/middleware.ts`,
+`src/lib/auth/rbac.ts` (comment เท่านั้น) — ทั้ง 3 ไฟล์นี้ถูกแก้ไปแล้วตั้งแต่ Increment 1/2/4 ก่อน
+รอบนี้ ไม่ได้แก้เพิ่มวันนี้ ส่วนที่แก้จริงในรอบนี้คือ `src/lib/api-client.ts` (+`delete` method),
+`tests/integration/helpers.ts` (+`deleteTestWorkspace`/`uniqueSlug`/`sessionFor`),
+`tests/e2e/db-helpers.ts` (+`deleteTestWorkspace`/`uniqueSlug`), และ
+`docs/{architecture,folder-structure,session-log}.md`
+
+**Added ใหม่ทั้งหมด (~54 ไฟล์)**:
+
+- API: `app/api/workspaces/{route,[workspaceId]/route,[workspaceId]/members/route,
+[workspaceId]/members/[memberId]/route,[workspaceId]/projects/route}.ts`,
+  `app/api/projects/[projectId]/route.ts`
+- UI: `app/(dashboard)/workspaces/{page,new/page}.tsx`, `app/w/[slug]/{layout,page}.tsx`,
+  `w/[slug]/settings/page.tsx`, `w/[slug]/members/page.tsx`, `w/[slug]/projects/{page,new/page}.tsx`,
+  `w/[slug]/projects/[projectId]/{page,edit/page}.tsx`
+- `features/workspace/`: schemas×5 (+2 test), hooks×6, components×6, `workspace-response.ts`,
+  `workspace-member-response.ts`
+- `features/project/`: schemas×2, hooks×2, components×2, `project-response.ts`
+- `lib/auth/{workspace-rbac.ts+test,workspace-membership.ts}`, `lib/slug.ts+test`
+- `repositories/workspace/{workspace,workspace-member,project}.repository.ts`
+- Tests: `tests/integration/{workspace,workspace-member,project,workspace-isolation}
+.integration.test.ts`, `tests/e2e/{workspace-flow,project-flow,member-management,
+workspace-settings}.spec.ts`, `tests/e2e/scripts/delete-test-workspace.ts`
+- Migration: `prisma/migrations/20260727023507_add_workspace_project_core/migration.sql`
+
+หมายเหตุ: บางไฟล์ในรายการนี้ (เช่น `create-workspace-form.tsx`, `workspace-picker.tsx`,
+`workspace-switcher.tsx`, `use-workspaces.ts`, `use-create-workspace.ts`) เป็นของ Increment 5
+เดิม (ก่อนรอบนี้) แต่ยัง untracked เหมือนกันเพราะทั้ง Milestone 3 ยังไม่เคย commit เลยสักครั้ง —
+git status เห็นเป็นไฟล์ใหม่ทั้งหมดเท่ากันหมด ไม่ได้แปลว่าทุกไฟล์ถูกสร้างในรอบนี้
+
 ---
 
 ## Milestone 3 Final Quality Gate
@@ -1069,12 +1177,780 @@ VerificationToken:0` — สะอาด 100%
 
 **ยังไม่ commit/tag ใดๆ** ตามคำสั่ง — รอ Final Review Report และการอนุมัติ
 
+## Milestone 3 Committed: v0.3.0
+
+ผู้ใช้อนุมัติ Final Review Report แล้วสั่ง commit+tag+push — commit `83808bf`
+("feat(workspace): complete milestone 3"), annotated tag `v0.3.0`, push ขึ้น `origin/main`
+สำเร็จ (72 ไฟล์เปลี่ยน) ยืนยันด้วย `git ls-remote origin` ตรงกับ local **Milestone 3 ปิดสมบูรณ์**
+หมายเหตุ: README.md/CHANGELOG.md ไม่ได้อัปเดตในรอบ audit นี้ (ต่างจาก M2 ที่อัปเดตทั้งคู่ก่อน commit) —
+ยังค้างอยู่ที่สถานะ "Milestone 2 complete"/`[0.2.0]` ล่าสุด ไม่ใช่ปัญหาเร่งด่วนแต่ควรแก้ก่อน
+Milestone ถัดไปจะปิด
+
+---
+
+## Milestone 4 — Architecture & Planning Phase (ก่อนเขียนโค้ด)
+
+ผู้ใช้สั่งให้ทำ architecture/planning phase เต็มรูปแบบสำหรับ Milestone 4 (Task Management Core)
+ก่อนแตะโค้ดใดๆ — ห้ามแก้ไฟล์ ห้ามเขียนโค้ด รอ approve ก่อนเสมอ ทบทวน schema/architecture.md/
+folder-structure.md ทั้งหมด รวมถึงย้อนอ่าน session-log.md ทุก Phase เพื่อดึงข้อจำกัดที่ล็อกไว้แล้ว
+ตั้งแต่ต้นโปรเจกต์ ที่พบและใช้เป็นข้อจำกัดจริง (ไม่ใช่ทางเลือกเปิด):
+
+- **Status/Priority values ถูกล็อกไว้แล้วใน `globals.css`** ตั้งแต่ Phase 3 (6 status, 5 priority)
+  ยังไม่เคยถูกใช้ในโค้ดเลยจนถึงตอนนี้ — enum ต้องตรงเป๊ะ ไม่ใช่คิดใหม่
+- **ชื่อ resource คือ `Issue` ไม่ใช่ `Task`** — ตรงกับ README ("issue tracker"), ERD เดิมจาก Phase 2,
+  และตัวอย่าง commit message ใน `coding-standards.md` เอง (`feat(issues): ...`)
+  แม้ milestone จะชื่อ "Task Management" ในแผนเดิมก็ตาม
+- **Project Key ถูก defer มาที่นี่แล้วตั้งแต่ M3** (Decision Point 5: "ยังไม่มี Issue/Task system
+  จะออกแบบพร้อมกันตอนนั้น") — ต้องออกแบบพร้อมกับ Issue schema รอบนี้
+
+เสนอแผนครบ 6 หัวข้อ (Prisma schema, API endpoints, RBAC, repository layer, feature modules, UI
+routes) + testing strategy + migration strategy + architectural risks + roadmap 9 increment
+(จังหวะเดียวกับ M2/M3) พร้อม **Decision Points A–H** ให้อนุมัติก่อนเริ่ม — ผู้ใช้อนุมัติทุกข้อตามที่
+เสนอ (คอลัมน์ "เลือก" ด้านล่าง) letter พวกนี้ถูกอ้างอิงซ้ำตลอดทุก increment ที่ตามมา เก็บตารางเต็มไว้
+ที่นี่กันต้องไล่ความจำ:
+
+| #   | หัวข้อ                        | เลือก                                                     |
+| --- | ----------------------------- | --------------------------------------------------------- |
+| A   | ชื่อ model                    | `Issue` (ไม่ใช่ `Task`)                                   |
+| B   | ขอบเขต unique ของ Project key | ทั้ง workspace (workspace-wide) ไม่ใช่แค่ใน project เดียว |
+| C   | Drag-and-drop                 | Defer — ใช้ status control (ปุ่ม/dropdown) ก่อน           |
+| D   | Issue detail UI               | หน้าเต็มธรรมดาก่อน ไม่ใช่ slide-over/intercepting route   |
+| E   | Activity feed                 | Defer ทั้งหมด (ไม่มี `IssueActivity` model ใน M4)         |
+| F   | ขอบเขตของ Label               | Workspace-scoped (ใช้ร่วมกันได้ทุก project ใน workspace)  |
+| G   | ใครแก้ไข issue ได้            | MEMBER ขึ้นไปทุกคน (ไม่จำกัดแค่ reporter/assignee/ADMIN)  |
+| H   | Comment moderation            | Author แก้ไข comment ตัวเองได้ / ADMIN+ ลบของใครก็ได้     |
+
+สั่งเริ่มเฉพาะ **Increment 1** เท่านั้น ห้ามข้ามไป increment อื่น
+
+### Increment 1 — Prisma Schema + Migration ✅
+
+**Schema**: เพิ่ม `IssueStatus`/`IssuePriority` enum (ตรงกับ token ที่ล็อกไว้), model
+`Issue`/`Label`/`IssueLabel`/`Comment`, เพิ่ม `Project.key`/`Project.issueCounter` (คอลัมน์ใหม่บน
+ตาราง M3 เดิม — migration แรกของ M4 ที่แตะตาราง milestone ก่อนหน้า ต่างจาก M3 ที่ไม่แตะตาราง M2
+เลย) ตรวจ row count ก่อนรัน migration ยืนยัน `Project:0` แถว จึงเพิ่มคอลัมน์ `key` แบบ required
+(ไม่มี default) ได้อย่างปลอดภัยโดยไม่ต้อง backfill
+
+**บล็อกเกอร์เครื่องมือที่เจอ**: `prisma migrate dev` ปฏิเสธรันเพราะ environment เป็น
+non-interactive (มี warning เรื่อง unique constraint ที่ปกติต้อง confirm ผ่าน TTY) แก้ด้วยการใช้
+`prisma migrate diff --from-config-datasource --to-schema ./prisma/schema.prisma --script` สร้าง
+SQL ดิบแทน (เทียบ DB จริงกับ schema ตรงๆ ไม่ต้องใช้ shadow database) แล้วสร้างโฟลเดอร์ migration เอง
+ตาม convention ของ Prisma (`<timestamp>_<name>/migration.sql`) ก่อนรัน `prisma migrate deploy`
+(คำสั่งที่ออกแบบมาสำหรับ non-interactive CI/deploy โดยเฉพาะ ไม่ต้อง confirm) — ยืนยัน SQL ที่ได้
+ตรงกับที่ `migrate dev` ควรสร้างเป๊ะก่อนรัน (ตรวจเองว่ามีแต่ `CREATE TYPE`/`CREATE TABLE`/
+`ALTER TABLE ... ADD COLUMN`/`CREATE INDEX`/`ADD FOREIGN KEY` ไม่มีอะไร destructive)
+
+**ตรวจสอบผลกระทบ migration**: query Neon จริงยืนยัน 13 ตาราง (9 เดิม + 4 ใหม่), คอลัมน์ใหม่บน
+`Project` ตรงตาม design (`key` text NOT NULL ไม่มี default, `issueCounter` integer NOT NULL
+default 0), FK cascade rule ทุกจุดตรงตามที่ออกแบบ (`Issue.assignee`→SetNull,
+`Issue.reporter`/`Comment.author`→Restrict, ที่เหลือ Cascade) row count ทุกตารางที่เกี่ยวข้องยังคง
+0
+
+**ปัญหาที่ต้องตัดสินใจ**: เพิ่มคอลัมน์ `Project.key` แบบ required ทำให้ `pnpm typecheck` พังที่จุด
+เดียว (`project.repository.ts`'s `create()` + route ที่เรียกมัน เพราะยังไม่มีที่ไหน generate ค่า
+`key`) ถามผู้ใช้ว่าจะแก้แบบ minimal ตอนนี้หรือปล่อยแดงไปจนกว่าจะถึง Increment 2 — **ผู้ใช้เลือกแก้
+แบบ minimal ทันที** เพิ่ม `src/lib/issue-key.ts` (`deriveIssueKey()` — pure function แปลงชื่อ
+project เป็น prefix ตัวพิมพ์ใหญ่ เช่น "Design System"→"DS", "Orbit"→"ORB", รูปแบบเดียวกับ
+`slug.ts` เป๊ะ) + unit test 6 ตัว, เพิ่ม `projectRepository.findByWorkspaceAndKey` (mirror
+`findByWorkspaceAndName`), แก้ route `POST /api/workspaces/[workspaceId]/projects` ให้ derive
+key จากชื่อ + เช็ค collision คืน 409 `key_taken` (ไม่มี auto-retry-with-suffix — mirror พฤติกรรม
+จริงของ `slug_taken` ที่มีอยู่แล้ว ไม่ใช่ของใหม่), เพิ่ม `key` เข้า `toProjectResponse` ให้ตรงกับ
+field ที่มีจริงในโมเดล (field ที่ต้อง generate เอง เช่น การให้ user แก้ key ได้ ยังไม่ทำ — รอ
+increment ถัดไปตามที่ตกลง)
+
+**Quality Gate**: `lint` ✅ `typecheck` ✅ `build` ✅ `test` ✅ 48/48 (unit, +6 จาก
+`issue-key.test.ts`) `test:integration` ✅ 70/70 (ไม่มี test ใหม่ของ Issue/Label/Comment รอบนี้
+ตามสโคป — Increment 1 คือ schema เท่านั้น) `test:e2e` ✅ 34/34 (รันกับ production build ตาม
+บทเรียนจาก M3 เรื่อง Turbopack dev-server flakiness) ตรวจ Neon จริงหลังรันทุก suite:
+`user:0 workspace:0 project:0 issue:0 label:0 comment:0` สะอาด 100%
+
+ยังไม่ commit (รอทำครบทุก increment ตาม pattern M2/M3) รายงานผลแล้วรออนุมัติก่อนเริ่ม Increment 2
+
+### Increment 2 — Repositories + Zod Schemas + Response Mappers ✅
+
+ผู้ใช้อนุมัติ Increment 1 สั่งทำเฉพาะ Increment 2 ตามสโคป: repository สำหรับ Issue/Label/Comment,
+zod schemas, response mapper — **ห้ามมี API route/UI/hooks รอบนี้** ไม่มี integration/e2e test
+(ยังไม่มี route ให้ test เรียก) มีแค่ unit test สำหรับ schema ที่มี logic จริงคุ้มค่าจะ test
+
+**Repositories** (`repositories/issue/{issue,label,comment}.repository.ts`) — mirror
+`repositories/workspace/` เป๊ะ (หนึ่งไฟล์ต่อหนึ่ง model):
+
+- `issueRepository.create()` ใช้ `prisma.$transaction` ห่อ 2 ขั้นตอน (increment
+  `Project.issueCounter` แล้ว insert `Issue` ด้วยเลขนั้น) — ต่างจาก
+  `workspaceRepository.createWithOwner` ที่ใช้ nested-create เพราะ Project มีอยู่แล้วไม่ได้ถูกสร้าง
+  พร้อมกัน แต่ยังเป็น "หนึ่ง atomic domain operation แตะสองตาราง" แบบเดียวกัน — ยึดหลักการเดียวกับที่
+  M3 วางไว้แล้ว ไม่ใช่ pattern ใหม่
+- `issueRepository.findManyByProject()` เรียง `[status, position]` — ใช้ประโยชน์จากที่ Postgres
+  เรียง enum column ตามลำดับที่ประกาศไว้ใน schema.prisma (ซึ่งตั้งใจเรียงให้ตรงกับลำดับคอลัมน์บน
+  Kanban board อยู่แล้ว) query เดียวได้ผลลัพธ์จัดกลุ่มตามคอลัมน์บอร์ดถูกต้องทันที ไม่ต้อง sort เพิ่ม
+  ฝั่ง client
+- `commentRepository` ทุก method ที่คืนค่า include `author: true` (mirror
+  `workspaceMemberRepository.findManyByWorkspace`) กัน response ต้อง query User แยก
+- **ตั้งใจไม่เพิ่ม repository สำหรับ `IssueLabel`** (join table) รอบนี้ — ยังไม่มีอะไรเรียกใช้
+  (ไม่มี label-assignment API จนกว่าจะถึง Increment 4) เพิ่มตอนนี้จะเป็น unused scaffolding ขัดกับ
+  กติกาใน `development-guide.md`
+
+**Zod schemas** (`features/issue/schemas/`) — mirror pattern `create-workspace`/`update-workspace`
+เป๊ะ: `ISSUE_PRIORITIES` (export จาก `create-issue.schema.ts`, ใช้ร่วมกับ update) กับ
+`ISSUE_STATUSES` (export จาก `update-issue.schema.ts` เท่านั้น เพราะ status ไม่ settable ตอน
+create) ผ่าน `satisfies` เช็คตรงกับ enum จริงเหมือนที่ `PROJECT_STATUSES` ทำไว้ `updateIssueSchema`
+ใช้ `assigneeId: z.uuid().nullable().optional()` แยกกรณี "ไม่แตะ" (field ไม่มีใน payload) กับ "ยกเลิก
+มอบหมาย" (`null` ชัดเจน) ออกจากกัน — เขียน unit test ล็อกพฤติกรรมนี้ไว้โดยเฉพาะเพราะเป็นจุดที่ผิดพลาด
+ง่ายและ repository layer ต้องพึ่งพา distinction นี้ตรงๆ `create-label.schema.ts` export
+`hexColorSchema` ให้ update ใช้ร่วม (mirror `workspaceSlugSchema`) `create-comment.schema.ts` ใช้
+schema เดียวกันทั้ง create/edit (comment มี field เดียวที่ required เสมอ ไม่มี partial-update shape
+ที่ต่างจาก create ให้แยกไฟล์)
+
+**Response mappers** (`features/issue/{issue,label,comment}-response.ts`) — `toIssueResponse`
+รับ `projectKey` เป็น parameter แยก เพราะ `key` ของ issue ("ORB-123") คำนวณจาก `project.key` +
+`issue.number` ไม่ได้เก็บเป็นคอลัมน์ (single source of truth เหมือนทุก mapper ก่อนหน้า)
+`toCommentResponse` ไม่ spread ทั้ง `User` row (กัน `passwordHash` หลุด mirror
+`toWorkspaceMemberResponse`)
+
+**ปัญหาที่ต้องตัดสินใจซ้ำจาก Increment 1**: ไม่มีรอบนี้ — งานอยู่ในสโคปที่ตกลงไว้ล่วงหน้าครบ ไม่มี
+fallout ที่กระทบไฟล์เดิมเหมือน Increment 1
+
+**Quality Gate**: `lint` ✅ `typecheck` ✅ `build` ✅ (ไม่มี route ใหม่ ตามสโคป route list เหมือน
+Increment 1 เป๊ะ) `test` ✅ 62/62 (unit, +14 จาก `create-label.schema.test.ts` (6) และ
+`update-issue.schema.test.ts` (8)) — ไม่รัน `test:integration`/`test:e2e` เพราะยังไม่มี route ให้
+เทส (ตามสโคปที่ตกลง ไม่ใช่ข้าม)
+
+ยังไม่ commit (รอทำครบทุก increment ตาม pattern M2/M3) รายงานผลแล้วรออนุมัติก่อนเริ่ม Increment 3
+
+### Increment 3 — Issue API Routes ✅
+
+ผู้ใช้อนุมัติ Increment 2 สั่งทำเฉพาะ Increment 3 ตามสโคป: Issue API routes/validation/repository
+integration/RBAC/response mapper — **ห้าม UI/hooks/middleware/schema เปลี่ยน/migration ใหม่/
+Label API/Comment API/integration test/e2e test รอบนี้**
+
+**Routes** (2 ไฟล์ 5 handler รวม): `POST/GET /api/projects/[projectId]/issues` (list+create),
+`GET/PATCH/DELETE /api/issues/[issueId]` (detail/update/delete) — mirror pattern
+`/api/projects/[projectId]/route.ts` เป๊ะ (resolve child resource ก่อน แล้ว derive workspaceId
+จากมัน ไม่ใช่รับ workspaceId ตรงจาก URL แบบ list/create ของ Project) 404-not-403 ทุกจุด (เช็คซ้ำ
+ด้วยการอ่าน error message ให้ตรงกับ resource: "Project not found" สำหรับ issues list/create,
+"Issue not found" สำหรับ detail/update/delete)
+
+**RBAC** (Decision Point G): MEMBER+ ดู/สร้าง/แก้ issue ได้ (ต่างจาก Project ที่สร้าง/แก้ต้อง
+ADMIN+ — เหตุผลเดิม: issue เป็นงานประจำวันของ contributor ไม่ใช่โครงสร้าง workspace) ADMIN+ ลบ
+เท่านั้น (ตรงกับ bar ของ Project delete)
+
+**จุดออกแบบใหม่ที่ไม่มีใน M3 มาก่อน**:
+
+1. **Assignee ต้องเป็น workspace member** — ไม่มี FK บังคับ cross-table ได้ เช็คด้วย
+   `resolveWorkspaceMembership(project.workspaceId, data.assigneeId)` เองใน route (POST และ
+   PATCH) คืน 400 `invalid_assignee` ถ้าไม่ใช่ — ตรงกับ Risk 5 ที่ระบุไว้ตั้งแต่ Architecture
+   Review เช็คด้วย `if (data.assigneeId)` ตัวเดียวครอบทั้ง 3 กรณี (null=unassign ข้ามเช็ค,
+   undefined=ไม่แตะข้ามเช็ค, string จริง=validate) เพราะ falsy check ครอบคลุมพอดี
+2. **Position คำนวณฝั่ง server ตอนสร้าง** — เพิ่ม `issueRepository.findMaxPositionInStatus()`
+   (aggregate query ใหม่) หา max position ของ column BACKLOG ในโปรเจกต์นั้น แล้ว `+1000` (gap
+   ใหญ่ๆ เผื่อ increment ในอนาคตที่มี drag-and-drop ต้องคำนวณ midpoint) ไม่ต้องรอ increment
+   ถัดไป เพราะ POST ต้องมีค่านี้ใช้งานได้จริงตั้งแต่รอบนี้ ถึงแม้ drag-and-drop เองจะ defer อยู่
+   (Decision Point C)
+
+**Quality Gate**: `lint` ✅ `typecheck` ✅ `build` ✅ (route ใหม่ 2 เส้นทางปรากฏถูกต้อง:
+`/api/issues/[issueId]`, `/api/projects/[projectId]/issues`) `test` ✅ 62/62 (ไม่มี unit test
+ใหม่รอบนี้ตามสโคป — ไม่มี helper/schema ใหม่ให้ test มีแต่ route ซึ่งเทสผ่าน integration/e2e ที่
+defer ไป) ไม่รัน `test:integration`/`test:e2e` ตามคำสั่งชัดเจนของผู้ใช้รอบนี้
+
+ยังไม่ commit (รอทำครบทุก increment ตาม pattern M2/M3) รายงานผลแล้วรออนุมัติก่อนเริ่ม Increment 4
+
+### Increment 4 — Label API + Comment API + IssueLabel Repository ✅
+
+ผู้ใช้อนุมัติ Increment 3 สั่งทำเฉพาะ Increment 4 ตามสโคป: Label API, Comment API, IssueLabel
+repository, repository integration, RBAC, response mapper — **ห้าม UI/hooks/schema เปลี่ยน/
+migration ใหม่/integration test/e2e test/เริ่ม Kanban รอบนี้**
+
+**IssueLabel repository ใหม่** (`repositories/issue/issue-label.repository.ts`) — ตามที่ defer
+ไว้จาก Increment 2 ตอนนี้มี label-assignment API จริงให้เรียกใช้แล้ว ไม่มี response mapper แยก
+เพราะ join row เองไม่มี field ที่มีความหมายนอกจาก 2 id (ตามที่ comment ใน schema.prisma บอกไว้
+ตั้งแต่ Increment 1) — caller map ผ่าน `label` (`toLabelResponse`) แทน
+
+**Routes** (6 ไฟล์ 10 handler รวม):
+
+- `GET/POST /api/workspaces/[workspaceId]/labels` — list/create label definition (ADMIN+ สร้าง,
+  Decision Point F)
+- `PATCH/DELETE /api/workspaces/[workspaceId]/labels/[labelId]` — แก้/ลบ (ADMIN+) มี
+  cross-workspace tampering guard เหมือน `members/[memberId]/route.ts` เป๊ะ
+  (`resolveTargetLabel` เช็ค `label.workspaceId !== workspaceId`)
+- `GET/POST /api/issues/[issueId]/labels` — list/attach label ให้ issue (**MEMBER+ ทั้งคู่** —
+  ต่างจากการสร้าง label definition ที่ต้อง ADMIN+ เพราะ "ติด label ที่มีอยู่แล้ว" เป็นงาน triage
+  ประจำวัน ไม่ใช่งานโครงสร้าง) เช็คว่า label เป็นของ workspace เดียวกับ issue ก่อนเสมอ (คนละ
+  workspace → 404 เหมือน label ไม่มีอยู่จริง)
+- `DELETE /api/issues/[issueId]/labels/[labelId]` — detach (MEMBER+)
+- `GET/POST /api/issues/[issueId]/comments` — list/สร้าง comment (MEMBER+, Decision Point H)
+- `PATCH/DELETE /api/comments/[commentId]` — แก้ (author เท่านั้น) / ลบ (author หรือ ADMIN+,
+  Decision Point H) — flat route แก้ตาม `commentId` อย่างเดียว ต้อง resolve
+  comment→issue→project→workspace เองในฟังก์ชัน `resolveCommentContext` (รูปแบบเดียวกับที่
+  `/api/issues/[issueId]/route.ts` resolve issue→project) ก่อนเช็คสิทธิ์ได้
+
+**Schema ใหม่ 1 ไฟล์**: `attach-label.schema.ts` (`{labelId: uuid}`) — payload ใหม่ที่ยังไม่มี
+schema รองรับจาก Increment 2 (create-comment schema ถูกใช้ซ้ำสำหรับ PATCH comment ตามที่ออกแบบไว้
+ตั้งแต่ต้น ไม่ต้องสร้างใหม่)
+
+**Quality Gate**: `lint` ✅ `typecheck` ✅ `build` ✅ (route ใหม่ 6 เส้นทางปรากฏถูกต้อง) `test`
+✅ 62/62 (ไม่มี unit test ใหม่ — `attachLabelSchema` เป็น single-field uuid validation ธรรมดา
+ไม่มี edge-case logic ที่คุ้มค่าจะ test แยก ตรงกับที่ตัดสินใจไว้ตั้งแต่ Increment 2 สำหรับ schema
+แบบเดียวกัน) ไม่รัน `test:integration`/`test:e2e` ตามคำสั่งชัดเจนของผู้ใช้รอบนี้
+
+ยังไม่ commit (รอทำครบทุก increment ตาม pattern M2/M3) รายงานผลแล้วรออนุมัติก่อนเริ่ม Increment 5
+
+### Increment 5A — TanStack Query Hooks (Issue/Label/Comment) ✅
+
+ผู้ใช้อนุมัติ Increment 4 สั่งทำเฉพาะ Increment 5A ตามสโคป: React Query hooks สำหรับ Issue/Label/
+Comment เท่านั้น — **ห้าม UI/Kanban/dialog/routing/schema เปลี่ยน/API เปลี่ยน/middleware เปลี่ยน
+รอบนี้** เป็น increment แรกของ M4 ที่แตะ client-side code แต่ยังไม่ใช่ UI จริง
+
+**16 hook ไฟล์ใหม่** ใน `features/issue/hooks/` mirror pattern จาก M3 เป๊ะทุกจุด:
+
+- **Issue** (5): `use-issues` (list, query key `["issues", projectId]`), `use-issue` (detail,
+  `["issue", issueId]`), `use-create-issue`, `use-update-issue`, `use-delete-issue`
+  — update/delete รับทั้ง `issueId` และ `projectId` เพราะ route `PATCH/DELETE
+/api/issues/[issueId]` ไม่มี `projectId` ใน URL แต่ query ของ list ต้องถูก invalidate ด้วย
+  (เหตุผลเดียวกับที่ `use-update-member-role.ts` รับ `{memberId, data}` แยกจาก `workspaceId`
+  ใน M3)
+- **Label** (workspace definition, 4): `use-labels`, `use-create-label`, `use-update-label`
+  (`{labelId, data}` mutate arg, mirror `use-update-member-role.ts`), `use-delete-label`
+  (mirror `use-remove-member.ts`)
+- **Issue-Label** (attach/detach, 3): `use-issue-labels` (query key แยก `"issue-labels"`
+  ไม่ปนกับ `"labels"` เพราะเป็นคนละ resource — labels ที่ติดอยู่กับ issue หนึ่งอัน vs label
+  ทั้งหมดของ workspace), `use-attach-label`, `use-detach-label`
+- **Comment** (4): `use-comments`, `use-create-comment`, `use-update-comment` (รับ `{commentId,
+data}` เพราะ route แบน `/api/comments/[commentId]` ไม่มี `issueId` ใน URL, reuse
+  `CreateCommentInput` type เหมือนที่ route เอง reuse schema), `use-delete-comment`
+
+**ตัดสินใจสำคัญ**: ทุก mutation hook ของ Issue/Label/Comment มี `invalidateQueries` (ต่างจาก
+`use-create-project.ts`/`use-update-project.ts` ของ M3 ที่ **ไม่มี** invalidation เพราะหน้า
+project เป็น Server Component อ่านตรงจาก repository) เหตุผล: Kanban board (Increment 5B) เป็น UI
+ที่โต้ตอบถี่มาก (เปลี่ยนสถานะบ่อย, comment เพิ่มบ่อย) เหมาะกับ client-side cache + invalidate
+มากกว่า router.refresh() แบบเต็มหน้า — ตัดสินใจไว้ล่วงหน้าก่อนเขียน UI จริงเพื่อให้ Increment 5B
+ไม่ต้องมาตัดสินใจสถาปัตยกรรมกลางทาง
+
+**Quality Gate**: `lint` ✅ `typecheck` ✅ `build` ✅ (route list ไม่เปลี่ยน ตามคาด — hook ไม่ใช่
+route) `test` ✅ 62/62 ไม่เปลี่ยน (hook ที่เป็นแค่ wrapper รอบ useQuery/useMutation ไม่มี logic ให้
+unit test — ตรงกับที่ M3 ไม่เคย unit test hook ไฟล์ไหนเลยสักตัว) ไม่รัน `test:integration`/
+`test:e2e` ตามคำสั่งชัดเจนของผู้ใช้รอบนี้
+
+ยังไม่ commit (รอทำครบทุก increment ตาม pattern M2/M3) รายงานผลแล้วรออนุมัติก่อนเริ่ม Increment 5B
+
+### Increment 5B — Kanban Board Shell, Columns, Issue Cards ✅
+
+ผู้ใช้อนุมัติ Increment 5A พร้อมตัดสินใจเรื่อง label ที่ค้างไว้ล่วงหน้า: **embed labels เข้าไปใน
+Issue response เลย ไม่ให้ board fetch label แยกต่อ card** (เพื่อให้ board โหลดด้วย request เดียว)
+สั่งทำเฉพาะ Increment 5B ตามสโคป — **ห้าม issue detail page/comments UI/label management UI/
+drag-and-drop/dialog/filter/routing เปลี่ยน/schema เปลี่ยน/API endpoint ใหม่รอบนี้** (ขยาย response
+shape ได้เท่าที่จำเป็น)
+
+**Extend Issue response ให้ embed labels** (ตามคำสั่ง): เพิ่ม `WITH_LABELS` constant
+(`{labels: {include: {label: true}}}`) ใน `issue.repository.ts` ใช้ร่วมกันทั้ง 4 method ที่คืน
+Issue (`create`/`findById`/`findManyByProject`/`update`) เพื่อให้ type ที่ป้อนเข้า
+`toIssueResponse` สอดคล้องกันไม่ว่าจะมาจาก method ไหน `toIssueResponse` เพิ่ม `labels:
+LabelResponse[]` โดย map ผ่าน `toLabelResponse` ที่มีอยู่แล้ว (reuse ไม่สร้าง mapper ใหม่)
+อัปเดต `IssueResponse` (client type ใน `use-issues.ts`) ให้ตรงกัน — **ไม่มี API route ใหม่**
+ตามที่สั่ง เป็นแค่ response shape ขยาย
+
+**Constants ใหม่**: `src/constants/issue.ts` (`ISSUE_STATUS_COLOR`/`ISSUE_PRIORITY_COLOR`) —
+การใช้งานจริงครั้งแรกของโฟลเดอร์ `constants/` ที่ folder-structure.md จองไว้ตั้งแต่ Foundation
+("status colors/labels, role hierarchy") ค่าอ้างอิง CSS custom property ที่ล็อกไว้ตั้งแต่ Phase 3
+(`--color-status-*`/`--color-priority-*`) ซึ่งไม่เคยถูกใช้ในโค้ดจริงมาก่อนจนถึงตอนนี้ ใช้ inline
+`style` (ไม่ใช่ Tailwind class) เพราะสีต้องคำนวณจากค่า dynamic (status/priority ของแต่ละ issue) —
+Tailwind JIT compiler ตรวจจับ class name แบบ static เท่านั้น class ที่สร้างจาก string
+interpolation ใช้ไม่ได้จริง
+
+**Components 3 ไฟล์ใหม่** ใน `features/issue/components/`:
+
+- `kanban-board.tsx` (Client Component, `"use client"`) — เรียก `useIssues(projectId)` ครั้งเดียว
+  แบ่งกลุ่มตาม status ฝั่ง client (`.filter()`) ไม่ query แยกต่อ column, มี loading skeleton (6
+  คอลัมน์) และ empty state (ยังไม่มี issue เลยในโปรเจกต์)
+- `kanban-column.tsx` — แสดง header (จุดสีตาม `ISSUE_STATUS_COLOR` + ชื่อ status ดิบ เช่น
+  "BACKLOG" ไม่แปลไทย ตรงกับ precedent ของ ProjectStatus ใน M3 ที่แสดง "ACTIVE"/"ON_HOLD" ดิบ
+  เหมือนกัน) + จำนวน issue + list ของ `IssueCard`
+- `issue-card.tsx` — key (font-mono ตาม typography spec Phase 3 ที่กำหนด JetBrains Mono ไว้
+  สำหรับ "issue key" โดยเฉพาะ), priority badge (ซ่อนถ้า NONE), title, label badge (ถ้ามี) ทั้งหมด
+  ใช้ Badge/Card เดิม ไม่สร้าง UI primitive ใหม่
+
+**Mount บนหน้าเดิม ไม่สร้าง route ใหม่**: เพิ่ม `<KanbanBoard>` ต่อท้ายเนื้อหาเดิมของ
+`/w/[slug]/projects/[projectId]/page.tsx` (Server Component เดิมจาก M3 อ่าน project info ตรงจาก
+repository) — ไม่ลบ/แก้เนื้อหาเดิม (ชื่อ/description/status/owner/created date/ปุ่มแก้ไข) แค่เพิ่ม
+section "Issue" ต่อท้าย ตรงกับที่ proposal เดิมเคยเสนอไว้ว่า "project detail page evolves into
+Kanban board" แต่ทำแบบ additive ไม่ใช่แทนที่ทั้งหมด
+
+**ยืนยันด้วย browser จริง**: สมัคร user จริง→สร้าง workspace/project จริง→ยืนยันหน้าว่างแสดง empty
+state ถูกต้อง→สร้าง label + 2 issue (priority ต่างกัน) + ย้าย 1 issue ไป IN_PROGRESS ผ่าน API
+ตรง (ยังไม่มี UI สร้าง issue ใน increment นี้) → reload หน้า → **ยืนยันด้วย
+`read_network_requests` ว่ามี `GET .../issues` แค่ครั้งเดียวต่อการโหลดหน้า ไม่มี request แยกต่อ
+label** ตรงตามข้อกำหนดเรื่อง efficiency ที่สั่งไว้ → เห็น DS-1 (URGENT + label "Bug") อยู่ใน
+BACKLOG, DS-2 (LOW) อยู่ใน IN_PROGRESS ถูกต้องครบทั้ง 6 คอลัมน์เรียงลำดับ BACKLOG→CANCELLED
+ตามที่ตั้งใจ ลบข้อมูลทดสอบหมดหลังยืนยัน (`workspace.delete` cascade ลบ project/issue/label ให้
+อัตโนมัติ)
+
+**ข้อจำกัดที่ทราบแล้ว ไม่ได้แก้รอบนี้**: หน้า project detail อยู่ใน container `max-w-3xl` (กำหนด
+ไว้ที่ `w/[slug]/layout.tsx` ใช้ร่วมกับทุกหน้าใน route group) ทำให้ board แคบกว่าที่ Kanban ควรจะ
+เป็นในจอกว้าง ต้อง scroll แนวนอนเร็วกว่าที่ควร — ไม่แก้ layout ที่ใช้ร่วมกันตอนนี้เพราะจะกระทบทุก
+หน้าอื่นด้วย (settings/members/dashboard) ไม่ใช่แค่หน้านี้ และ "ห้าม routing เปลี่ยน" ตามสโคป
+รอตัดสินใจว่าจะขยาย container เฉพาะหน้านี้หรือทั้ง route group เมื่อไหร่ที่เหมาะสม ไม่ใช่ตอนนี้ /
+ตาม Phase 3 UI/UX doc มือถือควรเห็น List view + bottom tab bar แทน Kanban แต่ increment นี้สร้าง
+แค่ desktop Kanban (scroll แนวนอนได้บนจอเล็กแต่ไม่ใช่ mobile-optimized list view จริง) — ยังไม่ทำ
+ตามสโคปที่ไม่ได้ระบุไว้
+
+**Quality Gate**: `lint` ✅ `typecheck` ✅ `build` ✅ (route list ไม่เปลี่ยน ตามสโคป "ไม่มี API
+endpoint ใหม่") `test` ✅ 62/62 ไม่เปลี่ยน (component ใหม่ไม่มี unit test — เป็น UI component ที่
+ต้องมี browser/RTL setup ถึงจะเทสได้จริง ยืนยันด้วย manual browser test แทนตามที่ทำเสมอสำหรับ UI
+increment) ไม่รัน `test:integration`/`test:e2e` ตามคำสั่งชัดเจนของผู้ใช้รอบนี้
+
+ยังไม่ commit (รอทำครบทุก increment ตาม pattern M2/M3) รายงานผลแล้วรออนุมัติก่อนเริ่ม Increment 6
+
+### Increment 6 — Issue Detail Page, Edit/Status/Label/Comment UI ✅
+
+ผู้ใช้อนุมัติ Increment 5B สั่งทำเฉพาะ Increment 6 ตามสโคป: Create Issue dialog, Edit Issue UI,
+Issue detail panel/page, Comment UI, Label assignment UI, Status change UI — **reuse hook จาก
+Increment 5A ทั้งหมด ห้ามสร้าง API endpoint ใหม่นอกจากจำเป็นจริงๆ ห้าม drag-and-drop** สุดท้ายไม่ต้อง
+เพิ่ม API endpoint ใหม่แม้แต่ตัวเดียว — ทุกอย่างต่อกับ 15 endpoint ที่มีอยู่แล้วจาก Increment 3/4
+
+**Textarea primitive ใหม่** (`components/ui/textarea.tsx`) — shadcn ไม่เคยถูกติดตั้งให้มี textarea
+มาก่อน (Foundation ติดตั้งแค่ Button/Input/Card/Badge/Skeleton/Dialog) เขียนเองมิเรอร์ style ของ
+`input.tsx` เป๊ะ (ไม่เพิ่ม dependency ใหม่) จำเป็นเพราะ description ของ issue และ comment body เป็น
+ข้อความหลายบรรทัด ใช้ `Input` บรรทัดเดียวจะแย่มากด้าน UX
+
+**Component ใหม่ 6 ไฟล์** ใน `features/issue/components/`:
+
+- `create-issue-dialog.tsx` — Dialog แบบ controlled state เดียวกับที่ `MemberList`'s ปุ่มลบใช้อยู่
+  (ไม่ใช้ `DialogTrigger asChild` เพราะ codebase ยังไม่เคยใช้ pattern นั้นเลย) ฟอร์ม title/
+  description/priority/assignee เรียก `useWorkspaceMembers`(M3)+`useCreateIssue`(5A) ตรงๆ
+- `edit-issue-form.tsx` — title/description/priority/assignee พร้อมปุ่ม "บันทึก" **ไม่มี `status`**
+  ในฟอร์มนี้โดยตั้งใจ เพื่อไม่ให้มีสอง control แก้ field เดียวกันพร้อมกัน (ดูข้อถัดไป) ทุก MEMBER
+  แก้ได้ (Decision Point G) ไม่มี role gate เหมือน `EditProjectForm`
+- `issue-status-select.tsx` — instant-apply select (onChange ยิงทันที ไม่มีปุ่ม save) มิเรอร์
+  `MemberList`'s role `<select>` เป๊ะ — คือ "status control (ปุ่ม/dropdown)" ที่ Decision Point C
+  เสนอไว้แทน drag-and-drop
+- `issue-label-section.tsx` — แสดง label ที่ติดอยู่ (`useIssueLabels`) พร้อมปุ่ม detach ต่อป้าย
+  (MEMBER+ ตาม Decision Point F), dropdown แนบ label ที่มีอยู่แล้ว (MEMBER+), และฟอร์มสร้าง label
+  ใหม่แบบย่อ (**ADMIN+ เท่านั้น** ตรงกับ bar ของ `POST /api/workspaces/[id]/labels`) — ตัดสินใจเอง
+  ว่ารวม "สร้าง label ใหม่" เข้าไปด้วยแม้ผู้ใช้เขียนสโคปว่า "Label assignment UI" เฉยๆ เพราะไม่งั้น
+  workspace ที่ยังไม่มี label เลยจะ "แนบ" อะไรไม่ได้เลย — ระบุไว้ชัดเจนในรายงานนี้เผื่อไม่ตรงตามที่
+  ตั้งใจไว้
+- `comment-section.tsx` — list + สร้าง comment + แต่ละแถวมี "แก้ไข" (author เท่านั้น) / "ลบ"
+  (author หรือ ADMIN+ ตาม Decision Point H) พร้อม confirm dialog ก่อนลบ มิเรอร์ pattern เดียวกับ
+  `MemberList`'s remove-confirm เป๊ะ
+- `issue-detail-panel.tsx` — client orchestrator ตัวเดียวที่เรียก `useIssue()` ครั้งเดียว
+  แล้วส่ง initial value ไปให้ `EditIssueForm` เป็น prop (มิเรอร์วิธี initialize-from-resolved-data
+  ไม่ใช้ effect แบบ `ProfileFields`/`EditProjectForm` — ต่างกันแค่ตรงที่ resolve ผ่าน client query
+  แทน Server Component prop เพราะสั่งให้ reuse hook)
+
+**Route ใหม่ 1 เส้นทาง**: `app/w/[slug]/projects/[projectId]/issues/[issueId]/page.tsx`
+(Server Component) — resolve session→workspace(`resolveWorkspaceForRequest`)→project
+(เช็ค `project.workspaceId !== workspace.id`)→issue (เช็ค `issue.projectId !== project.id`) 404
+ทุกจุดแบบเดียวกับ project detail page เป๊ะ แล้วส่ง id ต่างๆ ลงไปให้ `IssueDetailPanel` (client)
+ดึงข้อมูลจริงเองผ่าน `useIssue` — หน้าเต็มธรรมดา ไม่ใช่ slide-over ตาม Decision Point D
+
+**Kanban card เชื่อมไปหน้า detail**: `issue-card.tsx` เพิ่ม prop `slug` ห่อทั้ง Card ด้วย `<Link
+href="/w/{slug}/projects/{projectId}/issues/{id}">` (thread ผ่าน `kanban-column.tsx`/
+`kanban-board.tsx`) project detail page (`page.tsx`) เพิ่มปุ่ม "Issue ใหม่" (`CreateIssueDialog`)
+ข้างหัวข้อ "Issue"
+
+**Quality Gate**: `lint` ✅ 0 error (autofix แค่ import order) `typecheck` ✅ 0 error `build` ✅
+(route ใหม่ปรากฏถูกต้อง: `/w/[slug]/projects/[projectId]/issues/[issueId]`, ไม่มี API route ใหม่
+ตามที่ตั้งใจ) `test` ✅ 62/62 ไม่เปลี่ยน (component ใหม่ไม่มี unit test — เหตุผลเดียวกับ Increment
+5B) ไม่รัน `test:integration`/`test:e2e` ตามสโคปที่ยังไม่ถึง Increment 7-9
+
+**Manual Verification ผ่าน browser จริง** (สมัคร 2 user จริง, Neon จริง, ใช้ `next dev --webpack`
+เพราะ Turbopack ชน OneDrive junction-point bug เดิมที่เจอตั้งแต่ M2 อีกครั้งพอดี — ยืนยันว่าไม่ใช่
+บั๊กจากโค้ด Increment 6 เพราะ error เกิดตอนใช้ Turbopack ล้วนๆ ก่อนแม้แต่จะแตะหน้าใหม่): สร้าง
+workspace+project→สร้าง issue "DPQ-1" ผ่าน dialog (priority HIGH, assignee ตัวเอง)→คลิกการ์ดเข้า
+หน้า detail→เปลี่ยนสถานะเป็น IN_PROGRESS ทันทีไม่ต้องกด save→สร้าง label "Bug" ใหม่ (สีแดง)→แนบเข้า
+issue→ลบออก (detach)→แนบกลับ→แก้ title/priority(URGENT)/assignee(unassign)ผ่าน Edit form กด
+บันทึก→เห็น toast→เพิ่ม comment→แก้ไข comment ตัวเอง→ลบ comment ตัวเอง (พร้อม confirm dialog)→กลับไป
+หน้า Kanban ยืนยันการ์ดย้ายไปคอลัมน์ IN_PROGRESS พร้อม title/priority/label ใหม่ถูกต้องครบ (fresh
+page load ไม่ใช่ cache) → เชิญ user คนที่สอง "Member Tester" เป็น MEMBER (ไม่ใช่ ADMIN) → login
+สลับเป็น Member Tester ยืนยัน: **ไม่เห็นฟอร์ม "สร้าง label ใหม่"** (ADMIN+ เท่านั้น) แต่ยังแนบ/ถอด
+label ได้ (MEMBER+), แก้ไข issue ได้เต็มที่ (Decision Point G) → Member Tester คอมเมนต์ →
+สลับกลับ Owner ยืนยัน: เห็นปุ่ม "ลบ" อย่างเดียวบน comment ของ Member Tester (ไม่เห็น "แก้ไข" — author
+เท่านั้นแก้ได้) กดลบ (moderate) สำเร็จ — ครบทุกกฎ RBAC ของ Decision Point F/G/H
+
+**Cleanup**: ลบ workspace ทดสอบ + user ทดสอบทั้ง 2 คนผ่านสคริปต์ชั่วคราว `_manual-cleanup.ts`
+(ลบทิ้งทันทีหลังใช้ ไม่เคย commit มิเรอร์ pattern เดียวกับที่ M3 เคยทำ) ยืนยันด้วย `_check-clean.ts`
+ว่าทุกตารางกลับสู่ 0 แถว (`user/workspace/project/issue/label/comment: 0`) ลบสคริปต์ทั้งสองทิ้งแล้ว
+พร้อมลบ `.claude/launch.json` ที่สร้างเองระหว่าง manual verification (บทเรียนเดียวกับที่ M2 เจอ)
+
+ยังไม่ commit/tag/push ใดๆ ตามคำสั่ง — รายงานผลแล้วหยุดตามคำสั่ง ไม่เริ่ม Increment 7
+
+## Milestone 4 — Architecture & Code Audit (ก่อน Increment 7)
+
+ผู้ใช้สั่งให้ทำ audit ล้วนๆ (ห้ามแก้โค้ด ห้าม commit ห้ามเริ่ม Increment 7) ทบทวนทุกอย่างที่ทำใน
+Increment 1–6: schema, repository 4 ไฟล์, API route handler 15 ไฟล์, response mapper 4 ไฟล์,
+zod schema 6 ไฟล์, hook 16 ไฟล์, component 11 ไฟล์ เทียบกับ pattern ที่ M2/M3 วางไว้ ยืนยันด้วย
+`grep` จริงหลายจุด (ไม่ใช่แค่อ่านแล้วสรุปเอง) เช่นยืนยันว่า `prisma.` ไม่มีนอก `repositories/` เลย
+ทั้ง `src/app` และ `src/features`
+
+**สรุปผล**:
+
+- **จุดแข็ง**: repository isolation 100% (grep ยืนยัน), response mapper เป็น single source of
+  truth ทุกจุด (ไม่มี raw Prisma object หลุดไปหา client, `Comment.author` ไม่ spread ทั้งแถว), RBAC
+  Decision Point F/G/H ถูก enforce ตรงกันทั้ง server และ UI (ยืนยันด้วย manual test จริงตอน
+  Increment 6), transaction ของ `issueRepository.create` atomic ถูกต้อง, error handling
+  (`try/catch → handleApiError`) กับ 404-not-403 enumeration-safety สม่ำเสมอทุก route ใหม่,
+  naming convention คงเส้นคงวาทั้ง 6 increment
+- **ปัญหาที่พบ 9 ข้อ** พร้อม severity:
+  1. **[Medium]** duplicated issue-context resolution — บล็อก `issueRepository.findById →
+projectRepository.findById → resolveWorkspaceMembership` (พร้อม 404 3 จุด) ถูก copy-paste
+     ซ้ำใน **8 handler function** ข้าม 4 ไฟล์ (`issues/[issueId]/route.ts` ×3,
+     `issues/[issueId]/labels/route.ts` ×2, `issues/[issueId]/labels/[labelId]/route.ts` ×1,
+     `issues/[issueId]/comments/route.ts` ×2) — ~70 บรรทัดซ้ำ
+  2. **[Medium]** label ที่ embed ใน Issue response ค้าง (stale) — `useAttachLabel`/
+     `useDetachLabel` (Increment 5A) invalidate แค่ `["issue-labels", issueId]` ไม่แตะ
+     `["issue", issueId]`/`["issues", projectId]` ทำให้ Kanban board (5B ฝัง label ใน
+     IssueResponse) ยังโชว์ label เก่าจนกว่า staleTime 30s จะหมดหรือ reload หน้าใหม่
+  3. **[Medium]** duplicated assignee-membership validation — บล็อก "เช็คว่า assigneeId เป็น
+     workspace member" เหมือนกันเป๊ะซ้ำใน `POST /api/projects/[projectId]/issues` กับ
+     `PATCH /api/issues/[issueId]`
+  4. **[Low]** dead code — `issueRepository.findByProjectAndNumber` (เพิ่มไว้ Increment 2) ไม่มี
+     route ไหนเรียกใช้เลย ตรงกับ pattern "unused scaffolding" ที่ Standing Rules เตือนไว้ (และ
+     Increment 3 review เคยจับ+ลบ `countByWorkspaceAndRole` แบบเดียวกันมาก่อน)
+  5. **[Low]** dead code — `useDeleteIssue` (Increment 5A) ไม่มี component ไหน import เลย (ไม่มี
+     Delete Issue UI ตามสโคป Increment 6 ที่ระบุไว้)
+  6. **[Low]** `DELETE /api/issues/[issueId]` เรียก `resolveWorkspaceMembership` +
+     `requireWorkspaceRole` แยกกัน 2 ครั้งแทนที่จะเรียก `requireWorkspaceAccess` ตัวเดียวที่ทำงาน
+     เหมือนกันเป๊ะ (ยังไม่แก้รอบนี้ — ไม่อยู่ใน scope cleanup ที่อนุมัติ)
+  7. **[Low]** หน้า Issue detail's Server Component fetch issue หนึ่งครั้งแค่ validate URL nesting
+     แล้วทิ้ง ให้ `IssueDetailPanel` fetch ซ้ำฝั่ง client ผ่าน `useIssue` — เป็น trade-off ที่ตั้งใจ
+     (ทำตามคำสั่ง "reuse existing hooks") ไม่ใช่บั๊ก
+     8-9. **[Low, cosmetic]** ป้าย "Priority"/"Assignee"/"Label" เป็นภาษาอังกฤษปนใน UI ที่ส่วนใหญ่เป็น
+     ไทย (สืบทอดมาจาก M3's "Role" label ไม่ใช่ของใหม่) และ className ของ `<select>` ถูก copy-paste
+     ซ้ำ ~10 จุดข้าม M3+M4 (ไม่มี shared primitive) — ทั้งคู่ไม่ใช่ปัญหาเฉพาะ M4 ไม่แก้รอบนี้
+
+**คำแนะนำ**: extract `resolveIssueContext()`/`validateAssignee()` + แก้ cache invalidation (ข้อ
+1-3) ก่อนเข้า Increment 7 (กัน test ไป bake ความซ้ำซ้อนเข้าไปด้วย) ส่วนข้อ 4-9 ปล่อยไว้ตามที่เป็น
+(ข้อ 4/5 ผู้ใช้สั่งชัดว่า "ห้ามลบ reserved code ตอนนี้")
+
+**Verdict**: ไม่มีข้อไหนเป็น correctness/security/data-integrity bug — RBAC, transaction, response
+shape ถูกต้องหมด พร้อมเข้า Increment 7 ได้ทันที แต่แนะนำให้ทำ cleanup เล็กๆ ก่อน — ผู้ใช้อนุมัติ audit
+และสั่งทำ cleanup ตามข้อ 1-3 ก่อนเริ่ม Increment 7
+
+## Milestone 4 — Cleanup Pass (หลัง audit ก่อน Increment 7)
+
+สโคปแคบมาก 3 ข้อจาก audit (Medium severity ทั้งหมด) — **ห้าม feature ใหม่ ห้าม API เปลี่ยน ห้าม UI
+เปลี่ยน (เชิงพฤติกรรม) ห้ามลบ dead code ที่ intentionally reserved (ข้อ 4/5 ของ audit) รักษา
+behavior เดิมทุกจุด**
+
+### 1) Extract `resolveIssueContext(issueId, userId)`
+
+เพิ่มใน `lib/auth/workspace-membership.ts` (บ้านเดียวกับ `resolveWorkspaceMembership`/
+`requireWorkspaceAccess`/`resolveWorkspaceForRequest` อยู่แล้ว) คืน `{issue, project, membership}
+| null` — null เมื่อ issue ไม่มีจริง, project ของมันหาย, หรือผู้ใช้ไม่ใช่ workspace member (เหมือน
+`resolveCommentContext` ที่มีอยู่แล้วใน comments route แต่เป็น local function ไฟล์เดียว) แทนที่
+บล็อก 3 ขั้นตอนที่ซ้ำใน 8 จุดของ 4 ไฟล์ (`issues/[issueId]/route.ts` GET/PATCH/DELETE,
+`issues/[issueId]/labels/route.ts` GET/POST, `issues/[issueId]/labels/[labelId]/route.ts` DELETE,
+`issues/[issueId]/comments/route.ts` GET/POST) ด้วยการเรียก helper ตัวเดียว — response body/status
+code ของทุก 404 เหมือนเดิมทุกประการ (ยืนยันด้วย manual test: `GET /api/issues/<uuid ปลอม>` คืน
+`{"error":"not_found","message":"Issue not found"}` เหมือนก่อนแก้เป๊ะ)
+
+### 2) Extract `validateAssignee(workspaceId, assigneeId)`
+
+เพิ่มในไฟล์เดียวกัน คืน `boolean` (`true` ทันทีถ้า `assigneeId` เป็น null/undefined — ไม่มีอะไรต้อง
+validate, มิเรอร์ semantics ของ `if (data.assigneeId)` เดิม) แทนที่บล็อกซ้ำใน
+`POST /api/projects/[projectId]/issues` กับ `PATCH /api/issues/[issueId]` — เก็บการสร้าง
+NextResponse (`invalid_assignee`/400) ไว้ที่ route เดิม (ไม่ดึงเข้า helper) เพื่อไม่ผูก error-shape
+เข้ากับ helper โดยไม่จำเป็น
+
+### 3) แก้ cache invalidation ของ label attach/detach
+
+`useAttachLabel`/`useDetachLabel` เพิ่ม parameter `projectId` (มิเรอร์ pattern เดียวกับ
+`useUpdateIssue(issueId, projectId)`) แล้ว invalidate `["issue", issueId]` และ
+`["issues", projectId]` เพิ่มจาก `["issue-labels", issueId]` เดิม — เพราะ label ถูก embed เข้า
+`IssueResponse` ตั้งแต่ Increment 5B ทั้งสอง query key นี้ต้องถูก invalidate ด้วยไม่งั้น Kanban
+board ค้าง thread prop `projectId` ผ่าน `IssueLabelSection` (`issue-detail-panel.tsx` มี
+`projectId` อยู่แล้วในฐานะ prop เดิม ไม่ต้องเพิ่ม fetch ใหม่)
+
+### Quality Gate
+
+`lint` ✅ 0 error (autofix ไม่มีอะไรต้องแก้) `typecheck` ✅ 0 error `build` ✅ **route list เหมือน
+เดิมทุกตัวอักษร** เทียบกับก่อน cleanup (ยืนยันว่าไม่มี API เปลี่ยน) `test` ✅ 62/62 ไม่เปลี่ยน
+
+### Manual Verification — ยืนยัน behavior ไม่เปลี่ยนจริง
+
+เปิดระบบจริง (`next dev --webpack`, บั๊ก OneDrive junction-point เดิมโผล่มาอีกตอนใช้ Turbopack
+ธรรมดา — ใช้ workaround เดิม) สมัคร user จริง 1 คน สร้าง workspace/project/issue จริง:
+
+- **ทดสอบจุดสำคัญที่สุด (ข้อ 3 — cache fix)**: คลิกการ์ด issue เข้าหน้า detail (client-side nav
+  รักษา QueryClient เดิมข้ามหน้า), สร้าง+แนบ label ใหม่ → ยืนยันด้วย `read_network_requests` ว่า
+  หลัง `POST .../labels` มี `GET /api/issues/[issueId]` ยิงตามทันที (การ invalidate `["issue",
+issueId]` ที่เพิ่มใหม่ทำงานจริง) → คลิก breadcrumb กลับไปหน้า project (client-side nav อีกครั้ง
+  ไม่ hard reload) → **เห็น label ใหม่บนการ์ด Kanban ทันทีโดยไม่ต้อง reload หน้า** (ก่อนแก้ต้องรอ
+  staleTime 30 วิ หรือ reload) ยืนยันด้วย network log ว่า `GET .../projects/[id]/issues` ยิงซ้ำหลัง
+  navigate กลับจริง (ไม่ใช่ใช้ cache เดิม)
+- **ทดสอบ resolveIssueContext ผ่าน PATCH**: เปลี่ยนสถานะทันที (IssueStatusSelect) + แก้ assignee
+  เป็นตัวเอง (Edit form) → `PATCH /api/issues/[issueId]` คืน 200 ทั้งคู่ (validateAssignee ผ่าน
+  เพราะ assignee เป็น workspace member จริง)
+- **ทดสอบ 404 enumeration-safety**: `GET /api/issues/00000000-0000-0000-0000-000000000000` (uuid
+  ปลอม) คืน `{"error":"not_found","message":"Issue not found"}` — **ตรงกับ body ก่อนแก้เป๊ะทุก
+  ตัวอักษร**
+
+**ไม่ได้ทดสอบ DELETE /api/issues/[issueId] ด้วยมือ** (ไม่มี UI เรียก ตามที่ตั้งใจไว้ตั้งแต่
+Increment 6) แต่ตรรกะเหมือน GET/PATCH ทุกจุด (แค่ `resolveIssueContext` + `requireWorkspaceRole`
+เดิม ไม่ได้แก้อะไรเพิ่ม) มั่นใจว่าไม่กระทบจาก static review + GET/PATCH ที่ยืนยันแล้วว่า
+`resolveIssueContext` ทำงานถูกต้อง
+
+**Cleanup**: ลบ workspace/user ทดสอบผ่านสคริปต์ชั่วคราว (ลบทิ้งทันที ไม่เคย commit) ยืนยัน Neon
+กลับสู่ 0 แถวทุกตาราง ลบ `.claude/launch.json` เฉพาะไฟล์ (ระวังไม่ลบทั้งโฟลเดอร์ซ้ำปัญหาเดิม — รอบ
+Increment 6 เคยพลาด `rm -rf .claude` ไปครั้งหนึ่งแล้วต้อง `git checkout` กู้ `settings.local.json`
+คืน รอบนี้ตรวจสอบไม่ให้เกิดซ้ำ)
+
+ยังไม่ commit/tag/push ใดๆ ตามคำสั่ง — หยุดตามคำสั่ง ไม่เริ่ม Increment 7
+
+## Milestone 4 — Increment 7: Tests ✅
+
+ผู้ใช้อนุมัติ cleanup pass สั่งทำเฉพาะ Increment 7 ตามสโคป: unit/integration/repository/API/RBAC/
+concurrency test ครอบคลุม Issue/Label/Comment/IssueLabel ทั้งหมด — **ห้ามเปลี่ยน architecture ห้าม
+refactor โค้ดที่ไม่เกี่ยวข้อง ห้าม feature ใหม่ ห้ามแก้ UI (ยกเว้นจำเป็นจริงๆ เพื่อ accessibility —
+ไม่เจอกรณีแบบนั้นเลยรอบนี้) reuse helper/pattern จาก Milestone 3 ทั้งหมด**
+
+**Unit tests**: ไม่เพิ่มไฟล์ใหม่ — ตรวจสอบแล้วว่า schema ที่เหลือของ M4 ที่ยังไม่มีเทส
+(`create-issue.schema.ts`, `create-comment.schema.ts`, `attach-label.schema.ts`,
+`update-label.schema.ts`) มีแต่ constraint ธรรมดา (min/max length, uuid, hex ที่ reuse
+`hexColorSchema` ซึ่งเทสไว้แล้ว) ตรงกับ pattern เดิมของ M3 ที่ไม่เคยเขียนเทสแยกให้
+`create-project.schema.ts`/`update-project.schema.ts`/`update-workspace.schema.ts`/
+`update-member-role.schema.ts` เลยเช่นกัน (มีแต่ schema ที่มี logic จริง เช่น slug regex หรือ
+role-escalation check ถึงจะได้เทสแยก) — 62 unit test เดิม (`issue-key.test.ts` ×6,
+`create-label.schema.test.ts` ×6, `update-issue.schema.test.ts` ×8 จาก Increment 1-2 + ของเดิม
+42 จาก M2/M3) ถือว่าครอบคลุม unit-level logic ของ M4 ครบแล้วตาม bar เดียวกับที่ M2/M3 ใช้
+
+**Integration tests — ไฟล์ใหม่ 4 ไฟล์ (55 test ใหม่)**, ทุกไฟล์มิเรอร์ pattern ของ M3 เป๊ะ
+(`vi.mock("@/lib/auth/auth")`, `sessionFor`/`uniqueEmail`/`uniqueSlug`/`deleteTestWorkspace`/
+`deleteTestUser` จาก `./helpers` เดิม ไม่แก้ไฟล์นั้นเลย, `jsonRequest`/`*Ctx` helper local ต่อไฟล์
+ตาม convention เดิม, ลำดับ cleanup `workspaceIds` ก่อน `emails` เสมอเพราะ `Issue.reporter`/
+`Comment.author` เป็น `onDelete: Restrict`):
+
+- `tests/integration/issue.integration.test.ts` (15 test) — Issue CRUD ครบ (POST/GET
+  list, GET/PATCH/DELETE detail), RBAC (MEMBER+ สร้าง/แก้ได้แม้ไม่ใช่ reporter/assignee ตาม
+  Decision Point G, ADMIN+ เท่านั้นลบได้), invalid_assignee ทั้งตอนสร้างและ reassign (ยืนยันด้วยว่า
+  assignee ไม่ถูกเปลี่ยนจริงใน DB เมื่อ reject), แยกกรณี "ไม่ส่ง assigneeId" (ไม่แตะ) กับ
+  "`assigneeId: null`" (ยกเลิกมอบหมายจริง) ที่ระดับ integration ไม่ใช่แค่ schema — บวก **describe
+  block แยกสำหรับ concurrency test** ("Concurrent issue creation (atomic numbering)"): เรียก
+  `issueRepository.create()` ตรงๆ (repository-level, ไม่ผ่าน route) พร้อมกัน 10 ครั้งด้วย
+  `Promise.all`, ยืนยันว่า `number` ที่ได้ไม่ซ้ำกันเลยสักตัว (`Set` size = 10) และเรียงต่อเนื่อง
+  1-10 ไม่มีช่องว่าง พร้อมยืนยัน `Project.issueCounter` สุดท้ายตรงกับจำนวนจริง — พิสูจน์ atomicity
+  ของ `$transaction` ที่ `issueRepository.create` ใช้ (Milestone 4 Increment 2's ประกัน "Postgres's
+  row-level UPDATE x = x + 1 is atomic") ตรงตามที่ผู้ใช้สั่งให้มี concurrency test สำหรับ issue
+  numbering โดยเฉพาะ
+- `tests/integration/label.integration.test.ts` (14 test) — workspace Label CRUD (ADMIN+
+  สร้าง/แก้/ลบ, ทุก MEMBER อ่านได้ตาม Decision Point F), name_taken 409 ทั้งตอนสร้างและ rename,
+  invalid hex color 400, cross-workspace tampering guard ทั้ง PATCH/DELETE (มิเรอร์
+  `workspace-member.integration.test.ts`'s memberId guard เป๊ะ)
+- `tests/integration/issue-label.integration.test.ts` (9 test) — attach/detach (ทุก MEMBER+
+  ทำได้ตาม Decision Point F ต่างจากการสร้าง label definition), already_attached 409, label จาก
+  workspace อื่น 404 (enumeration-safe เหมือน label ไม่มีอยู่จริง), detach ของที่ไม่เคยแนบ 404
+- `tests/integration/comment.integration.test.ts` (11 test) — Comment CRUD, เรียงลำดับ
+  oldest-first ยืนยันจริง (ไม่ใช่แค่เชื่อ comment ว่าเรียงถูก), แก้ได้เฉพาะ author (ADMIN+ ก็แก้
+  ของคนอื่นไม่ได้), ลบได้ทั้ง author หรือ ADMIN+ แต่ MEMBER ธรรมดาที่ไม่ใช่ author ลบไม่ได้
+  (Decision Point H ครบทั้ง 2 แกน)
+
+**แก้ไฟล์เดิม 2 ไฟล์ (เพิ่ม test ไม่แตะ logic เดิม)**:
+
+- `tests/integration/project.integration.test.ts` — เพิ่ม 2 test: ยืนยัน `deriveIssueKey`
+  ทำงานถูกต้องผ่าน route จริง ("Design System" → key `"DS"`), และยืนยัน `key_taken` 409 เมื่อชื่อ
+  ต่างกันแต่ derive คีย์ซ้ำกัน ("Design System" vs "Data Store" ทั้งคู่ได้ "DS") — gap ที่ audit
+  ไม่ได้ระบุตรงๆ แต่ผู้ใช้สั่งชัดใน scope Increment 7 ("verify duplicate project key... behavior")
+- `tests/integration/workspace-isolation.integration.test.ts` — ขยาย `setupTwoWorkspaces()`
+  ให้สร้าง issue+label ใน workspace B ด้วย (ผ่าน `issueRepository`/`labelRepository` ตรงๆ) เพิ่ม
+  4 test ใหม่: สมาชิก workspace A ได้ 404 ทั้งดึง issue ของ B ตรงๆ, ดึง label ของ issue นั้น, ดึง
+  comment ของ issue นั้น, และดึง label list ทั้ง workspace ของ B — ครบทุก resource ใหม่ของ M4 ใน
+  isolation suite เดียวกับที่ M3 วางไว้ (ไม่สร้างไฟล์ isolation แยกใหม่)
+
+**ไม่แตะ**: `tests/integration/helpers.ts` (helper เดิมพอสำหรับทุกไฟล์ใหม่ ไม่ต้องเพิ่ม), e2e
+(Playwright — ไม่อยู่ใน scope ที่สั่งของ Increment 7 นี้เลย)
+
+**Quality Gate**: `lint` ✅ 0 error `typecheck` ✅ 0 error `build` ✅ (route list เหมือนเดิมทุก
+ตัวอักษร — ไม่มี API เปลี่ยน) `test` (unit) ✅ 62/62 ไม่เปลี่ยน `test:integration` ✅ **125/125**
+(70 เดิม + 55 ใหม่) ยืนยัน Neon กลับสู่ 0 แถวทุกตารางหลังรันครบ (`user/workspace/project/issue/
+label/comment: 0`)
+
+ยังไม่ commit/tag/push ใดๆ ตามคำสั่ง — หยุดตามคำสั่ง ไม่เริ่ม Increment 8
+
+## Milestone 4 — Increment 8: Playwright E2E ✅
+
+ผู้ใช้อนุมัติ Increment 7 สั่งทำเฉพาะ Increment 8 ตามสโคป: e2e เต็ม user workflow ครอบ
+scenario ที่ระบุไว้ทั้งหมด reuse helper/pattern จาก M3 ทั้งหมด **ห้ามแก้ production code เว้นแต่
+เจอบั๊กจริง ห้าม refactor โค้ดที่ไม่เกี่ยวข้อง ห้าม feature ใหม่**
+
+**ไฟล์ใหม่ 2 ไฟล์** ใน `tests/e2e/`, ทั้งคู่ reuse `registerViaUi`(`actions.ts`) และ
+`deleteTestUser`/`deleteTestWorkspace`/`uniqueEmail`/`uniqueSlug`(`db-helpers.ts`) เดิมทั้งหมด
+ไม่แก้ไฟล์เหล่านั้นเลย:
+
+- `tests/e2e/issue-flow.spec.ts` — session เดียวต่อเนื่อง (มิเรอร์ `project-flow.spec.ts`)
+  ครอบ: สร้าง workspace→project→issue (dialog)→เปิดหน้า detail→เปลี่ยนสถานะทันที (ยืนยันคงอยู่
+  หลัง reload และหลังกลับไป board)→แก้ไข title/priority→สร้าง label ใหม่จากหน้า detail→แนบ→ถอด→
+  comment CRUD ครบ (สร้าง/แก้/ลบ)→**ลบ issue** ผ่าน `page.request.delete()` ตรงไปที่
+  `DELETE /api/issues/[issueId]` (ไม่มี Delete Issue UI จริงในแอป — audit ข้อ 5 ยืนยันแล้วว่า
+  `useDeleteIssue` ยังไม่ถูกใช้ที่ไหนและไม่ได้อยู่ใน scope Increment 6 — ยิง request ตรงผ่าน
+  browser context ที่ login อยู่แล้ว แทนที่จะสร้างปุ่มใหม่ซึ่งจะเป็นการเพิ่ม feature นอกสโคป) แล้ว
+  ยืนยันทั้งหน้า detail 404 และ board ไม่แสดง issue นั้นอีก
+- `tests/e2e/issue-permissions.spec.ts` — 3 browser context พร้อมกัน (owner/member/outsider,
+  มิเรอร์ pattern `member-management.spec.ts`) ครอบ: เชิญ member, member แก้ไข issue ได้ทั้งที่
+  ไม่ใช่ reporter/assignee (Decision Point G), member ไม่เห็นฟอร์มสร้าง label แต่แนบ label ที่มี
+  อยู่แล้วได้ (Decision Point F), member เห็น comment ของ owner แต่ไม่มีปุ่มแก้ไข/ลบ (ไม่ใช่ author
+  ไม่ใช่ ADMIN+) ในขณะที่ comment ของตัวเองแก้ไข/ลบได้เต็มที่, owner (ADMIN+) moderate-ลบ comment
+  ของ member ได้ (Decision Point H ครบทั้ง 2 แกน), member เรียก `DELETE /api/issues/[id]` เอง
+  ผ่าน API ตรงได้ 403 (RBAC verification จริง ไม่ใช่แค่ UI ซ่อนปุ่ม), outsider ที่มี workspace
+  แยกต่างหากของตัวเอง (ไม่ใช่แค่ user ที่ไม่เคย login) เปิด URL ของ issue นี้ตรงๆ ได้ 404
+  (cross-workspace access — มิเรอร์ pattern การสร้าง "คนละ workspace จริง" จาก
+  `tests/integration/workspace-isolation.integration.test.ts`)
+
+**บั๊กที่พบระหว่างทำ — เป็นบั๊กใน test ที่เขียนเอง ไม่ใช่ production code**: setup test ทั้งสองไฟล์
+ใช้ regex `/w/{slug}/projects/[^/]+$` เช็ค URL หลังกด "สร้างโปรเจกต์" — เป็น pattern เดียวกับที่
+`project-flow.spec.ts` ใช้อยู่แล้วและผ่านมาตลอด แต่ `[^/]+` ก็ matched คำว่า **"new"** ได้พอดี
+(URL ก่อน submit คือ `/projects/new`) ทำให้ assertion อาจ resolve true จาก URL เดิมก่อน
+client-side redirect (`router.push`) จะทำงานจริงเสร็จ — `project-flow.spec.ts` ไม่เคยเจอปัญหานี้
+เพราะไม่เคยเก็บ `page.url()` ไปใช้ต่อ แต่ `issue-flow.spec.ts` เก็บไว้ในตัวแปร `projectUrl` เพื่อ
+กลับมาใช้ทีหลัง เจอ URL ผิด (`/projects/new`) หลุดเข้ามา ทำให้ test ปลายทาง
+("the issue is still visible on the Kanban board after navigating back") หา element ไม่เจอ
+(หน้าจริงที่ไปถึงคือหน้า "สร้างโปรเจกต์ใหม่" ไม่ใช่หน้า project) **แก้โดยเปลี่ยน regex ให้ match
+เฉพาะรูปแบบ UUID** (`[0-9a-f-]{36}$`) ซึ่งไม่มีทาง match คำว่า "new" ได้ พร้อมเพิ่มการรอ heading
+ของ project ก่อนอ่าน `page.url()` แก้ทั้ง 2 ไฟล์ที่มี pattern เดียวกัน (ไม่แก้ `project-flow.spec.ts`
+เพราะไม่ได้อยู่ใน scope ของ Increment นี้และไม่เคยแสดงอาการจริง — รายงานเป็นความเสี่ยงแฝงไว้ในหัวข้อ
+technical debt แทน)
+
+**ยืนยันด้วย production build ตามบทเรียนจาก M2/M3**: รันรอบแรกผ่าน `pnpm dev` (Turbopack) เจอ 3
+test fail (1 ของตัวเอง + 2 ของเดิมจาก M3 คือ `project-flow.spec.ts`'s "ON_HOLD" กับ
+`issue-permissions.spec.ts`'s setup) — ตรงกับ pattern OneDrive+Turbopack concurrent-load
+flakiness ที่บันทึกไว้ตั้งแต่ M2/M3 เป๊ะ สลับไปรันกับ **production build** (`pnpm build && pnpm
+start`, ปล่อยให้ Playwright's `reuseExistingServer` ใช้ server ที่รันอยู่แทนที่จะ spawn `pnpm dev`
+เอง — ไม่แก้ `playwright.config.ts` เลย) ทั้งสองบั๊ก M3 หายไปทันที (ยืนยันว่าเป็น dev-server
+artifact ไม่ใช่บั๊กจริง) เหลือแค่บั๊ก regex ของตัวเองที่ยัง fail ซ้ำ (deterministic ไม่ใช่ flaky —
+เป็นสัญญาณว่าเป็นบั๊กจริงไม่ใช่ timing) แก้ตามที่อธิบายข้างต้นแล้วรันซ้ำ **ผ่าน 59/59 สองรอบติดกัน**
+
+**Quality Gate**: `lint` ✅ 0 error `typecheck` ✅ 0 error `build` ✅ (route list เหมือนเดิมทุก
+ตัวอักษร — ไม่มี production code เปลี่ยนเลยนอกจาก 2 ไฟล์ test) `test` (unit) ✅ 62/62 `test:e2e`
+✅ **59/59 × 2 รอบติดกัน** (production build) ยืนยัน Neon กลับสู่ 0 แถวทุกตารางหลังรันครบ
+(`user/workspace/project/issue/label/comment: 0`)
+
+ยังไม่ commit/tag/push ใดๆ ตามคำสั่ง — หยุดตามคำสั่ง ไม่เริ่ม Increment 9
+
+## Milestone 4 — สรุปความคืบหน้าโดยย่อ (อ่านเร็วๆ ไม่ต้องไล่ทุก increment ด้านบน)
+
+| Increment | เนื้อหา                                                                         | ไฟล์หลักที่เพิ่ม/แก้                                                                                                                                                                                                                          | สถานะ                           |
+| --------- | ------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------- |
+| Planning  | Architecture proposal + Decision Points A–H                                     | (ไม่มีโค้ด)                                                                                                                                                                                                                                   | ✅ อนุมัติแล้ว                  |
+| 1         | Schema + migration                                                              | `schema.prisma`, migration, `issue-key.ts`                                                                                                                                                                                                    | ✅ อนุมัติแล้ว                  |
+| 2         | Repository + zod schema + response mapper                                       | `repositories/issue/*`, `features/issue/schemas/*`, `*-response.ts`                                                                                                                                                                           | ✅ อนุมัติแล้ว                  |
+| 3         | Issue API (5 endpoint)                                                          | `api/projects/[id]/issues`, `api/issues/[id]`                                                                                                                                                                                                 | ✅ อนุมัติแล้ว                  |
+| 4         | Label API + Comment API + `IssueLabel` repo (10 endpoint)                       | `api/workspaces/[id]/labels/*`, `api/issues/[id]/labels/*`, `api/issues/[id]/comments`, `api/comments/[id]`                                                                                                                                   | ✅ อนุมัติแล้ว                  |
+| 5A        | TanStack Query hooks (16 ไฟล์)                                                  | `features/issue/hooks/*`                                                                                                                                                                                                                      | ✅ อนุมัติแล้ว                  |
+| 5B        | Kanban board (shell/column/card) + embed labels ใน Issue response               | `features/issue/components/*`, `constants/issue.ts`, mount บน project detail page เดิม                                                                                                                                                        | ✅ อนุมัติแล้ว                  |
+| 6         | Create/Edit/Status/Label/Comment UI + Issue detail page                         | `features/issue/components/{create-issue-dialog,edit-issue-form,issue-status-select,issue-label-section,comment-section,issue-detail-panel}.tsx`, `app/w/[slug]/projects/[projectId]/issues/[issueId]/page.tsx`, `components/ui/textarea.tsx` | ✅ อนุมัติแล้ว                  |
+| Audit     | Architecture & code audit (read-only, 9 findings)                               | (ไม่มีโค้ด)                                                                                                                                                                                                                                   | ✅ อนุมัติแล้ว                  |
+| Cleanup   | Extract `resolveIssueContext`/`validateAssignee` + fix label cache invalidation | `lib/auth/workspace-membership.ts`, 5 route files, `use-attach-label.ts`/`use-detach-label.ts`, `issue-label-section.tsx`/`issue-detail-panel.tsx`                                                                                            | ✅ อนุมัติแล้ว                  |
+| 7         | Unit/Integration/Repository/API/RBAC/Concurrency tests (55 test ใหม่)           | `tests/integration/{issue,label,issue-label,comment}.integration.test.ts` (ใหม่), `project.integration.test.ts`/`workspace-isolation.integration.test.ts` (แก้)                                                                               | ✅ อนุมัติแล้ว                  |
+| 8         | Playwright e2e (2 ไฟล์ใหม่, 59/59 ผ่าน ×2 รอบ)                                  | `tests/e2e/{issue-flow,issue-permissions}.spec.ts`                                                                                                                                                                                            | ✅ อนุมัติแล้ว                  |
+| 9         | Docs (architecture.md/folder-structure.md/README.md/development-guide.md)       | (ไม่มีโค้ด production)                                                                                                                                                                                                                        | ✅ อนุมัติแล้ว — รอ final audit |
+
+**Route ที่มีจริงตอนนี้** (จาก `pnpm build` ล่าสุด, ไม่เปลี่ยนจาก Increment 4 — ทั้ง Increment 6
+และ cleanup pass ไม่เพิ่ม/ลบ API endpoint เลย): `GET/POST /api/projects/[projectId]/issues`,
+`GET/PATCH/DELETE /api/issues/[issueId]`, `GET/POST /api/issues/[issueId]/labels`,
+`DELETE /api/issues/[issueId]/labels/[labelId]`, `GET/POST /api/issues/[issueId]/comments`,
+`PATCH/DELETE /api/comments/[commentId]`, `GET/POST /api/workspaces/[workspaceId]/labels`,
+`PATCH/DELETE /api/workspaces/[workspaceId]/labels/[labelId]`
+
+**UI ที่มีจริงตอนนี้**: Kanban board (คลิกการ์ดเข้าหน้า issue detail ได้แล้ว) + ปุ่ม "Issue ใหม่"
+เปิด dialog สร้าง issue บนหน้า project detail + หน้า issue detail เต็มรูปแบบ (status instant-apply,
+แก้ไข title/description/priority/assignee, แนบ/ถอด/สร้าง label, comment CRUD) — ครบทุก UI ของ
+Milestone 4 ตามแผนเดิมแล้ว
+
+**Test coverage ตอนนี้**: unit 62 + integration 125 + e2e 59 (ครบ Issue/Label/Comment/
+IssueLabel API, RBAC, workspace isolation, invalid assignee, duplicate project key, concurrency
+ของ issue numbering ที่ระดับ integration และครบ full user workflow จริงผ่าน browser ที่ระดับ e2e)
+
+## Milestone 4 — Increment 9: Documentation ✅
+
+ผู้ใช้อนุมัติ Increment 8 สั่งทำเฉพาะ Increment 9 ตามสโคป: อัปเดต `architecture.md`,
+`folder-structure.md`, `README.md` (ตามความจำเป็น), `development-guide.md` (ถ้าจำเป็น),
+`coding-standards.md` (เฉพาะถ้าล้าสมัยจริง), `session-log.md` (ไฟล์นี้) — **ห้ามแก้โค้อด production
+ยกเว้นจำเป็นจริงเพื่อแก้ความไม่ตรงกันของเอกสาร ห้าม feature ใหม่ ห้าม refactor โค้ดที่ไม่เกี่ยวข้อง
+ห้ามแก้ test ใดๆ ห้ามเปลี่ยน production behavior**
+
+**วิธีทำ**: อ่านโค้ดจริงทั้งหมดของ M4 ก่อนเขียนเอกสาร (ไม่ใช้ความจำ) — `prisma/schema.prisma`,
+`repositories/issue/*.ts` ทั้ง 4 ไฟล์, `lib/auth/workspace-membership.ts`
+(`resolveIssueContext`/`validateAssignee`), route handler ตัวอย่างจากทุก resource
+(`issues/[issueId]/route.ts`, `projects/[projectId]/issues/route.ts`,
+`issues/[issueId]/labels/route.ts`, `comments/[commentId]/route.ts`,
+`workspaces/[workspaceId]/labels/route.ts`), `features/issue/issue-response.ts`,
+`constants/issue.ts`, `lib/issue-key.ts` พร้อมยืนยันด้วย `find`/`Glob` ตรงว่าทุกไฟล์/route/folder
+ที่จะเขียนถึงมีอยู่จริง (ไม่ใช่เขียนจากที่จำได้จาก session-log เดิมเฉยๆ)
+
+**`docs/architecture.md`**: เพิ่มหัวข้อใหม่ "Issue tracking core (Milestone 4)" ครอบ Decision
+Point ทั้ง 8 ข้อที่ implement จริง (`Project.key`/`deriveIssueKey`/unique ทั้ง workspace,
+atomic `issueCounter` ผ่าน `$transaction`, `Issue.position` เป็น `Float` เผื่อ drag-and-drop
+ในอนาคต, label workspace-scoped, MEMBER+ แก้ issue ได้ทุกคน, comment moderation,
+`validateAssignee`/`resolveIssueContext` ที่ไม่มี FK ให้พึ่ง, label embed ใน Kanban response)
+แก้ "Current state" ท้ายไฟล์จาก "M2+M3" เป็น "M2+M3+M4" และลบ "task/issue tracking" ออกจาก
+รายการ "ยังไม่สร้าง" (ของจริงตอนนี้คือ AI copilot/GitHub integration/drag-and-drop/activity feed)
+
+**`docs/folder-structure.md`**: เพิ่ม 4 หัวข้อใหม่ — `features/issue/` (schema/hook/component
+ครบตามที่มีจริง, เปรียบเทียบกับ `features/project/` ที่ไม่มี cache invalidation),
+`repositories/issue/` (รวม `issue-label.repository.ts` ที่ตั้งใจสร้างทีหลังใน Increment 4),
+`constants/` (การใช้งานจริงครั้งแรกของโฟลเดอร์ที่จองไว้ตั้งแต่ Foundation),
+`components/ui/textarea.tsx` (เหตุผลที่เขียนเองไม่ใช้ `shadcn add`) แก้รายการหน้าใต้
+`app/w/[slug]/` ให้รวม `projects/[projectId]/issues/[issueId]/page.tsx` ที่ขาดไปก่อนหน้านี้
+
+**`README.md`**: แก้ "Status" ที่ค้างอยู่ที่ "Milestone 2 complete" มาตั้งแต่หลัง M3 commit (ปัญหาที่
+บันทึกไว้แล้วใน "Next Steps" ของรายงานก่อนหน้า) เป็นสถานะจริงตอนนี้ (M2/M3 ขึ้น GitHub แล้ว, M4
+code-complete รอ final review/commit) เพิ่มหัวข้อ "Features" สรุป 3 milestone แบบผู้ใช้อ่านเร็วๆ ได้
+
+**`docs/development-guide.md`**: เพิ่มหัวข้อ "Testing structure" ใหม่ทั้งหมด (ไม่เคยมีมาก่อนตั้งแต่
+M2 ทั้งที่มี unit/integration/e2e จริงมาตลอด) อธิบาย unit/integration/e2e แต่ละชั้นทำหน้าที่อะไร,
+pattern การ extend ไฟล์เดิมแทนสร้างใหม่, และคำเตือนเรื่อง Turbopack dev-server flakiness
+(รัน production build ก่อนสรุปว่าเป็นบั๊กจริง) — เป็น gap เอกสารที่มีมาตั้งแต่ M2 ไม่ใช่ของ M4 โดยตรง
+แต่ M4's Increment 7/8 ทำให้เห็นชัดว่าไม่เคยมีที่ไหนอธิบาย testing convention ไว้เป็นทางการเลย
+
+**`docs/coding-standards.md`**: ตรวจแล้วไม่พบความไม่ตรงกัน (ตัวอย่าง commit message
+`feat(issues): ...` ยังใช้ได้จริงพอดี, ไม่มีข้อความอ้างอิง milestone ใดที่ผิดจากปัจจุบัน) — **ไม่แก้**
+
+**สิ่งที่ตั้งใจไม่แตะ (นอกสโคปที่สั่งชัดเจน)**: `CHANGELOG.md` (ไม่อยู่ในรายการไฟล์ที่สั่งให้แก้ —
+ยังค้างที่ `[0.2.0]` ตั้งแต่หลัง M3 commit ตามที่เคยรายงานไว้แล้ว), `docs/setup-guide.md` (พบว่า
+ตาราง "Common commands" ขาด `pnpm test:integration` ไปเลย — เป็น gap ตั้งแต่ M2 ไม่ใช่ของ M4 และ
+ไม่อยู่ในรายการไฟล์ที่สั่ง — รายงานเป็น documentation debt แทนที่จะแก้เอง), `docs/auth-flow.md`/
+`docs/security.md` (ไม่เกี่ยวกับ M4 เลย ไม่แตะ)
+
+**ไม่แก้ production code เลยแม้แต่บรรทัดเดียว** — ตรวจสอบแล้วไม่พบความไม่ตรงกันระหว่างเอกสารกับโค้ด
+ที่ต้องใช้ trivial fix ใดๆ (พฤติกรรมจริงตรงกับที่ audit/increment ก่อนหน้ารายงานไว้ทุกจุด)
+
+**Validation ที่ทำก่อนเขียนเอกสาร**:
+
+- ยืนยัน route ทุกเส้นทางที่จะเขียนถึงมีไฟล์จริง (`find`/`Glob` บน `src/app/api/issues`,
+  `src/app/api/comments`, `src/app/api/workspaces/[workspaceId]/labels`,
+  `src/app/api/projects/[projectId]/issues`, `src/app/w/[slug]/**`) — ครบทุกเส้นทางตรงตามที่
+  session-log เดิมบันทึกไว้ ไม่มีตกหล่น/ไม่มีของที่เขียนถึงแต่ไม่มีจริง
+- ยืนยันโฟลเดอร์ `repositories/issue/`, `features/issue/`, `constants/` มีไฟล์ตรงตามที่จะเขียนถึง
+- ยืนยัน `tests/integration/` และ `tests/e2e/` มีไฟล์ M4 ทั้งหมดที่ Increment 7/8 รายงานไว้จริง
+  (`issue`/`label`/`issue-label`/`comment.integration.test.ts`, `issue-flow`/
+  `issue-permissions.spec.ts`)
+- ไม่พบ reference ที่ล้าสมัยจาก Milestone 3 ในเอกสารที่แก้ (ตรวจ `architecture.md`/
+  `folder-structure.md` ทั้งไฟล์ก่อนแก้ — ของเดิมเขียนถูกต้องตามยุคของมัน แค่ขาดหัวข้อ M4 เพิ่มเข้ามา
+  ไม่มีข้อความผิดที่ต้องลบ)
+
+**Quality Gate**: `lint` ✅ 0 error `typecheck` ✅ 0 error `build` ✅ (ไม่มีไฟล์ production
+เปลี่ยนเลย — แก้แค่ `.md` 4 ไฟล์: `architecture.md`/`folder-structure.md`/`README.md`/
+`development-guide.md`) `test` (unit) ✅ 62/62 ไม่เปลี่ยน — ไม่รัน `test:integration`/`test:e2e`
+ซ้ำรอบนี้ (ไม่มีอะไรเปลี่ยนที่จะกระทบผลลัพธ์ ตามคำสั่ง "ห้ามแก้ test ใดๆ")
+
+ยังไม่ commit/tag/push ใดๆ ตามคำสั่ง — **ยังไม่ทำ final audit** ตามคำสั่ง หยุดหลัง Increment 9
+รอคำสั่งก่อนเริ่ม final completion audit + commit + tag `v0.4.0` + push
+
 ## Next Steps (เมื่อได้รับอนุมัติ)
 
-1. รอการอนุมัติ Final Milestone 3 Review Report
-2. เมื่ออนุมัติ → audit+commit+tag (`v0.3.0`)+push ตาม pattern เดียวกับ M2 (ห้าม commit ก่อนได้รับ
-   คำสั่งชัดเจน)
-3. (นอกขอบเขต — พิจารณาแยกทีหลัง) ThemeToggle hydration mismatch ที่พบระหว่าง M2 manual
-   verification, push tag `v0.1.0` ขึ้น GitHub ถ้าต้องการ, ชื่อโปรเจกต์ "Orbit" vs "TeamFlow",
-   ownership-transfer action (ยังไม่ implement ตามที่ proposal ระบุไว้แต่แรก), TOCTOU race บน
-   uniqueness check (risk ที่รับรู้แล้วตั้งแต่ Increment 3 review ไม่แก้เพราะต้อง consistent กับ M2)
+1. **Increment 9 (docs) เสร็จแล้ว** ✅ — รอคำสั่งเริ่ม **final completion audit** ของ Milestone 4
+   ทั้งก้อน (เทียบ Architecture Proposal เดิม + Decision Point A-H กับโค้ดจริงทีละหัวข้อ แบบเดียวกับ
+   Milestone 3 Completion Review ที่เคยทำก่อน commit `v0.3.0`) ก่อน commit+tag+push
+2. เมื่อ final audit ผ่าน → commit+tag (`v0.4.0`)+push (ห้าม commit ก่อนได้รับคำสั่งชัดเจน)
+3. **Documentation debt ที่เจอระหว่าง Increment 9 แต่นอกสโคปที่สั่ง ไม่ได้แก้**:
+   `docs/setup-guide.md`'s ตาราง "Common commands" ขาด `pnpm test:integration` มาตั้งแต่ M2
+   (ไม่ใช่ปัญหาของ M4 แต่ยังไม่เคยแก้)
+4. (นอกขอบเขต — พิจารณาแยกทีหลัง) `CHANGELOG.md` ยังไม่อัปเดตหลัง M3 commit (ค้างที่ `[0.2.0]`),
+   ThemeToggle hydration mismatch (M2), tag `v0.1.0` ยังไม่ push, ชื่อโปรเจกต์ "Orbit" vs
+   "TeamFlow", ownership-transfer action, TOCTOU race บน uniqueness check, project detail page
+   container กว้างไม่พอสำหรับ Kanban บนจอใหญ่, ยังไม่มี mobile list-view สำหรับ board ตาม Phase 3
+   UI/UX doc, ยังไม่มี Delete Issue UI (`useDeleteIssue` hook จาก 5A ยังไม่ถูกใช้ที่ไหนเลย —
+   audit ข้อ 5, ตั้งใจไม่ลบตามคำสั่ง), `issueRepository.findByProjectAndNumber` ไม่มีใครเรียก
+   (audit ข้อ 4, ตั้งใจไม่ลบตามคำสั่ง), `DELETE /api/issues/[issueId]` ยังไม่เปลี่ยนไปใช้
+   `requireWorkspaceAccess` ตัวเดียว (audit ข้อ 6, low severity ไม่อยู่ใน scope cleanup รอบนี้),
+   `<select>` styling ซ้ำข้าม M3+M4 ยังไม่มี shared primitive (audit ข้อ 9),
+   `project-flow.spec.ts`'s `/projects/[^/]+$` regex มีความเสี่ยงแฝงแบบเดียวกับที่เจอใน
+   Increment 8 (match คำว่า "new" ได้ด้วย) แต่ยังไม่เคยแสดงอาการจริงและไม่ได้แก้ตามสโคป — ควรพิจารณา
+   แก้พร้อมกันถ้ามีโอกาสแตะไฟล์นั้นอีกในอนาคต

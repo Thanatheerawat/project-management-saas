@@ -1,6 +1,8 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { prisma } from "@/lib/prisma";
+import { issueRepository } from "@/repositories/issue/issue.repository";
+import { labelRepository } from "@/repositories/issue/label.repository";
 
 import {
   deleteTestUser,
@@ -16,7 +18,8 @@ import {
 // assertion here checks 404 (not 403) — per the Milestone 3 proposal, a
 // non-member response must be indistinguishable from "this resource
 // doesn't exist," which is the property that actually prevents workspace
-// enumeration.
+// enumeration. Milestone 4 cleanup pass extended this file with the same
+// checks for Issue/Label/Comment (see docs/session-log.md, Increment 7).
 vi.mock("@/lib/auth/auth", () => ({ auth: vi.fn() }));
 const { auth } = await import("@/lib/auth/auth");
 const mockedAuth = vi.mocked(auth);
@@ -27,6 +30,12 @@ const { GET: listMembers, POST: addMember } =
 const { GET: listProjects, POST: createProject } =
   await import("@/app/api/workspaces/[workspaceId]/projects/route");
 const { GET: getProject } = await import("@/app/api/projects/[projectId]/route");
+const { GET: listWorkspaceLabels } =
+  await import("@/app/api/workspaces/[workspaceId]/labels/route");
+const { GET: getIssue } = await import("@/app/api/issues/[issueId]/route");
+const { GET: listIssueLabels } = await import("@/app/api/issues/[issueId]/labels/route");
+const { GET: listIssueComments } =
+  await import("@/app/api/issues/[issueId]/comments/route");
 
 function jsonRequest(url: string, method: string, body?: unknown): Request {
   return new Request(url, {
@@ -42,6 +51,10 @@ function workspaceCtx(workspaceId: string) {
 
 function projectCtx(projectId: string) {
   return { params: Promise.resolve({ projectId }) };
+}
+
+function issueCtx(issueId: string) {
+  return { params: Promise.resolve({ issueId }) };
 }
 
 async function createUser(prefix: string): Promise<{ id: string; email: string }> {
@@ -96,7 +109,27 @@ describe("Cross-workspace isolation", () => {
     );
     const { id: projectBId } = (await projectB.json()) as { id: string };
 
-    return { workspaceA, ownerA, workspaceB, ownerB, projectBId };
+    const issueB = await issueRepository.create({
+      projectId: projectBId,
+      title: "B's issue",
+      position: 1000,
+      reporterId: ownerB.id,
+    });
+    const labelB = await labelRepository.create({
+      workspaceId: workspaceB.id,
+      name: "B's label",
+      color: "#000000",
+    });
+
+    return {
+      workspaceA,
+      ownerA,
+      workspaceB,
+      ownerB,
+      projectBId,
+      issueBId: issueB.id,
+      labelBId: labelB.id,
+    };
   }
 
   it("a member of A gets 404 (not the data) fetching B's workspace detail", async () => {
@@ -197,5 +230,53 @@ describe("Cross-workspace isolation", () => {
 
     expect(crossMemberResponse.status).toBe(noWorkspaceResponse.status);
     expect(await crossMemberResponse.json()).toEqual(await noWorkspaceResponse.json());
+  });
+
+  it("a member of A gets 404 fetching B's issue directly by id", async () => {
+    const { ownerA, issueBId } = await setupTwoWorkspaces();
+    mockedAuth.mockResolvedValue(sessionFor(ownerA.id));
+
+    const response = await getIssue(
+      jsonRequest(`http://localhost:3000/api/issues/${issueBId}`, "GET"),
+      issueCtx(issueBId),
+    );
+
+    expect(response.status).toBe(404);
+  });
+
+  it("a member of A gets 404 listing B's issue's labels", async () => {
+    const { ownerA, issueBId } = await setupTwoWorkspaces();
+    mockedAuth.mockResolvedValue(sessionFor(ownerA.id));
+
+    const response = await listIssueLabels(
+      jsonRequest(`http://localhost:3000/api/issues/${issueBId}/labels`, "GET"),
+      issueCtx(issueBId),
+    );
+
+    expect(response.status).toBe(404);
+  });
+
+  it("a member of A gets 404 listing B's issue's comments", async () => {
+    const { ownerA, issueBId } = await setupTwoWorkspaces();
+    mockedAuth.mockResolvedValue(sessionFor(ownerA.id));
+
+    const response = await listIssueComments(
+      jsonRequest(`http://localhost:3000/api/issues/${issueBId}/comments`, "GET"),
+      issueCtx(issueBId),
+    );
+
+    expect(response.status).toBe(404);
+  });
+
+  it("a member of A gets 404 listing B's workspace labels", async () => {
+    const { ownerA, workspaceB } = await setupTwoWorkspaces();
+    mockedAuth.mockResolvedValue(sessionFor(ownerA.id));
+
+    const response = await listWorkspaceLabels(
+      jsonRequest(`http://localhost:3000/api/workspaces/${workspaceB.id}/labels`, "GET"),
+      workspaceCtx(workspaceB.id),
+    );
+
+    expect(response.status).toBe(404);
   });
 });

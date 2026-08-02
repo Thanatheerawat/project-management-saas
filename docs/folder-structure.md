@@ -62,13 +62,17 @@ wrapped in React's `cache()` so the layout and page don't double-query for
 the same request) and calls `notFound()` — not `redirect()` — for both a
 nonexistent slug and one the caller isn't a member of.
 
-Pages under this segment: `page.tsx` (dashboard shell), `settings/page.tsx`,
-`members/page.tsx`, `projects/page.tsx` (list), `projects/new/page.tsx`,
-`projects/[projectId]/page.tsx` (detail), `projects/[projectId]/edit/page.tsx`.
-Each of the ADMIN+-gated pages (settings edit, project create/edit) does its
-own page-level role check for UX (showing a read-only view or a message
-instead of a form that would 403 on submit) — the actual enforcement is
-server-side in the Route Handler either way.
+Pages under this segment: `page.tsx` (dashboard shell — also mounts the
+Kanban board's parent, see below), `settings/page.tsx`, `members/page.tsx`,
+`projects/page.tsx` (list), `projects/new/page.tsx`,
+`projects/[projectId]/page.tsx` (detail — renders the project's Kanban
+board, added Milestone 4), `projects/[projectId]/edit/page.tsx`, and
+`projects/[projectId]/issues/[issueId]/page.tsx` (issue detail — added
+Milestone 4, a full page per Decision Point D, not a slide-over/intercepting
+route). Each of the ADMIN+-gated pages (settings edit, project create/edit,
+label creation) does its own page-level role check for UX (showing a
+read-only view or a message instead of a form that would 403 on submit) —
+the actual enforcement is server-side in the Route Handler either way.
 
 ## `features/workspace/` and `features/project/`
 
@@ -80,6 +84,67 @@ resource (`toWorkspaceResponse`/`toProjectResponse`/
 `toWorkspaceMemberResponse`) — the single mapper every Route Handler for
 that resource uses, so list/create/detail/update endpoints can't drift into
 returning different field sets for the same resource.
+
+## `features/issue/` (Milestone 4)
+
+Same shape as `features/workspace/`, covering three resources at once
+(`Issue`, `Label`, `Comment` — `IssueLabel` is a join table with no
+dedicated response mapper, see `architecture.md`):
+
+- `schemas/` — `create-issue`, `update-issue`, `create-label`,
+  `update-label`, `attach-label`, `create-comment` (reused for comment
+  edit — a comment has exactly one editable field, so there's no
+  partial-update shape distinct from create).
+- `hooks/` — 16 files, one per query/mutation, grouped by resource
+  (`use-issue*`, `use-label*`, `use-issue-labels`/`use-attach-label`/
+  `use-detach-label` for the join, `use-comment*`). Unlike
+  `features/project/`'s hooks (which don't invalidate — that page is a
+  Server Component reading straight from the repository), every Issue/
+  Label/Comment mutation hook calls `invalidateQueries`, because the
+  Kanban board is a client-rendered, frequently-interacted-with surface.
+- `components/` — `kanban-board.tsx`/`kanban-column.tsx`/`issue-card.tsx`
+  (the board itself), `create-issue-dialog.tsx`, `edit-issue-form.tsx`,
+  `issue-status-select.tsx` (instant-apply, the status-change control that
+  substitutes for deferred drag-and-drop), `issue-label-section.tsx`,
+  `comment-section.tsx`, `issue-detail-panel.tsx` (the client orchestrator
+  that calls `useIssue()` once and threads the result to the components
+  above).
+- `issue-response.ts`, `label-response.ts`, `comment-response.ts` — one
+  mapper per resource, same rule as `workspace-response.ts`/
+  `project-response.ts`. `toCommentResponse` never spreads the full
+  `User` row for `author` (keeps `passwordHash` from ever reaching a
+  client), mirroring `toWorkspaceMemberResponse`.
+
+## `repositories/issue/`
+
+One file per model, same convention as `repositories/workspace/`:
+`issue.repository.ts`, `label.repository.ts`, `comment.repository.ts`,
+`issue-label.repository.ts` (the join table — added in Increment 4, once
+label-assignment endpoints existed to call it; deliberately not created
+alongside the other three in Increment 2, since an unused repository would
+be scaffolding ahead of need). `issue.repository.ts`'s `create()` wraps two
+statements in `prisma.$transaction` (increment `Project.issueCounter`, then
+insert the `Issue` with that number) rather than the nested-create pattern
+`workspaceRepository.createWithOwner` uses, since the `Project` here
+already exists rather than being created in the same call.
+
+## `constants/`
+
+First real use as of Milestone 4 (`constants/issue.ts`) — the folder was
+reserved since Foundation but had nothing to hold until status/priority
+colors needed a single source of truth. `ISSUE_STATUS_COLOR`/
+`ISSUE_PRIORITY_COLOR` map each enum value to the CSS custom property
+locked in `globals.css` since the Phase 3 UI/UX doc, referenced via inline
+`style` (not a Tailwind class) because the color is chosen dynamically per
+issue — Tailwind's JIT compiler can't pick up a class name built from
+string interpolation.
+
+## `components/ui/textarea.tsx` (Milestone 4)
+
+The first multi-line text input the app has needed — hand-built (not
+`npx shadcn@latest add textarea`, since no dependency update was in scope
+for this increment) mirroring `input.tsx`'s styling exactly. Used for issue
+description and comment body.
 
 ## Not a monorepo
 

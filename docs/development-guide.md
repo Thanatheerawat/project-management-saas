@@ -41,3 +41,50 @@
 
 Mixing these up (e.g. caching server data in Zustand) reintroduces the
 stale-cache bugs TanStack Query exists to prevent — keep the split strict.
+
+## Testing structure
+
+Three layers, each with a different job — a new feature typically touches
+all three:
+
+- **Unit (`pnpm test`, Vitest, files live next to what they test)** — pure
+  logic only: password hashing, RBAC hierarchy checks, zod schemas that
+  have actual branching (e.g. slug/hex-color regex, the
+  null-vs-omitted-field distinction in `updateIssueSchema`). A schema with
+  nothing but `min`/`max`/`uuid` constraints and no branching doesn't get
+  a dedicated unit test — match the existing precedent in
+  `features/*/schemas/` before adding one.
+- **Integration (`pnpm test:integration`, `tests/integration/`)** — calls
+  Route Handlers directly against the real Neon database (no test-DB
+  split in this stack), mocking only `auth()`. One file per resource
+  (`workspace`, `project`, `issue`, `label`, `issue-label`, `comment`,
+  …), plus `workspace-isolation.integration.test.ts` as the single home
+  for every cross-workspace 404 check regardless of which resource it's
+  about. Shared fixtures (`sessionFor`, `uniqueEmail`, `uniqueSlug`,
+  `deleteTestUser`, `deleteTestWorkspace`) live in `helpers.ts` — extend
+  that file instead of copy-pasting a fixture into a new test file.
+  Repository-level concurrency (e.g. the atomic issue-numbering test) is
+  tested here too, calling the repository function directly rather than
+  through an HTTP request.
+- **E2E (`pnpm test:e2e`, Playwright, `tests/e2e/`)** — full browser
+  journeys against a real running app and real database, reusing
+  `actions.ts` (shared UI flows like `registerViaUi`) and
+  `db-helpers.ts`/`scripts/` for cleanup. Prefer extending an existing
+  spec file over creating a new one when the scenario is a variation of
+  an existing journey (e.g. `issue-flow.spec.ts` mirrors
+  `project-flow.spec.ts`'s single continuous-session pattern;
+  `issue-permissions.spec.ts` mirrors `member-management.spec.ts`'s
+  multi-browser-context pattern for RBAC checks). **Run against a
+  production build** (`pnpm build && pnpm start`, then `pnpm test:e2e`)
+  when diagnosing a failure before assuming it's a real bug — this
+  environment has a recurring Turbopack dev-server flakiness issue under
+  concurrent load (unrelated to OneDrive-sync issues also seen with
+  `next dev`) that a production build doesn't exhibit; a failure that
+  reproduces deterministically against a production build is real, one
+  that only shows up under `next dev` most likely isn't.
+
+Every milestone's final quality gate cleans the test database back to 0
+rows in every affected table after the full suite runs — verify this
+manually (a quick `SELECT count(*)` per table, or the same ad hoc cleanup
+script pattern used throughout `docs/session-log.md`) before considering
+a testing increment done.

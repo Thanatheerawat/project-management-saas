@@ -8,6 +8,7 @@ export const projectRepository = {
     name: string;
     description?: string;
     ownerId: string;
+    key: string;
   }) {
     return prisma.project.create({ data });
   },
@@ -22,6 +23,17 @@ export const projectRepository = {
   findByWorkspaceAndName(workspaceId: string, name: string) {
     return prisma.project.findUnique({
       where: { workspaceId_name: { workspaceId, name } },
+    });
+  },
+
+  // Same check-then-act shape as findByWorkspaceAndName, for the `key`
+  // uniqueness check the create route runs before insert (Milestone 4
+  // Increment 1 — this method exists now because Project.key is a
+  // required column as of this migration; the create route's use of it
+  // is minimal on purpose and revisited in a later Milestone 4 increment).
+  findByWorkspaceAndKey(workspaceId: string, key: string) {
+    return prisma.project.findUnique({
+      where: { workspaceId_key: { workspaceId, key } },
     });
   },
 

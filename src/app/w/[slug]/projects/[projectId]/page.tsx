@@ -5,6 +5,8 @@ import { notFound } from "next/navigation";
 import { Breadcrumb } from "@/components/layout/breadcrumb";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { CreateIssueDialog } from "@/features/issue/components/create-issue-dialog";
+import { KanbanBoard } from "@/features/issue/components/kanban-board";
 import { auth } from "@/lib/auth/auth";
 import { resolveWorkspaceForRequest } from "@/lib/auth/workspace-membership";
 import { hasWorkspaceRole } from "@/lib/auth/workspace-rbac";
@@ -77,6 +79,14 @@ export default async function ProjectDetailPage({
             {new Date(project.createdAt).toLocaleDateString("th-TH")}
           </p>
         </div>
+      </div>
+
+      <div className="flex flex-col gap-3">
+        <div className="flex items-center justify-between gap-2">
+          <h2 className="text-foreground text-sm font-semibold">Issue</h2>
+          <CreateIssueDialog projectId={project.id} workspaceId={workspace.id} />
+        </div>
+        <KanbanBoard projectId={project.id} slug={slug} />
       </div>
     </div>
   );

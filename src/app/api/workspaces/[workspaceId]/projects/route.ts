@@ -5,6 +5,7 @@ import { createProjectSchema } from "@/features/project/schemas/create-project.s
 import { handleApiError } from "@/lib/api-error";
 import { auth } from "@/lib/auth/auth";
 import { requireWorkspaceAccess } from "@/lib/auth/workspace-membership";
+import { deriveIssueKey } from "@/lib/issue-key";
 import { projectRepository } from "@/repositories/workspace/project.repository";
 
 const NOT_FOUND = { error: "not_found", message: "Workspace not found" } as const;
@@ -77,6 +78,24 @@ export async function POST(request: Request, { params }: RouteContext) {
       );
     }
 
+    // Auto-derived from the name (Milestone 4 Increment 1) — not yet
+    // client-settable, same as slug is auto-derived (not user-typed) on
+    // workspace creation. Collision handling also mirrors that: a 409 with
+    // no silent retry-with-suffix, since the creator can just pick a
+    // different name. A user-editable key field is a later Milestone 4
+    // increment, not this one.
+    const key = deriveIssueKey(data.name);
+    const keyTaken = await projectRepository.findByWorkspaceAndKey(workspaceId, key);
+    if (keyTaken) {
+      return NextResponse.json(
+        {
+          error: "key_taken",
+          message: "A project with a similar name already exists in the workspace",
+        },
+        { status: 409 },
+      );
+    }
+
     // The creator becomes the initial project owner — status isn't
     // client-settable at creation, it's the ProjectStatus default (ACTIVE).
     const project = await projectRepository.create({
@@ -84,6 +103,7 @@ export async function POST(request: Request, { params }: RouteContext) {
       name: data.name,
       description: data.description,
       ownerId: session.user.id,
+      key,
     });
 
     return NextResponse.json(toProjectResponse(project), { status: 201 });

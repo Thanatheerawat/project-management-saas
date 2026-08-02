@@ -154,6 +154,66 @@ describe("Project CRUD", () => {
     expect(body.error).toBe("name_taken");
   });
 
+  it("POST derives the issue key prefix from the project name (Milestone 4 Increment 1)", async () => {
+    const { workspace, admin } = await setupWorkspace();
+    mockedAuth.mockResolvedValue(sessionFor(admin.id));
+
+    const response = await createProject(
+      jsonRequest(
+        `http://localhost:3000/api/workspaces/${workspace.id}/projects`,
+        "POST",
+        {
+          name: "Design System",
+        },
+      ),
+      workspaceCtx(workspace.id),
+    );
+    const body = (await response.json()) as { key: string };
+
+    expect(response.status).toBe(201);
+    expect(body.key).toBe("DS");
+  });
+
+  it("POST rejects a project whose derived key collides with an existing one, with 409 key_taken", async () => {
+    const { workspace, admin } = await setupWorkspace();
+    mockedAuth.mockResolvedValue(sessionFor(admin.id));
+
+    const first = await createProject(
+      jsonRequest(
+        `http://localhost:3000/api/workspaces/${workspace.id}/projects`,
+        "POST",
+        {
+          name: "Design System",
+        },
+      ),
+      workspaceCtx(workspace.id),
+    );
+    expect(first.status).toBe(201);
+
+    // "Data Store" derives to the same "DS" prefix as "Design System" —
+    // key uniqueness is scoped to the workspace, not the exact name
+    // (Decision Point B).
+    const second = await createProject(
+      jsonRequest(
+        `http://localhost:3000/api/workspaces/${workspace.id}/projects`,
+        "POST",
+        {
+          name: "Data Store",
+        },
+      ),
+      workspaceCtx(workspace.id),
+    );
+    const body = (await second.json()) as { error: string };
+
+    expect(second.status).toBe(409);
+    expect(body.error).toBe("key_taken");
+
+    const projectsWithKeyDS = await prisma.project.findMany({
+      where: { workspaceId: workspace.id, key: "DS" },
+    });
+    expect(projectsWithKeyDS).toHaveLength(1);
+  });
+
   it("GET list is visible to a plain MEMBER (Decision Point 1: workspace-wide visibility)", async () => {
     const { workspace, admin, member } = await setupWorkspace();
     mockedAuth.mockResolvedValue(sessionFor(admin.id));

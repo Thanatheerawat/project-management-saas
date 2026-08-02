@@ -60,6 +60,9 @@ model User {
   auditLogs            AuditLog[]
   workspaceMemberships WorkspaceMember[]
   ownedProjects        Project[]
+  assignedIssues       Issue[]              @relation("IssueAssignee")
+  reportedIssues       Issue[]              @relation("IssueReporter")
+  comments             Comment[]
 }
 
 // Auth.js Adapter contract — required shape even though only the
@@ -169,6 +172,7 @@ model Workspace {
 
   members  WorkspaceMember[]
   projects Project[]
+  labels   Label[]
 }
 
 // Exactly one OWNER per workspace is an application-level invariant (see
@@ -196,18 +200,148 @@ model WorkspaceMember {
 // User.isActive), so this is a safety rail more than an active concern
 // today.
 model Project {
-  id          String        @id @default(uuid())
-  workspaceId String
-  name        String
-  description String?
-  status      ProjectStatus @default(ACTIVE)
-  ownerId     String
-  createdAt   DateTime      @default(now())
-  updatedAt   DateTime      @updatedAt
+  id           String        @id @default(uuid())
+  workspaceId  String
+  name         String
+  description  String?
+  status       ProjectStatus @default(ACTIVE)
+  ownerId      String
+  // Milestone 4: short uppercase prefix for issue keys (e.g. "ORB" ->
+  // "ORB-123"). Unique per workspace, not globally — an issue key alone
+  // already unambiguously identifies one issue (Decision Point B, approved
+  // in the Milestone 4 proposal, see docs/session-log.md), and scoping to
+  // the workspace (not the project) matches Milestone 3's own
+  // `[workspaceId, name]` uniqueness pattern.
+  key          String
+  // Incremented atomically (`{ increment: 1 }`, a single Postgres row
+  // UPDATE) on every issue creation — this is the *only* safe way to hand
+  // out `Issue.number`. Computing `MAX(number) + 1` first and inserting
+  // second is a TOCTOU race that produces duplicate keys under concurrent
+  // creates, not just a slow loser (worse than the check-then-act pattern
+  // already accepted elsewhere in this codebase, e.g. M2's register route).
+  issueCounter Int           @default(0)
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
 
   workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
   owner     User      @relation(fields: [ownerId], references: [id], onDelete: Restrict)
+  issues    Issue[]
 
   @@unique([workspaceId, name])
+  @@unique([workspaceId, key])
   @@index([workspaceId])
+}
+
+// --- Milestone 4: Task Management Core (Issues) ------------------------
+
+// Values match the design tokens already locked in globals.css
+// (--status-backlog/todo/in-progress/in-review/done/cancelled, defined
+// since the Phase 3 UI/UX doc, unused in code until now) — not a free
+// choice, inventing different values would orphan real design tokens.
+enum IssueStatus {
+  BACKLOG
+  TODO
+  IN_PROGRESS
+  IN_REVIEW
+  DONE
+  CANCELLED
+}
+
+// Same reasoning as IssueStatus — matches the locked
+// --priority-urgent/high/medium/low/none tokens.
+enum IssuePriority {
+  URGENT
+  HIGH
+  MEDIUM
+  LOW
+  NONE
+}
+
+model Issue {
+  id          String        @id @default(uuid())
+  projectId   String
+  // Per-project sequence from Project.issueCounter — the display key
+  // ("ORB-123") is computed at the response layer (toIssueResponse) from
+  // `project.key` + this number, not stored redundantly here, same
+  // single-source-of-truth reasoning as every other response mapper in
+  // this codebase (e.g. toWorkspaceResponse).
+  number      Int
+  title       String
+  description String?
+  status      IssueStatus   @default(BACKLOG)
+  priority    IssuePriority @default(NONE)
+  // Fractional index (not an Int position) so reordering one card in the
+  // Kanban column only ever touches that one row — a drag-drop insert
+  // computes the midpoint between its new neighbors instead of
+  // renumbering everything after it. Documented MVP trade-off: float
+  // precision degrades after many reorders in the same slot;
+  // renormalization is deferred (Milestone 4 Architecture Review, Risk 6).
+  position    Float
+  assigneeId  String?
+  reporterId  String
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+
+  project  Project      @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  // SetNull, not Cascade/Restrict: unassigning is a normal, frequent
+  // action, not a deletion problem — if the assigned user's account is
+  // ever removed, the issue should just become unassigned, not block the
+  // removal or disappear itself.
+  assignee User?        @relation("IssueAssignee", fields: [assigneeId], references: [id], onDelete: SetNull)
+  // Restrict, matching Project.owner's reasoning: no hard user-delete
+  // feature exists yet (M2 only built soft-deactivation), so this is a
+  // safety rail, not an active concern today.
+  reporter User         @relation("IssueReporter", fields: [reporterId], references: [id], onDelete: Restrict)
+  labels   IssueLabel[]
+  comments Comment[]
+
+  @@unique([projectId, number])
+  @@index([projectId, status])
+  @@index([assigneeId])
+}
+
+// Workspace-scoped (Decision Point F, approved) so a label is reusable
+// across every project in the workspace, matching Linear's team-level
+// label model — not scoped to one Project.
+model Label {
+  id          String   @id @default(uuid())
+  workspaceId String
+  name        String
+  color       String
+  createdAt   DateTime @default(now())
+
+  workspace Workspace    @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  issues    IssueLabel[]
+
+  @@unique([workspaceId, name])
+}
+
+// Plain many-to-many join row — composite primary key instead of a
+// surrogate `id` since the pair itself is the whole identity of the row
+// (an issue either has a label attached or it doesn't; there's no other
+// data to hang off this relationship).
+model IssueLabel {
+  issueId String
+  labelId String
+
+  issue Issue @relation(fields: [issueId], references: [id], onDelete: Cascade)
+  label Label @relation(fields: [labelId], references: [id], onDelete: Cascade)
+
+  @@id([issueId, labelId])
+}
+
+model Comment {
+  id        String   @id @default(uuid())
+  issueId   String
+  authorId  String
+  body      String   @db.Text
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  issue  Issue @relation(fields: [issueId], references: [id], onDelete: Cascade)
+  // Restrict — same "no hard user-delete yet" safety-rail reasoning as
+  // Issue.reporter and Project.owner.
+  author User  @relation(fields: [authorId], references: [id], onDelete: Restrict)
+
+  @@index([issueId])
 }
