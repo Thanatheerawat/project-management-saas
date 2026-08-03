@@ -5,6 +5,7 @@ import { notFound } from "next/navigation";
 import { Breadcrumb } from "@/components/layout/breadcrumb";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { ProjectAnalyticsSummary } from "@/features/analytics/components/project-analytics-summary";
 import { CreateIssueDialog } from "@/features/issue/components/create-issue-dialog";
 import { KanbanBoard } from "@/features/issue/components/kanban-board";
 import { auth } from "@/lib/auth/auth";
@@ -79,6 +80,11 @@ export default async function ProjectDetailPage({
             {new Date(project.createdAt).toLocaleDateString("th-TH")}
           </p>
         </div>
+      </div>
+
+      <div className="flex flex-col gap-3">
+        <h2 className="text-foreground text-sm font-semibold">ภาพรวม</h2>
+        <ProjectAnalyticsSummary projectId={project.id} />
       </div>
 
       <div className="flex flex-col gap-3">

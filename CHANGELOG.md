@@ -5,6 +5,79 @@ All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.5.0] - 2026-08-04 - Milestone 5: Dashboard & Analytics
+
+A workspace dashboard and per-project analytics summary on top of the
+Issue Tracking core — status/priority breakdowns and team workload,
+read entirely from indexed database aggregate queries with no data
+duplicated or precomputed. First real use of Recharts, locked in the
+tech stack since Phase 4 but unused in code until now. Migrated on
+Neon and fully verified: unit, integration (including cross-workspace
+isolation), and Playwright e2e tests asserting exact rendered chart
+values, not just chart presence. See `docs/session-log.md` for the full
+history, including Decision Point A.
+
+### Added
+
+- Repository: five aggregation methods on the existing `issueRepository`
+  (`countByStatus`/`countByPriority` scoped to a project,
+  `countByStatusForWorkspace`/`countByPriorityForWorkspace`/
+  `countByAssigneeForWorkspace` scoped across a workspace) — each a
+  single Prisma `groupBy` with `_count: true`, reusing `Issue`'s existing
+  `@@index([projectId, status])` and `Project`'s existing
+  `@@index([workspaceId])`; no new `analyticsRepository` and no schema
+  changes
+- Response mappers (`features/analytics/`): `toIssueBreakdownResponse`
+  (zero-fills every `IssueStatus`/`IssuePriority`, keyed off
+  `ISSUE_STATUS_COLOR`/`ISSUE_PRIORITY_COLOR` for canonical order),
+  `toWorkloadResponse` (includes every workspace member even at zero
+  count, appends an `Unassigned` bucket only when applicable)
+- API (3 read-only endpoints, `MEMBER`+, no request body):
+  `GET /api/workspaces/[id]/analytics/overview`,
+  `GET /api/workspaces/[id]/analytics/workload`,
+  `GET /api/projects/[id]/analytics/overview`
+- TanStack Query hooks (`features/analytics/hooks/`):
+  `useWorkspaceAnalyticsOverview`, `useWorkspaceWorkload`,
+  `useProjectAnalyticsOverview` — 60s `staleTime`, no cross-invalidation
+  from issue/label mutation hooks (a documented trade-off, see
+  `docs/architecture.md`)
+- UI: `WorkspaceAnalyticsSection` (mounted on the existing `/w/[slug]`
+  dashboard page) and `ProjectAnalyticsSummary` (mounted on the existing
+  project detail page, above the Kanban board) — no new routes.
+  `StatusBreakdownChart`/`PriorityBreakdownChart` (shared between
+  workspace and project scope) and `WorkloadChart` (workspace-scope
+  only), all built on Recharts and colored via the existing
+  `ISSUE_STATUS_COLOR`/`ISSUE_PRIORITY_COLOR` tokens
+- Decision Point A (trend/velocity data): **A1** chosen — snapshot
+  metrics only this milestone, no schema change, no time-series charts
+- Integration tests: workspace overview (exact counts, zero-fill),
+  workspace workload (assigned/unassigned/zero-count members),
+  project-overview isolation from a sibling project, RBAC, and
+  enumeration safety (11 new, 136 total, `pnpm test:integration`);
+  extended `workspace-isolation.integration.test.ts` with the same
+  cross-workspace 404 checks for all three endpoints
+- Playwright e2e tests: a known status/priority/assignee mix verified
+  against the workspace dashboard's three charts and the project-level
+  summary via real mouse hover + Recharts' Tooltip (asserting actual
+  rendered values, not just chart presence), then a second project
+  proving per-project isolation (7 new, 66 total, `pnpm test:e2e`)
+
+### Verification
+
+- No schema or migration changes this milestone (Decision Point A1)
+- Quality gate green end to end: `lint`, `typecheck`, `build`, `test`,
+  `test:integration`, `test:e2e` (the last run against a production
+  build and confirmed stable across two consecutive runs)
+- Two test-code issues found and fixed while building the e2e hover
+  assertions (both in test code, not production): Recharts wraps a long
+  multi-word Y-axis label across lines and drops the joining space,
+  and the workload chart's category axis is Y (horizontal bar chart),
+  not X — both required adjusting the test's hover-targeting logic, not
+  the chart component
+- No new dependencies — Recharts was already present in `package.json`
+  since the Foundation-era locked stack; zero changes to
+  `package.json`/`pnpm-lock.yaml` throughout the entire milestone
+
 ## [0.4.0] - 2026-08-03 - Milestone 4: Task Management Core (Issue Tracking)
 
 A Kanban-style issue tracker on top of the Workspace/Project core — issues,

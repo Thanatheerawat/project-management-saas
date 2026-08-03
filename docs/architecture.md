@@ -158,12 +158,104 @@ out because they introduce patterns Milestone 2/3 didn't need:
   `["issue-labels", issueId]`, so the board doesn't show stale labels
   after an attach/detach from the detail page.
 
+## Dashboard & Analytics (Milestone 5)
+
+Read-only aggregate views over the `Issue`/`Project`/`WorkspaceMember`
+data that already exists after Milestone 4 — a workspace-level overview
+(status/priority breakdown + team workload) and a project-level overview
+(status/priority breakdown scoped to one project). No new tables, no new
+permission tier: this milestone is purely a new way of looking at data
+that Milestone 3/4 already made visible resource-by-resource.
+
+**Decision Point A (trend/velocity data): A1 chosen.** A "completed this
+week" chart would need a point-in-time signal for when an issue reached
+`DONE`, but `Issue.updatedAt` is a whole-row timestamp bumped by _any_
+edit (title, assignee, priority — not just status), so it can't be
+trusted as a status-change timestamp without adding a new history table.
+Rather than add that table (a real, if small, schema change) or ship an
+inaccurate approximation, Milestone 5 ships **snapshot metrics only** —
+status/priority/workload counts as they stand right now, no time-series
+charts at all. This mirrors how Milestone 4's Decision Point E deferred
+the Activity Feed entirely rather than half-building it; a minimal
+`IssueStatusChange` table remains the natural on-ramp for a future
+milestone that actually wants trend data, not something to retrofit here.
+
+**Aggregation happens in the repository layer, not in a route handler or
+in TypeScript.** Five new methods on the existing `issueRepository`
+(`countByStatus`/`countByPriority`, scoped to a project, and
+`countByStatusForWorkspace`/`countByPriorityForWorkspace`/
+`countByAssigneeForWorkspace`, scoped across every project in a
+workspace via the `Project` relation) are each a single Prisma
+`groupBy(...)` with `_count: true` — Postgres does the counting via an
+indexed aggregate query, reusing `Issue`'s existing
+`@@index([projectId, status])` and `Project`'s existing
+`@@index([workspaceId])`. No analytics-specific repository was added:
+every metric is fundamentally an `Issue`-level grouping, so a separate
+`analyticsRepository` would have split ownership of `Issue` queries
+across two files for no real benefit — it stays on `issueRepository`,
+consistent with the "one file per model" rule `repositories/` has
+followed since Milestone 3.
+
+**Response mappers zero-fill every enum value.** `toIssueBreakdownResponse`
+(`features/analytics/issue-breakdown-response.ts`) takes the raw grouped
+counts and produces `{ total, byStatus, byPriority }` with every
+`IssueStatus`/`IssuePriority` present — including the ones with zero
+issues — because "0 issues in CANCELLED" is real information a chart
+needs, not a key to omit. It reads the canonical key order directly from
+`ISSUE_STATUS_COLOR`/`ISSUE_PRIORITY_COLOR` (`constants/issue.ts`) rather
+than hardcoding a second list, so chart iteration order automatically
+matches the Kanban board's column order. `toWorkloadResponse`
+(`workload-response.ts`) joins the grouped per-assignee counts against
+the _full_ workspace member roster so a member with zero assigned issues
+still appears (not silently dropped), and appends a `{ userId: null,
+name: "Unassigned" }` bucket only when at least one issue genuinely has
+no assignee — never as a permanent zero-row.
+
+**API is three read-only `GET` endpoints**, no request body, no zod
+schema: `GET /api/workspaces/[workspaceId]/analytics/overview`, `GET
+/api/workspaces/[workspaceId]/analytics/workload`, and `GET
+/api/projects/[projectId]/analytics/overview`. All three are `MEMBER`+
+readable — a direct inheritance of Milestone 3's Decision Point 1 (every
+workspace member already sees every project's issues individually, so an
+aggregate of that same data introduces no new exposure) — and follow the
+same enumeration-safe 404 pattern as every other route
+(`requireWorkspaceAccess`/`resolveWorkspaceMembership`, unchanged from
+Milestone 3/4).
+
+**Recharts** (locked in the tech stack since Phase 4, unused in code
+until now) renders three components — `StatusBreakdownChart`/
+`PriorityBreakdownChart` (`Bar`/`Cell`, colored via
+`ISSUE_STATUS_COLOR`/`ISSUE_PRIORITY_COLOR`, the same tokens the Kanban
+board and priority badges already use — no second color definition) and
+`WorkloadChart` (a horizontal bar chart, since Recharts' `layout="vertical"`
+keeps member names legible regardless of count). `StatusBreakdownChart`/
+`PriorityBreakdownChart` are generic (`data: Record<Status, number>` /
+`Record<Priority, number>` props), so the same two components render at
+both workspace and project scope — the workspace dashboard additionally
+mounts `WorkloadChart`, which isn't meaningful at single-project scope.
+
+**Freshness is `staleTime`-based, not invalidation-based — a deliberate
+trade-off.** The three analytics TanStack Query hooks
+(`useWorkspaceAnalyticsOverview`/`useWorkspaceWorkload`/
+`useProjectAnalyticsOverview`, `features/analytics/hooks/`) use a 60
+second `staleTime`, longer than the Kanban board's own queries, since a
+dashboard is a glance-and-leave surface, not one requiring near-live
+freshness. Issue/label mutation hooks (`useCreateIssue`, etc.) are
+**not** modified to invalidate these query keys — doing so would
+recompute a workspace-wide aggregate on every single-issue edit, which is
+unnecessary churn for a summary view. A user sees updated numbers on
+their next visit to the dashboard (or after the `staleTime` window
+elapses), not instantly after an edit elsewhere. This is the same
+"documented trade-off, not an oversight" discipline already used for the
+WebSocket/queue decision earlier in this file.
+
 ## Current state
 
 Milestone 2 (Identity & Access Management), Milestone 3 (Workspace &
-Project Management Core), and Milestone 4 (Issue Tracking Core) are all
-implemented and covered by unit, integration, and e2e tests. See the root
-[README.md](../README.md) and [session-log.md](./session-log.md) for exact
-scope and what's still designed-but-not-built (AI copilot, GitHub
-integration, drag-and-drop, activity feed — later milestones/deferred
+Project Management Core), Milestone 4 (Issue Tracking Core), and
+Milestone 5 (Dashboard & Analytics) are all implemented and covered by
+unit, integration, and e2e tests. See the root [README.md](../README.md)
+and [session-log.md](./session-log.md) for exact scope and what's still
+designed-but-not-built (AI copilot, GitHub integration, drag-and-drop,
+activity feed, trend/velocity charts — later milestones/deferred
 decisions per the Development Plan).

@@ -99,4 +99,58 @@ export const issueRepository = {
   delete(id: string) {
     return prisma.issue.delete({ where: { id } });
   },
+
+  // --- Milestone 5: Analytics --------------------------------------
+  // Every method below is a single grouped aggregate query — Postgres
+  // does the counting, not a full issue fetch reduced in TypeScript.
+  // Callers (features/analytics) zero-fill statuses/priorities with no
+  // rows in the result, since "0 issues in this status" is still
+  // meaningful information for a chart, not something to omit.
+
+  // Reuses Issue's existing @@index([projectId, status]).
+  countByStatus(projectId: string) {
+    return prisma.issue.groupBy({
+      by: ["status"],
+      where: { projectId },
+      _count: true,
+    });
+  },
+
+  countByPriority(projectId: string) {
+    return prisma.issue.groupBy({
+      by: ["priority"],
+      where: { projectId },
+      _count: true,
+    });
+  },
+
+  // Scoped across every project in a workspace via the Project
+  // relation, reusing Project's existing @@index([workspaceId]) — no
+  // new index needed.
+  countByStatusForWorkspace(workspaceId: string) {
+    return prisma.issue.groupBy({
+      by: ["status"],
+      where: { project: { workspaceId } },
+      _count: true,
+    });
+  },
+
+  countByPriorityForWorkspace(workspaceId: string) {
+    return prisma.issue.groupBy({
+      by: ["priority"],
+      where: { project: { workspaceId } },
+      _count: true,
+    });
+  },
+
+  // Backs the workload chart. Prisma's groupBy groups `assigneeId: null`
+  // rows together as their own group — that group becomes the
+  // "Unassigned" bucket in toWorkloadResponse, not a filtered-out value.
+  countByAssigneeForWorkspace(workspaceId: string) {
+    return prisma.issue.groupBy({
+      by: ["assigneeId"],
+      where: { project: { workspaceId } },
+      _count: true,
+    });
+  },
 };

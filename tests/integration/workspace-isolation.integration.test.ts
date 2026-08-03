@@ -36,6 +36,12 @@ const { GET: getIssue } = await import("@/app/api/issues/[issueId]/route");
 const { GET: listIssueLabels } = await import("@/app/api/issues/[issueId]/labels/route");
 const { GET: listIssueComments } =
   await import("@/app/api/issues/[issueId]/comments/route");
+const { GET: getWorkspaceAnalyticsOverview } =
+  await import("@/app/api/workspaces/[workspaceId]/analytics/overview/route");
+const { GET: getWorkspaceWorkload } =
+  await import("@/app/api/workspaces/[workspaceId]/analytics/workload/route");
+const { GET: getProjectAnalyticsOverview } =
+  await import("@/app/api/projects/[projectId]/analytics/overview/route");
 
 function jsonRequest(url: string, method: string, body?: unknown): Request {
   return new Request(url, {
@@ -275,6 +281,54 @@ describe("Cross-workspace isolation", () => {
     const response = await listWorkspaceLabels(
       jsonRequest(`http://localhost:3000/api/workspaces/${workspaceB.id}/labels`, "GET"),
       workspaceCtx(workspaceB.id),
+    );
+
+    expect(response.status).toBe(404);
+  });
+
+  // Milestone 5: same cross-workspace checks for the analytics endpoints,
+  // added to this existing suite rather than a new isolation file — same
+  // precedent as Milestone 4's Issue/Label/Comment additions above.
+  it("a member of A gets 404 fetching B's workspace analytics overview", async () => {
+    const { ownerA, workspaceB } = await setupTwoWorkspaces();
+    mockedAuth.mockResolvedValue(sessionFor(ownerA.id));
+
+    const response = await getWorkspaceAnalyticsOverview(
+      jsonRequest(
+        `http://localhost:3000/api/workspaces/${workspaceB.id}/analytics/overview`,
+        "GET",
+      ),
+      workspaceCtx(workspaceB.id),
+    );
+
+    expect(response.status).toBe(404);
+  });
+
+  it("a member of A gets 404 fetching B's workspace workload", async () => {
+    const { ownerA, workspaceB } = await setupTwoWorkspaces();
+    mockedAuth.mockResolvedValue(sessionFor(ownerA.id));
+
+    const response = await getWorkspaceWorkload(
+      jsonRequest(
+        `http://localhost:3000/api/workspaces/${workspaceB.id}/analytics/workload`,
+        "GET",
+      ),
+      workspaceCtx(workspaceB.id),
+    );
+
+    expect(response.status).toBe(404);
+  });
+
+  it("a member of A gets 404 fetching B's project analytics overview", async () => {
+    const { ownerA, projectBId } = await setupTwoWorkspaces();
+    mockedAuth.mockResolvedValue(sessionFor(ownerA.id));
+
+    const response = await getProjectAnalyticsOverview(
+      jsonRequest(
+        `http://localhost:3000/api/projects/${projectBId}/analytics/overview`,
+        "GET",
+      ),
+      projectCtx(projectBId),
     );
 
     expect(response.status).toBe(404);

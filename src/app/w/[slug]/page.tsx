@@ -6,6 +6,7 @@ import { notFound } from "next/navigation";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardHeader, CardTitle } from "@/components/ui/card";
 import { EmptyState } from "@/components/ui/empty-state";
+import { WorkspaceAnalyticsSection } from "@/features/analytics/components/workspace-analytics-section";
 import { auth } from "@/lib/auth/auth";
 import { resolveWorkspaceForRequest } from "@/lib/auth/workspace-membership";
 import { projectRepository } from "@/repositories/workspace/project.repository";
@@ -64,6 +65,11 @@ export default async function WorkspaceDashboardPage({
             ))}
           </div>
         )}
+      </div>
+
+      <div>
+        <h2 className="text-foreground mb-3 text-sm font-semibold">ภาพรวม</h2>
+        <WorkspaceAnalyticsSection workspaceId={workspace.id} />
       </div>
     </div>
   );

@@ -1933,24 +1933,409 @@ pattern การ extend ไฟล์เดิมแทนสร้างให�
 ยังไม่ commit/tag/push ใดๆ ตามคำสั่ง — **ยังไม่ทำ final audit** ตามคำสั่ง หยุดหลัง Increment 9
 รอคำสั่งก่อนเริ่ม final completion audit + commit + tag `v0.4.0` + push
 
+---
+
+## Milestone 4 — Final Repository Audit (ก่อน commit v0.4.0)
+
+ผู้ใช้สั่งทำ audit ล้วนๆ ตาม checklist ที่ระบุ (Repository/Prisma/Quality/Testing/Documentation/
+Code quality) **ห้ามแก้อะไร ห้าม implement feature ใหม่ ห้าม refactor ห้ามเปลี่ยน architecture**
+รายงานผลอย่างเดียว
+
+**Repository**: `git status` ตรงตามคาด (13 tracked ไฟล์ modified + 17 untracked ใหม่ ทั้งหมดมาจาก
+Increment 1-9 ไม่มีไฟล์แปลกปลอม) ไม่พบ temp/debug file (`.claude/launch.json`, `_manual-cleanup.ts`,
+`.bak`/`.orig`, smoke-test script ค้าง — ไม่พบสักไฟล์) ตรวจ root directory ทั้งหมดด้วยมือ ไม่พบอะไรผิด
+ที่
+
+**Prisma**: `prisma generate` ✅ `prisma migrate status` ✅ ("Database schema is up to date!")
+อ่าน migration SQL ของ M4 (`20260728223612_add_issue_tracking_core`) ยืนยันมีแต่
+`CREATE TYPE`/`CREATE TABLE`/`ALTER TABLE ADD COLUMN`/`CREATE INDEX`/`ADD FOREIGN KEY` ไม่มี
+`DROP` ใดๆ แตะตาราง M2/M3 เดิม ตรวจ `migration_lock.toml` ยังคงสภาพ ("postgresql") ไม่ถูกแก้
+
+**Quality**: `lint` ✅ 0 error `typecheck` ✅ 0 error `build` ✅ (clean `.next`, route list ตรงตาม
+เอกสารเป๊ะ)
+
+**Testing (รันจริงทั้ง 3 ชั้นซ้ำทั้งหมด ไม่ใช่แค่เชื่อผลเก่า)**: `test` (unit) ✅ 62/62 `test:integration`
+✅ 125/125 (ต่อ Neon จริง) `test:e2e` ✅ 59/59 (รันกับ production build จริง — `pnpm build && pnpm
+start` แล้ว `pnpm test:e2e` ตามบทเรียนเรื่อง Turbopack dev-server flakiness ที่บันทึกไว้ตั้งแต่ M2/M3)
+kill process บน port 3000 หลังรันเสร็จเรียบร้อย
+
+**พบ 16 แถวกำพร้าใน `AuditLog`** (`userId: null`, action `REGISTER`/`LOGIN_SUCCESS`/`LOGOUT`/
+`EMAIL_VERIFIED`, วันที่ `2026-07-29`) ระหว่างเขียนสคริปต์ชั่วคราวตรวจ row count (เขียนที่ root แล้ว
+ลบทิ้งทันทีตามธรรมเนียมเดิม) สืบสาเหตุจริงด้วยการ query ตรง ไม่ใช่เดา — พบว่าเป็นเศษตกค้างจาก
+**manual verification ตอน Increment 6** (`2026-07-29`) ที่สคริปต์ cleanup ชั่วคราวลบ User ตรงๆ
+โดยไม่ได้ลบ `AuditLog` ก่อน (ต่างจาก `deleteTestUser` ใน `tests/integration/helpers.ts`/
+`tests/e2e/scripts/delete-test-user.ts` ที่ลบ `auditLog.deleteMany({where:{userId}})` ก่อนเสมอ) —
+`onDelete: SetNull` ทำงานถูกต้องตามออกแบบ (audit trail อยู่รอดแม้ user ถูกลบ) ไม่ใช่บั๊กโค้ด แค่ข้อมูล
+ตกค้างใน dev database ไม่กระทบ repository/test/release readiness เลย
+
+**Code quality**: grep `TODO|FIXME` เจอ 4 ไฟล์ แต่ตรวจแล้วทั้งหมดเป็น false positive (คำว่า `"TODO"`
+ที่เป็น literal ค่า enum `IssueStatus` ไม่ใช่ comment ค้างงาน) `console.*` เจอเฉพาะใน
+`src/lib/logger.ts` (wrapper ที่ตั้งใจให้เป็นแบบนั้น ไม่ใช่ debug leftover) grep ยืนยัน `prisma.*`
+ไม่มีนอก `repositories/` เลย (repository isolation ยังสมบูรณ์) ยืนยัน `package.json`/`pnpm-lock.yaml`
+**ไม่มี diff เลยเทียบกับ commit M3** — พิสูจน์ว่าทั้ง Milestone 4 ไม่เพิ่ม dependency ใหม่แม้แต่ตัวเดียว
+ตรงตามที่ทุก increment เคยรายงานไว้ scan secret pattern ในไฟล์ M4 ใหม่ทั้งหมดไม่พบอะไร
+
+**Documentation**: ตรวจทั้ง 6 ไฟล์ที่สั่งซ้ำอีกรอบ ไม่พบ reference ที่ล้าสมัยจาก Milestone 3 (คำว่า
+"Milestone 2"/"Milestone 3" ที่ยังเจอในเอกสารล้วนเป็นการอ้างอิงประวัติถูกต้อง เช่น "RBAC เพิ่มตั้งแต่
+M2/M3" ไม่ใช่การอ้างว่าสถานะปัจจุบันยังอยู่แค่ M2/M3)
+
+**Blocker**: **ไม่มี** ไม่มีอะไรบล็อกการปล่อย v0.4.0
+
+**Recommended** (ไม่ได้แก้ อยู่นอกสโคป audit): `docs/setup-guide.md`'s ตาราง "Common commands"
+ขาด `pnpm test:integration` มาตั้งแต่ M2, `CHANGELOG.md` ค้างที่ `[0.2.0]` (ตกทั้ง v0.3.0 และ v0.4.0)
+
+**Optional**: 16 แถวกำพร้าใน `AuditLog` ของ dev database (ไม่กระทบ codebase/test/release),
+รายการ known-limitation เดิมทั้งหมดจาก M4 audit (ข้อ 4/5/6/9 ที่ตั้งใจไม่แก้) + regex เสี่ยงใน
+`project-flow.spec.ts` — ทั้งหมดยังคงสภาพเดิม ไม่ใช่ finding ใหม่
+
+**สรุป: พร้อมปล่อย v0.4.0** — รายงานผลแล้ว ยังไม่ commit ใดๆ ตามคำสั่ง
+
+## CHANGELOG.md — เพิ่ม v0.3.0 และ v0.4.0
+
+ผู้ใช้สั่งอัปเดต `CHANGELOG.md` ก่อนปล่อย release — เพิ่มหัวข้อ `[0.3.0]` ที่ตกหล่นไปตั้งแต่หลัง commit
+`83808bf` (M3 ไม่เคยได้อัปเดต CHANGELOG เลย) และเพิ่มหัวข้อ `[0.4.0]` ใหม่ **ห้ามแก้ไฟล์อื่นใดๆ**
+
+ทั้งสองหัวข้อตามฟอร์แมต Keep a Changelog เดิมเป๊ะ (ย่อหน้าคำอธิบาย → `### Added` → `### Verification`)
+วางเรียงตามลำดับเวลาย้อนกลับถูกต้อง (v0.4.0 บนสุด → v0.3.0 → v0.2.0 เดิม → v0.1.0 เดิม):
+
+- **`[0.3.0] - 2026-07-28`** (วันที่ตรงกับ commit `83808bf` จริงจาก `git log --format=%ad`) —
+  สรุป Workspace/Project model, workspace RBAC, 14 API endpoint, ทุกหน้า, unit +28 (รวม 42)/
+  integration +41 (รวม 70)/e2e +23 (รวม 34) — ตัวเลข "ใหม่" คำนวณจากผลต่างของยอดรวมที่ยืนยันแล้วจริง
+  ในแต่ละ milestone (ไม่ใช่นับซ้ำจาก breakdown ย่อยที่อาจตกหล่นระหว่างทาง)
+- **`[0.4.0] - 2026-08-03`** (วันที่วันนี้ ก่อน commit จริง) — สรุป Issue/Label/Comment model, 15
+  API endpoint, Kanban UI, audit+cleanup pass, unit +20 (รวม 62)/integration +55 (รวม 125)/
+  e2e +25 (รวม 59)
+
+`pnpm lint` ✅ `pnpm typecheck` ✅ (ทั้งคู่ผ่านทันที เพราะแก้แค่ `.md`) `git status` ยืนยันมีแค่
+`CHANGELOG.md` เปลี่ยนจริง ไม่แตะไฟล์อื่น ยังไม่ commit ตามคำสั่ง
+
+## Milestone 4 Committed & Released: v0.4.0
+
+ผู้ใช้อนุมัติปล่อย release สั่ง commit+tag+push ตรงๆ ทำตามลำดับเดียวกับ M2/M3:
+
+1. `git add -A` → ตรวจ `git status --short` ยืนยัน 87 ไฟล์ตรงตามที่ audit ตรวจไว้แล้วเป๊ะ ไม่มีไฟล์
+   แปลกปลอมหลุดเข้ามา
+2. Commit ด้วย Conventional Commit: `feat(issues): complete milestone 4 - task management core`
+   — Husky pre-commit รัน lint-staged reformat อัตโนมัติ (เหมือนทุก milestone ก่อนหน้า) ผลลัพธ์:
+   commit `5a9de233f64645bb2db0d4be81599777396fa85f`, 74 ไฟล์เปลี่ยน (บาง path นับรวมกันเพราะ
+   lint-staged reformat), working tree clean หลัง commit
+3. สร้าง annotated tag `v0.4.0` พร้อมข้อความสรุป feature+test coverage เดียวกับที่ใช้ตอน v0.2.0/v0.3.0
+4. `git push origin main` — สำเร็จทันที (`83808bf..5a9de23`) ไม่มีปัญหา credential เหมือนตอน M2
+   (คาดว่าเพราะ Git Credential Manager ตั้งค่าไว้แล้วตั้งแต่ M2)
+5. `git push origin v0.4.0` — สำเร็จ ("new tag")
+6. ยืนยันด้วย `git ls-remote origin main refs/tags/v0.4.0` ตรงกับ local: `main` ชี้ commit `5a9de23`,
+   tag object resolve (`git rev-list -n1 v0.4.0`) ชี้ commit เดียวกันเป๊ะ
+
+**Milestone 4 ปิดสมบูรณ์บน GitHub แล้ว** — `v0.2.0`/`v0.3.0`/`v0.4.0` อยู่บน `origin/main` ครบ
+(ยกเว้น `v0.1.0` ที่ยังเป็น local-only tag ตามที่บันทึกไว้ตั้งแต่ M2)
+
+## เอกสารเสริมที่ผลิตให้ผู้ใช้ (ไม่แตะไฟล์ repo ใดๆ)
+
+หลังปล่อย v0.4.0 ผู้ใช้ขอเอกสารเสริม 3 ชิ้นสำหรับใช้นอก repo (ส่งเป็นข้อความในแชตเท่านั้น
+**ไม่ได้เขียนเป็นไฟล์ใน repo**):
+
+1. **GitHub Release Notes สำหรับ v0.4.0** — ฟอร์แมตมาตรฐาน GitHub release (Summary/Highlights/
+   Major Features/Architecture Improvements/Testing Summary/Documentation Updates/Breaking
+   Changes/Known Limitations/Acknowledgements) สรุปจาก CHANGELOG.md ที่มีอยู่แล้ว
+2. **Portfolio project description ฉบับเต็ม** ครอบ Overview/Motivation/Architecture/
+   Technologies/Key Features/Technical Challenges/Engineering Decisions/Testing Strategy/
+   Lessons Learned — เขียนให้ใช้ได้ทั้ง portfolio site, resume, LinkedIn, GitHub README
+3. **Resume bullet point แบบ ATS-friendly** 8 ข้อ เน้น Next.js/Prisma/PostgreSQL/TanStack
+   Query/RBAC/testing ตามที่ผู้ใช้ระบุคีย์เวิร์ดต้องมี พร้อม quantify ตัวเลขจริง (246 test รวม,
+   30+ endpoint, 3 milestone ฯลฯ)
+
+ทั้งหมดอ้างอิงข้อมูลจริงจาก session-log/CHANGELOG ที่มีอยู่แล้ว ไม่ได้สร้างตัวเลข/ฟีเจอร์ที่ไม่มีจริงขึ้นมา
+
+---
+
+## Milestone 5 — Proposal: Dashboard & Analytics
+
+ผู้ใช้สั่งเสนอ Milestone 5 ต่อจาก M4 โดยอิงจาก architecture/เอกสารที่มีอยู่ **ห้าม implement ห้ามเขียนโค้ด
+ห้ามแก้ไฟล์** เสนอตาม 11-milestone Development Plan เดิม (Setup→Auth→Database→Workspace→Task
+Management→**Dashboard**→Admin Dashboard→AI→API Docs→Testing→Deployment) — Milestone 5
+คือ "Dashboard" ตามแผนเดิม และเป็นการใช้งานจริงครั้งแรกของ **Recharts** ที่ล็อกไว้ใน stack ตั้งแต่
+Phase 4 แต่ไม่เคยแตะโค้ดเลย
+
+**สาระของ proposal** (10 หัวข้อ): Goal (เปลี่ยน dashboard shell เบาๆ จาก M3 ให้เป็น analytics
+surface จริง), Features (workspace overview/workload/project health), Architecture impact
+(ไม่มี layer ใหม่ อาศัย repository→mapper→route→hook→component เดิม, aggregation เกิดที่ repository
+layer ไม่ใช่ client-side), Database changes (ไม่มี — เว้นแต่ Decision Point A เลือกทางที่ต้องมี schema),
+API additions (3 endpoint), UI additions (ต่อยอดหน้าเดิม ไม่สร้าง route ใหม่), Hooks (3 hook อ่าน
+อย่างเดียว), Testing strategy, Documentation updates, Increment breakdown
+
+**Decision Point A** (จุดตัดสินใจสำคัญที่ยกขึ้นมาเอง ไม่ใช่ให้เลือกลอยๆ): trend/velocity chart ต้องการ
+ข้อมูล time-series ว่า issue เข้าสถานะ `DONE` เมื่อไหร่ แต่ `Issue.updatedAt` ถูก bump ด้วยการแก้ไข
+field ใดก็ได้ (ไม่ใช่แค่ status) ใช้อ้างอิงไม่ได้ตรงๆ เสนอ 3 ทาง:
+
+- **A1** — ไม่ทำ trend/velocity รอบนี้เลย (snapshot metric อย่างเดียว) มิเรอร์การตัดสินใจ defer
+  Activity Feed ทั้งหมดของ M4 Decision Point E
+- **A2** — เพิ่มตาราง `IssueStatusChange` เล็กๆ (schema change) บันทึกเฉพาะ status transition
+- **A3** — ประมาณด้วย `updatedAt` filter `status=DONE` ยอมรับความคลาดเคลื่อน
+
+เสนอแนะ A1 ให้ผู้ใช้พิจารณา — **ผู้ใช้อนุมัติแผนทั้งหมด แต่ยังไม่ตัดสินใจ Decision Point A ในรอบนี้**
+(ตัดสินใจแยกในข้อความถัดไป)
+
+## Milestone 5 — Decision Point A = A1 + Detailed Architecture Proposal
+
+ผู้ใช้เลือก **A1** (snapshot metric เท่านั้น ไม่มี trend/velocity ไม่มี schema/migration เปลี่ยน) แล้ว
+สั่งให้เสนอ Detailed Architecture Proposal เต็มรูปแบบ (**ยังคงห้ามเขียนโค้ด/แก้ไฟล์/แก้ schema**)
+
+**สาระ** (11 หัวข้อ ยึด engineering style เดียวกับ M4):
+
+1. **Repository design** — ขยาย `issueRepository` เดิมเท่านั้น (ไม่สร้าง `analyticsRepository`
+   ใหม่ เพราะ status/priority/assignee ทั้งหมดเป็น field ของ `Issue` อยู่แล้ว การแยก repository
+   ใหม่จะขัดกับ convention "หนึ่งไฟล์ต่อหนึ่ง model" ที่ใช้มาตลอด): `countByStatus(projectId)`,
+   `countByPriority(projectId)`, `countByStatusForWorkspace(workspaceId)`,
+   `countByPriorityForWorkspace(workspaceId)`, `countByAssigneeForWorkspace(workspaceId)` —
+   ทุกตัวเป็น Prisma `groupBy` เดี่ยวๆ (ให้ Postgres นับ ไม่ fetch แถวมานับใน TypeScript) รียูส index
+   เดิม (`Issue`'s `@@index([projectId, status])`, `Project`'s `@@index([workspaceId])`) ไม่มี
+   index ใหม่
+2. **Response mappers** — โมดูลใหม่ `features/analytics/`: `toIssueBreakdownResponse` (ใช้ร่วม
+   ทั้ง workspace/project overview เพราะ shape เดียวกัน, zero-fill ทุก enum key โดยอิง
+   `ISSUE_STATUS_COLOR`/`ISSUE_PRIORITY_COLOR` เป็น canonical key order แทนที่จะ hardcode ลำดับใหม่),
+   `toWorkloadResponse` (join กับ member roster เต็มให้ทุกคนโผล่แม้นับ 0, เติม "Unassigned" bucket
+   เฉพาะเมื่อมีจริง)
+3. **API contract** — 3 endpoint `GET` ล้วน ไม่มี body/schema ต้อง validate (workspace overview/
+   workload, project overview) response shape เดียวกันสำหรับ overview ทั้งสองระดับ
+4. **Hook design** — 3 hook อ่านอย่างเดียว query key ตายตัว, ไม่มี invalidation ข้ามจาก
+   issue/label mutation hook ใดๆ (ตัดสินใจไว้ล่วงหน้าว่าเป็น trade-off ที่ตั้งใจ ไม่ใช่มองข้าม)
+5. **UI component hierarchy** — mount เพิ่มบนหน้าเดิม 2 หน้า (`/w/[slug]` กับ project detail)
+   ไม่สร้าง route ใหม่ มิเรอร์วิธี M4 Increment 5B mount Kanban บนหน้าเดิม `StatusBreakdownChart`/
+   `PriorityBreakdownChart` ใช้ร่วมกันทั้ง workspace/project scope (component เดียวกัน รับ
+   `Record<Status,number>`/`Record<Priority,number>` เป็น prop) ไม่สร้างซ้ำ
+6. **Recharts mapping** — BarChart ล้วน (ไม่ใช้ PieChart เพราะนับตัวเลขแม่นยำกว่าสำหรับ dev tool)
+   สีต่อแท่งผ่าน `<Cell fill={ISSUE_STATUS_COLOR[status]}>` เรียงลำดับตรงกับคอลัมน์ Kanban/severity
+   ของ priority badge เดิม
+7. **Query strategy** — `staleTime` 60 วิ (นานกว่า Kanban board เพราะ dashboard เป็นหน้าดูผ่านๆ
+   ไม่ใช่หน้าที่ต้องสดตลอดเวลา) ไม่มี polling
+8. **Loading/empty/error states** — รียูส `Skeleton`/`EmptyState` เดิม เคสพิเศษที่ระบุไว้ชัดเจน:
+   workspace ที่มี issue จริงแต่ไม่มีใคร assign เลย ต้องโชว์แท่ง "Unassigned" ไม่ใช่ empty state
+   (empty state สงวนไว้เฉพาะ "ไม่มี issue เลยจริงๆ")
+9. **RBAC** — `MEMBER+` อ่านได้ทั้ง 3 endpoint ไม่มี tier ใหม่ สืบทอดจาก M3 Decision Point 1 ตรงๆ
+10. **Testing plan** — integration ไฟล์ใหม่ `analytics.integration.test.ts` + ขยาย
+    `workspace-isolation.integration.test.ts` เดิม (ไม่สร้าง isolation suite แยก) e2e ไฟล์ใหม่
+    `analytics-dashboard.spec.ts` ยืนยันตัวเลขจริงจาก UI ไม่ใช่แค่ "chart render"
+11. **Increment plan** — 6 increment (สั้นกว่า M4 หนึ่งขั้นเพราะ A1 ตัด schema step ออก): repository+
+    mapper → API → hooks → UI → tests → docs → final audit+commit+tag `v0.5.0`+push
+
+ผู้ใช้อนุมัติ proposal ทั้งหมด สั่งเริ่มเฉพาะ **Increment 1** เท่านั้น
+
+## Milestone 5 — Increment 1: Repository + Response Mappers ✅
+
+สโคปแคบตรงตามที่สั่ง: ขยาย `issueRepository` เท่านั้น (ห้ามสร้าง `analyticsRepository`) +
+สร้าง response mapper ใหม่ **ห้าม API route/hook/UI/test รอบนี้**
+
+**Repository** (`issue.repository.ts`, เพิ่ม 5 method ท้ายไฟล์): ทุกตัวเป็น `prisma.issue.groupBy`
+เดี่ยวๆ ด้วย `_count: true` — `countByStatus`/`countByPriority` scope ด้วย `projectId`,
+`countByStatusForWorkspace`/`countByPriorityForWorkspace`/`countByAssigneeForWorkspace` scope ผ่าน
+relation filter `{ project: { workspaceId } }` (รียูส index เดิม ไม่มี index ใหม่) `assigneeId: null`
+กลายเป็นกลุ่มของตัวเองอัตโนมัติจาก Prisma groupBy (ไม่ต้อง filter แยก) — กลายเป็น "Unassigned" bucket
+ที่ mapper แปลงต่อ
+
+**Response mappers** (โมดูลใหม่ `features/analytics/`): `issue-breakdown-response.ts`
+(`toIssueBreakdownResponse`) — zero-fill ทุก `IssueStatus`/`IssuePriority` โดยดึง key set จาก
+`Object.keys(ISSUE_STATUS_COLOR)`/`Object.keys(ISSUE_PRIORITY_COLOR)` (ลำดับ insertion ตรงกับที่
+ประกาศใน `constants/issue.ts` เป๊ะ ไม่ hardcode ลำดับใหม่) `workload-response.ts`
+(`toWorkloadResponse`) — join กับ member roster เต็ม (ทุกคนโผล่แม้นับ 0), เติม "Unassigned" เฉพาะ
+เมื่อมี count > 0 จริง, fallback เป็น email เมื่อ `user.name` เป็น null (กันป้ายชื่อว่างเปล่าบนกราฟ)
+
+**บั๊ก typecheck ที่เจอและแก้ระหว่างทาง**: array `workload` ที่สร้างจาก `members.map(...)` ถูก infer
+type เป็น `{userId: string, ...}[]` (ไม่ nullable) พอ `push({userId: null, ...})` (สำหรับ Unassigned)
+เลย type error — แก้ด้วยการประกาศ type `WorkloadEntry` (`userId: string | null`) แล้ว annotate
+ตัวแปร `workload` ชัดเจน
+
+**Quality Gate**: `lint` ✅ 0 error `typecheck` ✅ 0 error (แก้ error ข้างต้นแล้ว) `build` ✅ (route
+list ไม่เปลี่ยนเลย ตรงตามสโคป "ไม่มี API รอบนี้") `test` ✅ 62/62 ไม่เปลี่ยน ไม่รัน `test:integration`/
+`test:e2e` ตามคำสั่ง
+
+ยังไม่ commit — รายงานผลแล้วหยุดตามคำสั่ง รออนุมัติก่อนเริ่ม Increment 2
+
+## Milestone 5 — Increment 2: Analytics API Routes ✅
+
+ผู้ใช้อนุมัติ Increment 1 สั่งทำเฉพาะ Increment 2: 3 endpoint ตามที่ proposal วางไว้เป๊ะ **ห้ามเพิ่ม
+repository method ใหม่ (ใช้ของ Increment 1 เท่านั้น) ห้ามสร้าง response object มือ (ต้องใช้ mapper
+Increment 1) ห้ามมี business logic ใน route เกินกว่า orchestration**
+
+**Routes** (3 ไฟล์): `GET /api/workspaces/[workspaceId]/analytics/overview` — มิเรอร์
+`GET /api/workspaces/[workspaceId]/labels` เป๊ะ (`requireWorkspaceAccess(workspaceId, userId,
+"MEMBER")`) เรียก `countByStatusForWorkspace`+`countByPriorityForWorkspace` พร้อมกันผ่าน
+`Promise.all` แล้วส่งเข้า `toIssueBreakdownResponse` ตรงๆ `GET .../analytics/workload` — pattern
+เดียวกัน บวก `workspaceMemberRepository.findManyByWorkspace` เข้า `toWorkloadResponse`
+`GET /api/projects/[projectId]/analytics/overview` — มิเรอร์ `GET /api/projects/[projectId]/issues`
+เป๊ะ (resolve project ก่อน derive `workspaceId` แล้ว `resolveWorkspaceMembership` เอง ไม่ผ่าน
+`requireWorkspaceAccess` เพราะ pattern เดิมของไฟล์ต้นแบบเขียนแบบนี้) 404 body ตรงกับไฟล์ต้นแบบเป๊ะ
+("Workspace not found" / "Project not found")
+
+ไม่มี zod schema ใหม่ (ไม่มี request body ต้อง validate) ไม่มี business logic ใดๆ ใน route เกินกว่า
+resolve→เรียก repository→ส่งเข้า mapper
+
+**Quality Gate**: `lint` ✅ 0 error `typecheck` ✅ 0 error `build` ✅ (route list เพิ่มครบ 3 เส้นทาง
+ใหม่ ตรงตามที่ approved) `test` ✅ 62/62 ไม่เปลี่ยน ไม่รัน `test:integration`/`test:e2e` ตามคำสั่ง
+
+ยังไม่ commit — รายงานผลแล้วหยุดตามคำสั่ง รออนุมัติก่อนเริ่ม Increment 3
+
+## Milestone 5 — Increment 3: TanStack Query Hooks ✅
+
+ผู้ใช้อนุมัติ Increment 2 สั่งทำเฉพาะ Increment 3: 3 hook ตามชื่อ/query key ที่ proposal กำหนดไว้เป๊ะ
+**ห้าม mutation/optimistic update/invalidation/refetchInterval ห้าม UI/chart/test รอบนี้**
+
+**Hooks ใหม่** (`features/analytics/hooks/`): `use-workspace-analytics-overview.ts` (ประกาศ
+`IssueBreakdownResponse` เป็น canonical type ที่นี่) `use-project-analytics-overview.ts` (import
+type เดียวกันมาใช้ ไม่ declare ซ้ำ — สอง endpoint คืน shape เดียวกันจริง) `use-workspace-workload.ts`
+(ประกาศ `WorkloadEntry`/`WorkloadResponse` ของตัวเอง เพราะเป็น consumer เดียว) ทุกตัวใช้ `apiClient.get`
+เดิม (throw `ApiError` เดียวกันทุก hook) query key ตรงตามสั่งเป๊ะ (`["workspace-analytics-overview",
+workspaceId]` ฯลฯ) `staleTime: 60_000` ตามที่ proposal ระบุ
+
+**สิ่งที่ตรวจก่อนเขียน**: grep ทั้ง `features/` หา pattern `enabled:`/`staleTime` ที่มีอยู่แล้ว —
+**ไม่พบเลยสักที่** (hook เดิมทุกตัวรับ id แบบ required string ไม่มี guard) แปลว่า "enabled only when
+id exists" เป็น pattern ใหม่ที่ยังไม่เคยมีมาก่อนในโค้ดเบส แต่เป็นข้อกำหนดชัดเจนจากคำสั่งรอบนี้ — รับ
+parameter เป็น `string | undefined` แล้ว `enabled: Boolean(id)` ตามที่สั่ง ไม่ใช่ pattern ที่มีอยู่แล้ว
+ให้มิเรอร์ตรงๆ แต่ implement ตามข้อกำหนดที่ชัดเจนของคำสั่งรอบนี้แทน
+
+**Quality Gate**: `lint` ✅ 0 error `typecheck` ✅ 0 error `build` ✅ (route list ไม่เปลี่ยน — hook
+ไม่ใช่ route) `test` ✅ 62/62 ไม่เปลี่ยน ไม่รัน `test:integration`/`test:e2e` ตามคำสั่ง
+
+ยังไม่ commit — รายงานผลแล้วหยุดตามคำสั่ง **รออนุมัติก่อนเริ่ม Increment 4 (UI/charts)**
+
+## Milestone 5 — Increment 4: UI + Chart Components ✅
+
+ผู้ใช้อนุมัติ Increment 3 สั่งทำเฉพาะ Increment 4 ตามสโคป: UI ล้วนๆ **ห้ามแก้ schema/repository/
+API/mapper/hook ห้ามเขียน test รอบนี้ ใช้เฉพาะ hook จาก Increment 3**
+
+**Chart components ใหม่ 3 ไฟล์** (`features/analytics/components/`): `status-breakdown-chart.tsx`/
+`priority-breakdown-chart.tsx` (Recharts `BarChart`+`Cell` ต่อแท่ง สีจาก `ISSUE_STATUS_COLOR`/
+`ISSUE_PRIORITY_COLOR` เดิมใน `constants/issue.ts` ไม่สร้างสีใหม่ ลำดับหมวดหมู่ดึงจาก
+`ISSUE_STATUSES`/`ISSUE_PRIORITIES` ที่ `KanbanBoard`/`create-issue-dialog` ใช้อยู่แล้ว ไม่ hardcode
+ลำดับใหม่ซ้ำ) `workload-chart.tsx` (horizontal bar chart, `layout="vertical"` เพื่อให้ชื่อสมาชิกอ่าน
+ได้เต็มไม่ว่าจำนวนจะเท่าไหร่ bucket "Unassigned" ใช้สี `ISSUE_PRIORITY_COLOR.NONE` ซ้ำ — semantics
+"ไม่มีค่าที่มีความหมาย" เหมือนกับ priority NONE แทนที่จะสร้างสีเทาใหม่ สมาชิกจริงใช้
+`var(--color-primary)` ของแอปเดิม)
+
+**Orchestrator 2 ไฟล์**: `workspace-analytics-section.tsx` (เรียก `useWorkspaceAnalyticsOverview`+
+`useWorkspaceWorkload` พร้อมกัน, empty state gate ที่ `total === 0` เท่านั้น — workspace ที่มี issue
+จริงแต่ไม่มีใคร assign เลยยังคงเห็นกราฟ workload ปกติ ไม่ใช่ empty state ตามที่ proposal ระบุไว้ชัดเจน)
+`project-analytics-summary.tsx` (เรียก `useProjectAnalyticsOverview` อย่างเดียว ไม่มี workload
+chart ตามที่ proposal บอกว่า workload ไม่มีความหมายในระดับ project เดียว)
+
+**Mount บนหน้าเดิม ไม่สร้าง route ใหม่**: เพิ่ม `<WorkspaceAnalyticsSection>` ต่อท้ายส่วนโปรเจกต์ใน
+`/w/[slug]/page.tsx` เพิ่ม `<ProjectAnalyticsSummary>` เหนือ Kanban board ใน
+`/w/[slug]/projects/[projectId]/page.tsx` — มิเรอร์วิธี M4 Increment 5B mount `KanbanBoard` บนหน้า
+project detail เดิมทุกประการ
+
+**States**: Loading ใช้ `Skeleton` เดิม, Empty ใช้ `EmptyState` เดิม, Error เป็นข้อความ inline สั้นๆ
+ตามที่ `KanbanBoard` ทำอยู่แล้ว — ไม่มี design primitive ใหม่
+
+**Manual verification ผ่าน browser จริง** (สมัคร user จริง, Neon จริง, `pnpm build && pnpm start`):
+ยืนยัน empty state ถูกต้องก่อนมี issue → สร้าง 2 issue (URGENT+MEDIUM, self+unassigned) → ยืนยัน
+กราฟ status/priority/workload ขึ้นค่าจริงถูกต้องทั้งที่หน้า project detail และ dashboard ผ่าน
+`get_page_text`+`read_network_requests` (ทั้ง 3 endpoint คืน 200) ไม่พบ console error ลบข้อมูลทดสอบ
+ทั้งหมดหลังยืนยันเสร็จ (สคริปต์ชั่วคราว ลบทิ้งทันที ไม่เคย commit)
+
+**Quality Gate**: `lint` ✅ 0 error (autofix import order 1 จุด) `typecheck` ✅ 0 error `build` ✅
+(route list ไม่เปลี่ยน — UI ล้วนๆ) `test` ✅ 62/62 ไม่เปลี่ยน ไม่รัน `test:integration`/`test:e2e`
+ตามคำสั่ง
+
+ยังไม่ commit — รายงานผลแล้วหยุดตามคำสั่ง รออนุมัติก่อนเริ่ม Increment 5
+
+## Milestone 5 — Increment 5: Tests ✅
+
+ผู้ใช้อนุมัติ Increment 4 สั่งทำเฉพาะ Increment 5: integration + e2e ตาม 5 หัวข้อที่ระบุ (workspace
+overview/workload, project overview isolation, RBAC, enumeration safety) **ห้ามแก้ schema/
+repository/API/hook/UI รอบนี้**
+
+**Integration ใหม่** (`tests/integration/analytics.integration.test.ts`, 8 test): workspace
+overview ยืนยัน exact count ทั้ง status/priority + zero-fill ทุกค่าที่ไม่มีข้อมูล (ผ่าน `toEqual`
+เทียบทั้ง record) + เคส all-zero เมื่อยังไม่มี issue เลย, workload ยืนยันสมาชิกที่มีงาน/ไม่มีงาน (ยังคง
+โผล่ที่ count 0)/bucket Unassigned + เคสที่ไม่มี Unassigned เลยเมื่อทุก issue มี assignee, project
+overview ยืนยันไม่รั่วข้ามไปยัง sibling project ใน worksapce เดียวกัน, RBAC ยืนยัน MEMBER ธรรมดาอ่านได้
+ทั้ง 3 endpoint, enumeration safety ยืนยัน non-member กับ nonexistent id คืน 404 ทั้งคู่ ขยาย
+`workspace-isolation.integration.test.ts` เดิมเพิ่ม 3 test (ไม่สร้างไฟล์ isolation แยกใหม่ มิเรอร์
+pattern M4 Increment 7)
+
+**E2E ใหม่** (`tests/e2e/analytics-dashboard.spec.ts`, 7 test ต่อเนื่องใน session เดียว):
+สร้าง mix ของ issue ที่รู้ผลลัพธ์แน่นอน (status/priority/assignee) แล้วยืนยัน**ค่าจริงที่ render บน
+กราฟ** ไม่ใช่แค่ "กราฟมีอยู่" ตามที่สั่งชัดเจน
+
+**เทคนิคที่ใช้ยืนยันค่าจริง**: hover เมาส์จริงผ่าน Playwright (`page.mouse.move`) ไปยังตำแหน่งของแต่ละ
+หมวดหมู่บนแกน แล้วอ่านค่าจาก Recharts' `Tooltip` ที่ปรากฏขึ้นจริง (tooltip ทำงานตามตำแหน่งบนแกนหมวดหมู่
+ไม่ใช่ตามความสูงของแท่ง จึงใช้ได้แม้ค่าจะเป็น 0) — **ทดลองก่อนใน Claude Browser tool พบว่าแท่งกราฟไม่
+render เลยในเครื่องมือนั้น** สืบสาเหตุด้วย JS evaluate พบ `document.hidden = true`/`hasFocus() =
+false` ในแท็บของเครื่องมือนั้น (rAF animation ถูก throttle เพราะแท็บไม่ visible) — สรุปว่าเป็นข้อจำกัด
+เฉพาะเครื่องมือสำรวจ ไม่ใช่ปัญหาจริงของแอปหรือของ Playwright (Playwright รัน browser จริงที่ไม่ถูก
+background เหมือนกัน) แล้วเขียน spec จริงด้วย Playwright ตรงๆ พิสูจน์ว่าใช้ได้จริง
+
+**บั๊กที่พบระหว่างเขียนเทส (ทั้งหมดเป็นบั๊ก test เอง ไม่ใช่โค้ด production)**:
+
+1. Recharts ตัดบรรทัดชื่อสมาชิกที่ยาวหลายคำบนแกน Y แล้วเสียช่องว่างตรงจุดตัดบรรทัด (เช่น
+   "Analytics E2E User" กลายเป็น "Analytics E2EUser" ในข้อความที่อ่านได้) ทำให้หาข้อความ exact match
+   ไม่เจอ — แก้ด้วยการใช้ชื่อผู้ใช้ทดสอบเป็นคำเดียวไม่มีเว้นวรรค (`AnalyticsE2EUser`) แทน ไม่แตะ
+   component ที่ freeze ไว้รอบนี้
+2. `WorkloadChart` เป็น horizontal bar chart (`layout="vertical"` ในความหมายของ Recharts) แกน
+   หมวดหมู่จริงคือแกน Y ไม่ใช่ X ต่างจาก status/priority chart — helper hover เดิมคำนวณตำแหน่งผิดแกน
+   แก้ด้วยการเพิ่ม helper แยก (`readWorkloadCount`) ที่ hover ตามตำแหน่ง Y ของ tick แทน
+3. Test ที่อ่านค่า analytics ทันทีหลังสร้าง issue ใหม่บนหน้าเดิม (ไม่ reload) เจอค่าเก่าค้างอยู่ —
+   **ไม่ใช่บั๊ก** ตรงตามการตัดสินใจที่บันทึกไว้ใน architecture proposal เอง ("staleTime เป็นกลไก
+   ความสดของข้อมูล ไม่ใช่ invalidation ทันที") แก้ด้วยการเพิ่ม `page.reload()` ก่อนอ่านค่าจริง
+   จำลองพฤติกรรมผู้ใช้จริงที่ต้องกลับมาดูหน้า dashboard ใหม่ ไม่ใช่เห็นอัปเดตทันทีระหว่างแก้ไข
+
+**Quality Gate**: `lint` ✅ 0 error `typecheck` ✅ 0 error `build` ✅ (route list ไม่เปลี่ยน) `test`
+✅ 62/62 ไม่เปลี่ยน `test:integration` ✅ **136/136** (125 เดิม + 11 ใหม่) `test:e2e` ✅ **66/66
+สองรอบติดกัน** (59 เดิม + 7 ใหม่ รันกับ production build) ยืนยัน Neon กลับสู่ 0 แถวทุกตารางหลังรันครบ
+
+ยังไม่ commit — รายงานผลแล้วหยุดตามคำสั่ง รออนุมัติก่อนเริ่ม Increment 6
+
+## Milestone 5 — Increment 6: Documentation ✅
+
+ผู้ใช้อนุมัติ Increment 5 สั่งทำเฉพาะ Increment 6: เอกสารล้วนๆ **ห้ามแก้โค้ด/test/schema/repository/
+API/hook/UI ใดๆ รอบนี้**
+
+**`docs/architecture.md`**: เพิ่มหัวข้อ "Dashboard & Analytics (Milestone 5)" ครอบ Decision Point A
+(เลือก A1 พร้อมเหตุผลเต็ม), หลักการ aggregation ที่ repository layer (ไม่ใช่ TypeScript, ไม่สร้าง
+`analyticsRepository` ใหม่), การ zero-fill ของ response mapper, API contract 3 endpoint, การใช้
+Recharts ครั้งแรก, และกลยุทธ์ความสดของข้อมูลแบบ `staleTime`-based (ไม่ invalidate ข้าม hook) พร้อม
+เหตุผล แก้ "Current state" ท้ายไฟล์ให้รวม M5 และเพิ่ม "trend/velocity charts" เข้ารายการที่ยังไม่สร้าง
+
+**`docs/folder-structure.md`**: เพิ่มหัวข้อ `features/analytics/` (hooks/components/mapper ครบตาม
+ที่มีจริง) และเพิ่มโน้ตใน `repositories/issue/` เดิมว่า M5 เพิ่ม aggregation method 5 ตัวเข้าไปโดยไม่
+สร้าง repository ใหม่ — **จับได้เองระหว่างเขียนว่าพลาดสร้างหัวข้อ `repositories/issue/` ซ้ำ 2 อัน**
+(อันหนึ่งของเดิม อันหนึ่งที่เพิ่งเขียนใหม่ทับซ้อน) ตรวจพบทันทีด้วย `grep "^## "` ก่อนปิดงาน แก้โดยรวม
+เนื้อหาเข้าหัวข้อเดิมอันเดียว ไม่เหลือหัวข้อซ้ำ
+
+**`README.md`**: อัปเดต Status จาก "M4 code-complete" เป็น "M5 code-complete" (M2/M3/M4 ขึ้น GitHub
+ครบแล้วทั้ง 3 tag) เพิ่มหัวข้อ "Dashboard & Analytics" เข้า Features list
+
+**`CHANGELOG.md`**: เพิ่ม `[0.5.0]` ตามฟอร์แมต Keep a Changelog เดิมเป๊ะ (ย่อหน้า → Added →
+Verification) วางไว้บนสุดเหนือ `[0.4.0]` ตัวเลข test ใหม่คำนวณจากผลต่างของยอดรวมที่ยืนยันแล้วจริงในแต่
+ละรอบ (11 integration ใหม่ = 136-125, 7 e2e ใหม่ = 66-59)
+
+**`docs/session-log.md`**: ไฟล์นี้ — บันทึก Increment 4-6 อย่างละเอียดครบตามที่สั่ง
+
+**Quality Gate**: `lint` ✅ 0 error `typecheck` ✅ 0 error `build` ✅ (ไม่มีไฟล์ production เปลี่ยน
+เลย — แก้แค่เอกสาร) ไม่รัน test ใดๆ ตามคำสั่งชัดเจนของผู้ใช้รอบนี้
+
+ยังไม่ commit/tag/push ใดๆ ตามคำสั่ง — **ยังไม่ทำ final audit** หยุดหลัง Increment 6 รอคำสั่งก่อนเริ่ม
+final completion audit + commit + tag `v0.5.0` + push
+
+---
+
 ## Next Steps (เมื่อได้รับอนุมัติ)
 
-1. **Increment 9 (docs) เสร็จแล้ว** ✅ — รอคำสั่งเริ่ม **final completion audit** ของ Milestone 4
-   ทั้งก้อน (เทียบ Architecture Proposal เดิม + Decision Point A-H กับโค้ดจริงทีละหัวข้อ แบบเดียวกับ
-   Milestone 3 Completion Review ที่เคยทำก่อน commit `v0.3.0`) ก่อน commit+tag+push
-2. เมื่อ final audit ผ่าน → commit+tag (`v0.4.0`)+push (ห้าม commit ก่อนได้รับคำสั่งชัดเจน)
-3. **Documentation debt ที่เจอระหว่าง Increment 9 แต่นอกสโคปที่สั่ง ไม่ได้แก้**:
-   `docs/setup-guide.md`'s ตาราง "Common commands" ขาด `pnpm test:integration` มาตั้งแต่ M2
-   (ไม่ใช่ปัญหาของ M4 แต่ยังไม่เคยแก้)
-4. (นอกขอบเขต — พิจารณาแยกทีหลัง) `CHANGELOG.md` ยังไม่อัปเดตหลัง M3 commit (ค้างที่ `[0.2.0]`),
-   ThemeToggle hydration mismatch (M2), tag `v0.1.0` ยังไม่ push, ชื่อโปรเจกต์ "Orbit" vs
-   "TeamFlow", ownership-transfer action, TOCTOU race บน uniqueness check, project detail page
-   container กว้างไม่พอสำหรับ Kanban บนจอใหญ่, ยังไม่มี mobile list-view สำหรับ board ตาม Phase 3
-   UI/UX doc, ยังไม่มี Delete Issue UI (`useDeleteIssue` hook จาก 5A ยังไม่ถูกใช้ที่ไหนเลย —
-   audit ข้อ 5, ตั้งใจไม่ลบตามคำสั่ง), `issueRepository.findByProjectAndNumber` ไม่มีใครเรียก
-   (audit ข้อ 4, ตั้งใจไม่ลบตามคำสั่ง), `DELETE /api/issues/[issueId]` ยังไม่เปลี่ยนไปใช้
-   `requireWorkspaceAccess` ตัวเดียว (audit ข้อ 6, low severity ไม่อยู่ใน scope cleanup รอบนี้),
-   `<select>` styling ซ้ำข้าม M3+M4 ยังไม่มี shared primitive (audit ข้อ 9),
-   `project-flow.spec.ts`'s `/projects/[^/]+$` regex มีความเสี่ยงแฝงแบบเดียวกับที่เจอใน
-   Increment 8 (match คำว่า "new" ได้ด้วย) แต่ยังไม่เคยแสดงอาการจริงและไม่ได้แก้ตามสโคป — ควรพิจารณา
-   แก้พร้อมกันถ้ามีโอกาสแตะไฟล์นั้นอีกในอนาคต
+1. **Milestone 4**: ปิดสมบูรณ์แล้ว — commit `5a9de23`, tag `v0.4.0`, push ขึ้น `origin/main` สำเร็จ
+   ยืนยันด้วย `git ls-remote` ตรงกัน ไม่มีงานค้างของ M4 เอง
+2. **Milestone 5**: ทำครบ Increment 1-6 แล้ว (repository aggregation, response mappers, API,
+   hooks, UI/charts, tests, docs) **รอคำสั่งเริ่ม final completion audit** ของ Milestone 5 ทั้งก้อน
+   (เทียบ Architecture Proposal เดิม + Decision Point A กับโค้ดจริงทีละหัวข้อ แบบเดียวกับที่ทำก่อน
+   ปล่อย v0.3.0/v0.4.0) ก่อน commit+tag (`v0.5.0`)+push
+3. **Documentation debt เดิมที่ยังไม่แก้** (นอกสโคปทุกรอบที่ผ่านมา): `docs/setup-guide.md` ขาด
+   `pnpm test:integration` ในตาราง (ตั้งแต่ M2), 16 แถวกำพร้าใน `AuditLog` ของ dev database (เศษจาก
+   manual verification ของ M4 Increment 6 ไม่กระทบอะไร)
+4. (นอกขอบเขต — พิจารณาแยกทีหลัง เหมือนเดิมทุกข้อ) ThemeToggle hydration mismatch (M2), tag
+   `v0.1.0` ยังไม่ push, ชื่อโปรเจกต์ "Orbit" vs "TeamFlow" ที่เคยพูดถึงครั้งเดียว, ownership-transfer
+   action, TOCTOU race บน uniqueness check, project detail page container กว้างไม่พอสำหรับ Kanban
+   บนจอใหญ่, ยังไม่มี mobile list-view สำหรับ board, ยังไม่มี Delete Issue UI (`useDeleteIssue` hook
+   ยังไม่ถูกใช้ที่ไหนเลยตามที่ตั้งใจ), `issueRepository.findByProjectAndNumber` ไม่มีใครเรียก
+   (ตั้งใจ), `DELETE /api/issues/[issueId]` ยังไม่เปลี่ยนไปใช้ `requireWorkspaceAccess` ตัวเดียว,
+   `<select>` styling ซ้ำข้าม M3+M4 ยังไม่มี shared primitive, `project-flow.spec.ts`'s
+   `/projects/[^/]+$` regex มีความเสี่ยงแฝงเดียวกับที่เจอใน M4 Increment 8 แต่ยังไม่เคยแสดงอาการจริง,
+   trend/velocity chart ถูก defer ทั้งหมดใน M5 (Decision Point A1) — `IssueStatusChange` history
+   table เป็นทางเปิดสำหรับ milestone ในอนาคตถ้าต้องการข้อมูลนี้จริง

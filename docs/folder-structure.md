@@ -126,7 +126,11 @@ be scaffolding ahead of need). `issue.repository.ts`'s `create()` wraps two
 statements in `prisma.$transaction` (increment `Project.issueCounter`, then
 insert the `Issue` with that number) rather than the nested-create pattern
 `workspaceRepository.createWithOwner` uses, since the `Project` here
-already exists rather than being created in the same call.
+already exists rather than being created in the same call. Milestone 5
+added five aggregation methods here (`countByStatus`/`countByPriority`
+scoped to a project, and their `...ForWorkspace` counterparts scoped
+across a whole workspace) rather than a new `analyticsRepository` — see
+`architecture.md`'s "Dashboard & Analytics" section for why.
 
 ## `constants/`
 
@@ -138,6 +142,34 @@ locked in `globals.css` since the Phase 3 UI/UX doc, referenced via inline
 `style` (not a Tailwind class) because the color is chosen dynamically per
 issue — Tailwind's JIT compiler can't pick up a class name built from
 string interpolation.
+
+## `features/analytics/` (Milestone 5)
+
+Same shape as `features/workspace/`/`features/issue/`, but read-only —
+no `schemas/` folder, since every endpoint is a `GET` with no request
+body to validate:
+
+- `hooks/` — `use-workspace-analytics-overview.ts` (also declares the
+  shared `IssueBreakdownResponse` type, since the workspace and project
+  overview endpoints return the identical shape),
+  `use-project-analytics-overview.ts` (imports that same type rather than
+  redeclaring it), `use-workspace-workload.ts`. All three are
+  query-only — no mutations, no `invalidateQueries` wiring from other
+  features' hooks (see `architecture.md`'s "Dashboard & Analytics"
+  section for why that's deliberate).
+- `components/` — `status-breakdown-chart.tsx`/`priority-breakdown-chart.tsx`
+  (generic, shared between workspace and project scope),
+  `workload-chart.tsx` (workspace-scope only), and two orchestrators that
+  call the hooks and handle loading/empty/error states:
+  `workspace-analytics-section.tsx` (mounted on the workspace dashboard
+  page) and `project-analytics-summary.tsx` (mounted on the project
+  detail page).
+- `issue-breakdown-response.ts`/`workload-response.ts` — one mapper per
+  response shape, same rule as every other feature module's
+  `*-response.ts` files. Both are pure functions with no Prisma access;
+  the aggregation itself happens in `issueRepository` (see
+  `repositories/issue/` above, which this milestone extended rather than
+  splitting into a new `analyticsRepository`).
 
 ## `components/ui/textarea.tsx` (Milestone 4)
 
