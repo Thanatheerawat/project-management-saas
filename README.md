@@ -1,21 +1,35 @@
 # Orbit
 
+[![CI](https://github.com/Thanatheerawat/project-management-saas/actions/workflows/ci.yml/badge.svg)](https://github.com/Thanatheerawat/project-management-saas/actions/workflows/ci.yml)
+
 Project & issue tracker for software teams — Linear/Jira-style board with a
 free-tier AI copilot for task breakdown. Built as a portfolio project for
 Full Stack Software Engineer applications.
 
-**Status: Milestone 6 (Admin Dashboard) code-complete, not yet
-committed.** Milestones 2 (Identity & Access Management), 3 (Workspace &
-Project Management Core), 4 (Task Management Core / Issue Tracking), and
-5 (Dashboard & Analytics) are committed, tagged, and pushed (`v0.2.0`,
-`v0.3.0`, `v0.4.0`, `v0.5.0`). Milestone 6 adds a platform-wide admin
-dashboard — system overview, workspace/user management, an audit log
-viewer, and DB-reachability health monitoring — implemented and covered
-by unit, integration, and e2e tests, but still awaiting the final
-review/commit/tag (`v0.6.0`) pass. See
-[docs/session-log.md](./docs/session-log.md) for full history.
+**🔗 Live Demo:** _Not yet deployed — a hosted demo link will go here._
+<!-- Once deployed on Vercel: **[orbit-demo.vercel.app](https://orbit-demo.vercel.app)** -->
+
+**Status: Milestone 6 (Admin Dashboard) shipped.** Milestones 2 (Identity &
+Access Management), 3 (Workspace & Project Management Core), 4 (Task
+Management Core / Issue Tracking), 5 (Dashboard & Analytics), and 6 (Admin
+Dashboard) are all committed, tagged, and pushed (`v0.2.0`–`v0.6.0`). See
+[docs/session-log.md](./docs/session-log.md) for the full decision-by-decision
+history and [CHANGELOG.md](./CHANGELOG.md) for the release-by-release summary.
+
+## Screenshots
+
+_Coming soon._
+
+<!--
+| Kanban Board | Analytics Dashboard | Admin Dashboard |
+| --- | --- | --- |
+| ![Kanban board](./docs/screenshots/kanban-board.png) | ![Analytics dashboard](./docs/screenshots/analytics-dashboard.png) | ![Admin dashboard](./docs/screenshots/admin-dashboard.png) |
+-->
 
 ## Features
+
+Six milestones, each covered end to end by unit, integration, and e2e tests
+(307 tests total as of `v0.6.0`):
 
 - **Identity & Access** — register/login/logout, password reset, mock
   email verification, profile settings, platform-level RBAC
@@ -43,6 +57,28 @@ review/commit/tag (`v0.6.0`) pass. See
 Next.js (App Router) · TypeScript · Tailwind CSS · shadcn/ui · Prisma 7 ·
 PostgreSQL (Neon, via driver adapter) · next-auth v4 · TanStack Query ·
 Zustand · Recharts · Groq (AI, free tier, mock-switchable) · Vercel
+
+## Project Structure
+
+Condensed view — see [Folder Structure](./docs/folder-structure.md) for the
+full breakdown and the reasoning behind every folder.
+
+```
+src/
+├── app/           # Routing only: pages, layouts, Route Handlers (incl. /admin)
+├── features/      # Domain modules: auth, workspace, project, issue, analytics, admin
+│   └── <feature>/ #   schemas/ (zod) · hooks/ (TanStack Query) · components/ · *-response.ts
+├── repositories/  # The only layer allowed to call Prisma directly
+├── components/
+│   ├── ui/        # Generic design-system primitives (shadcn/ui)
+│   └── layout/    # Navbar, Sidebar, Breadcrumb, PageContainer
+├── lib/           # Cross-cutting helpers (prisma client, rbac, pagination, ...)
+└── middleware.ts  # Auth-only route protection (role checks happen deeper)
+
+tests/
+├── integration/   # Route Handler tests against the real database (Vitest)
+└── e2e/           # Full-browser tests against a production build (Playwright)
+```
 
 ## Docs
 

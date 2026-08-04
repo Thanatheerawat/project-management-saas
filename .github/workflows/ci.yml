@@ -1,0 +1,68 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  quality-gate:
+    name: Lint, Typecheck, Build & Test
+    runs-on: ubuntu-latest
+    env:
+      # Required by src/config/env.ts (validated eagerly on import, so
+      # `pnpm build` and `pnpm test:integration` both fail without them —
+      # `pnpm lint`/`pnpm typecheck`/`pnpm test` are pure static analysis
+      # and don't need these, but the values are scoped to the whole job
+      # for simplicity). Set both as repository secrets before this
+      # workflow can pass:
+      #   - DATABASE_URL: a Neon Postgres connection string
+      #   - NEXTAUTH_SECRET: 32+ chars, e.g. `openssl rand -base64 32`
+      DATABASE_URL: ${{ secrets.DATABASE_URL }}
+      NEXTAUTH_SECRET: ${{ secrets.NEXTAUTH_SECRET }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 11
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      # Prisma 7's generated client (src/generated/prisma) is gitignored —
+      # every consumer regenerates it locally, same as the setup guide's
+      # own Quick Start steps.
+      - name: Generate Prisma client
+        run: pnpm prisma generate
+
+      - name: Lint
+        run: pnpm lint
+
+      - name: Typecheck
+        run: pnpm typecheck
+
+      - name: Build
+        run: pnpm build
+
+      - name: Unit tests
+        run: pnpm test
+
+      # Runs against the real database behind DATABASE_URL (this project
+      # has no local/containerized Postgres — the Neon HTTP driver adapter
+      # is what src/lib/prisma.ts uses everywhere, including in tests).
+      # Each test cleans up the rows it creates, but a dedicated Neon
+      # branch for CI (rather than reusing the local dev database) is
+      # recommended to keep CI runs fully isolated from local development.
+      - name: Integration tests
+        run: pnpm test:integration
