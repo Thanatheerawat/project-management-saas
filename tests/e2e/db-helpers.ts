@@ -9,6 +9,7 @@ const CLEANUP_WORKSPACE_SCRIPT = path.resolve(
   __dirname,
   "./scripts/delete-test-workspace.ts",
 );
+const PROMOTE_SCRIPT = path.resolve(__dirname, "./scripts/promote-user.ts");
 
 let counter = 0;
 
@@ -48,6 +49,22 @@ export async function deleteTestUser(email: string): Promise<void> {
 // delete while they still own a project.
 export async function deleteTestWorkspace(slug: string): Promise<void> {
   await execAsync(`pnpm exec tsx "${CLEANUP_WORKSPACE_SCRIPT}" "${slug}"`, {
+    cwd: PROJECT_ROOT,
+  });
+}
+
+// Register only ever creates PlatformRole "USER" — Milestone 6's admin
+// dashboard e2e coverage needs ADMIN/SUPER_ADMIN accounts, which requires
+// going through Prisma directly (same tsx-subprocess reasoning as the
+// other helpers in this file). The caller still has to sign the promoted
+// account out and back in afterward — the JWT bakes `role` in at sign-in
+// (auth.config.ts's jwt callback), so it won't pick up the change until
+// the next login.
+export async function promoteUser(
+  email: string,
+  role: "ADMIN" | "SUPER_ADMIN",
+): Promise<void> {
+  await execAsync(`pnpm exec tsx "${PROMOTE_SCRIPT}" "${email}" "${role}"`, {
     cwd: PROJECT_ROOT,
   });
 }

@@ -249,13 +249,148 @@ elapses), not instantly after an edit elsewhere. This is the same
 "documented trade-off, not an oversight" discipline already used for the
 WebSocket/queue decision earlier in this file.
 
+## Admin Dashboard (Milestone 6)
+
+The first real consumer of `PlatformRole` (`hasRole`/`requireRole`,
+`src/lib/auth/rbac.ts`) since it was built in Milestone 2 — no route had
+ever called it before this milestone, `AuditLog` had recorded every
+action since Milestone 2 with no UI ever reading it back, and
+`User.isActive` had never been toggled from anywhere but a direct
+database edit. All three become real for the first time here. **No
+schema or migration changes** — the entire milestone is a new
+platform-wide view over data that already existed.
+
+**Repository extension, not a new `adminRepository`.** Five existing
+repositories (`userRepository`, `workspaceRepository`, `projectRepository`,
+`issueRepository`, `auditLogRepository`) each gained a handful of
+platform-wide methods (`findManyForAdmin`/`countAll`/`findByIdForAdmin`,
+plus `updateRole`/`updateActive` on `userRepository`, plus
+`countByStatusGlobal`/`countByPriorityGlobal` on `issueRepository` —
+identical to their `...ForWorkspace` Milestone 5 counterparts, just
+without a `where` clause) instead of centralizing every admin query into
+one new file, consistent with the "one file per model" rule
+`repositories/` has followed since Milestone 3. The one genuine
+exception is `repositories/system/health.repository.ts` — a
+single-method (`ping()`) file that isn't a Milestone 6 model repository
+at all, but exists to keep `prisma.$queryRaw("SELECT 1")` inside
+`repositories/` per the strict "no `prisma.*` outside `repositories/`"
+rule, since a raw connectivity check isn't a query against any of the
+five admin models. Flagged and approved explicitly during Increment 4,
+not a silent addition.
+
+**Response mappers reuse Milestone 5's aggregation shape directly.**
+`GET /api/admin/overview` feeds `countByStatusGlobal`/
+`countByPriorityGlobal` straight into the _existing_
+`toIssueBreakdownResponse` (`features/analytics/issue-breakdown-response.ts`)
+unmodified — the global and per-workspace grouped-count shapes are
+identical, so no new admin-specific chart-data mapper was needed. Three
+new mappers in `features/admin/` cover what Milestone 5 has no
+equivalent for: `toAdminUserListItemResponse`/`toAdminUserDetailResponse`
+(never spread the full `User` row — same `passwordHash`-safety discipline
+as every mapper in this codebase), and `toAdminWorkspaceResponse` — one
+function shared by both the list and detail endpoint, since the admin
+dashboard is deliberately read-only for workspaces this milestone
+(Decision Point D1 below), so there's no detail-only field to justify a
+second function.
+
+**Decision Points (full detail and rationale in `docs/session-log.md`,
+Milestone 6 proposal):**
+
+- **A2** — a caller below `ADMIN` visiting `/admin` gets `redirect("/profile")`,
+  not `notFound()`. This is the one deliberate departure from the
+  enumeration-safe 404 pattern used everywhere else in this app (see
+  "Two independent RBAC tiers" above): `/admin` has no ambiguity to
+  protect — a plain `USER` already knows the platform has an admin area,
+  unlike `/w/[slug]` where hiding whether a specific workspace exists is
+  the entire point.
+- **B1** — plain offset/limit pagination (`src/lib/pagination.ts`'s
+  `parsePagination()`), fixed `pageSize` of 20, no cursor-based paging —
+  the first pagination this app has needed anywhere, kept as simple as
+  the rest of the codebase's bias toward "the simplest thing that works."
+  Shared by all three paginated endpoints (workspaces, users, audit log)
+  so the parsing rule lives in exactly one place.
+- **C2+C3** — only `SUPER_ADMIN` may change another user's `role`; a
+  plain `ADMIN` can still change `isActive`. Self-role-change and
+  self-deactivation are both rejected with `400`, not `403` — this isn't
+  a privilege gap, it's a rule that applies regardless of privilege
+  (mirrors Milestone 4's `invalid_assignee` reasoning and Milestone 3's
+  "Owner is immutable" guard one tier up).
+- **D1** — the admin dashboard is **read-only for workspaces** this
+  milestone: no delete, no suspend. Deleting a workspace remains
+  something only its `OWNER` can do from inside the workspace itself, as
+  since Milestone 3.
+- **E1** — health monitoring is a DB-reachability check only
+  (`healthRepository.ping()` — `SELECT 1`, timed, never throws), not a
+  full ops dashboard. Vercel's serverless functions have no long-lived
+  process to report CPU/memory/uptime on, so anything beyond "can we
+  reach Postgres right now" would be fabricated.
+
+**Route segment and RBAC gate.** `/admin` is a new top-level segment,
+structurally the same choice as `w/[slug]` in Milestone 3: its own
+`layout.tsx` (not nested under `(dashboard)`, which renders a different
+Navbar) checks `hasRole(session.user.role, "ADMIN")` once and either
+lets the request through or redirects per Decision A2. `middleware.ts`
+only extends _which paths_ require a session (`/admin` added to
+`PROTECTED_PREFIXES`) — it still never checks `role`, the same
+auth-only-in-middleware rule established for `/w` in Milestone 3, so
+there remains exactly one place that decides platform-role
+authorization: the layout, and independently, every `/api/admin/*`
+route's own `requireRole` call. A conditional "Admin" link was added to
+both existing chrome layouts (`(dashboard)/layout.tsx`, `w/[slug]/layout.tsx`)
+— UX only, gated on the same `hasRole` check; the server/API remain the
+real authorization layer regardless of what the UI shows.
+
+**Query strategy is the tightest `staleTime` in the app, and the first
+polling hook.** Every admin read hook uses a 30 second `staleTime` (M5's
+analytics hooks use 60s) — an operator surface where an admin acting on
+stale data (a just-deactivated user still showing active) is a worse
+failure mode than the extra requests a shorter `staleTime` costs.
+`useAdminHealth` is the first hook in the app to use `refetchInterval`
+(30s, `staleTime` 10s) — every other query in this codebase relies on
+`staleTime`/manual invalidation alone. `useUpdateAdminUser` invalidates
+immediately on success (`["admin-user", userId]` exact +
+`["admin-users"]` prefix, covering every cached page/email-filter
+variant at once) rather than relying on `staleTime`, since it's an
+operator action on someone else's account that must be reflected right
+away — the opposite trade-off from Milestone 5's analytics dashboard,
+which deliberately does _not_ invalidate on issue/label mutations
+elsewhere in the app.
+
+**UI is 6 pages, 8 components, explicitly no new abstractions.**
+`/admin`, `/admin/workspaces` (+`/[workspaceId]`), `/admin/users`
+(+`/[userId]`), `/admin/audit-log` — every page is a thin Server
+Component (no repository calls, unlike most pages in this app) that
+passes `params`/session-derived props to a Client Component that owns
+all data-fetching via the Increment 5 hooks. No `DataTable` abstraction
+and no new UI library were introduced by explicit instruction — the
+three list components (`AdminWorkspaceList`/`AdminUserList`/
+`AdminAuditLogList`) each repeat the same loading/empty/error ternary
+inline rather than sharing a wrapper, an accepted cost of that
+constraint. `PaginationControls` (Prev/Next + "Page X of Y", no
+page-number input, per Decision B1) is the one genuinely shared piece,
+used by all three. There is deliberately **no cross-section navigation**
+between the four top-level admin pages this milestone (no sidebar, no
+tab bar) — `/admin` only links out via the single Navbar entry point;
+reaching `/admin/workspaces`/`/admin/users`/`/admin/audit-log` directly
+requires a URL, accepted explicitly rather than building nav ahead of a
+UI-hierarchy decision that hasn't been made yet.
+
+**Testing.** The first integration coverage of `PlatformRole` against
+real routes (RBAC verified across all three roles × all 8 endpoints, plus
+the C2+C3 business rules, pagination, and both filter types) and the
+first e2e coverage of a `SUPER_ADMIN`/`ADMIN` account (promoted directly
+via Prisma in test setup, since `register()` only ever creates `USER` —
+`tests/e2e/scripts/promote-user.ts`), including a real deactivate-then-
+login-fails round trip through the actual credentials provider.
+
 ## Current state
 
 Milestone 2 (Identity & Access Management), Milestone 3 (Workspace &
-Project Management Core), Milestone 4 (Issue Tracking Core), and
-Milestone 5 (Dashboard & Analytics) are all implemented and covered by
-unit, integration, and e2e tests. See the root [README.md](../README.md)
-and [session-log.md](./session-log.md) for exact scope and what's still
-designed-but-not-built (AI copilot, GitHub integration, drag-and-drop,
-activity feed, trend/velocity charts — later milestones/deferred
-decisions per the Development Plan).
+Project Management Core), Milestone 4 (Issue Tracking Core), Milestone 5
+(Dashboard & Analytics), and Milestone 6 (Admin Dashboard) are all
+implemented and covered by unit, integration, and e2e tests. See the
+root [README.md](../README.md) and [session-log.md](./session-log.md)
+for exact scope and what's still designed-but-not-built (AI copilot,
+GitHub integration, drag-and-drop, activity feed, trend/velocity
+charts, admin nav/sidebar — later milestones/deferred decisions per the
+Development Plan).

@@ -1,5 +1,6 @@
 import type { Session } from "next-auth";
 
+import type { PlatformRole } from "@/generated/prisma/client";
 import { prisma } from "@/lib/prisma";
 
 let counter = 0;
@@ -8,9 +9,12 @@ let counter = 0;
 // @/lib/auth/auth (see profile-and-me.integration.test.ts for why: the
 // route handlers read the session via getServerSession, which needs a real
 // Next.js request context a plain Vitest call can't provide).
-export function sessionFor(userId: string): Session {
+// `role` defaults to "USER" — every pre-Milestone-6 call site omits it and
+// keeps its exact prior behavior; the admin integration suite is the first
+// caller to pass "ADMIN"/"SUPER_ADMIN" explicitly.
+export function sessionFor(userId: string, role: PlatformRole = "USER"): Session {
   return {
-    user: { id: userId, role: "USER" },
+    user: { id: userId, role },
     expires: new Date(Date.now() + 3600_000).toISOString(),
   };
 }

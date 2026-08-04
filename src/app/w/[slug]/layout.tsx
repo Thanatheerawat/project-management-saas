@@ -1,12 +1,15 @@
+import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 
 import { Navbar } from "@/components/layout/navbar";
 import { PageContainer } from "@/components/layout/page-container";
 import { ThemeToggle } from "@/components/layout/theme-toggle";
+import { Button } from "@/components/ui/button";
 import { UserMenu } from "@/features/user/components/user-menu";
 import { WorkspaceSidebar } from "@/features/workspace/components/workspace-sidebar";
 import { WorkspaceSwitcher } from "@/features/workspace/components/workspace-switcher";
 import { auth } from "@/lib/auth/auth";
+import { hasRole } from "@/lib/auth/rbac";
 import { resolveWorkspaceForRequest } from "@/lib/auth/workspace-membership";
 
 // Deliberately NOT nested under (dashboard) — that group's layout.tsx
@@ -33,12 +36,22 @@ export default async function WorkspaceLayout({
   // exists to someone who isn't in it.
   if (!resolved) notFound();
 
+  // Milestone 6 Increment 4: UX-only — shows the "Admin" link for
+  // ADMIN/SUPER_ADMIN. Real authorization still lives in
+  // `app/admin/layout.tsx` and every `/api/admin/*` route.
+  const isAdmin = hasRole(session.user.role, "ADMIN");
+
   return (
     <div className="flex min-h-screen flex-col">
       <Navbar
         brand={<WorkspaceSwitcher name={resolved.workspace.name} />}
         actions={
           <>
+            {isAdmin && (
+              <Button variant="ghost" size="sm" asChild>
+                <Link href="/admin">Admin</Link>
+              </Button>
+            )}
             <ThemeToggle />
             <UserMenu />
           </>

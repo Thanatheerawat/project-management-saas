@@ -56,4 +56,10 @@ export const projectRepository = {
   delete(id: string) {
     return prisma.project.delete({ where: { id } });
   },
+
+  // Milestone 6: Admin Dashboard's system-overview stat card — a plain
+  // platform-wide count, no workspace scope.
+  countAll() {
+    return prisma.project.count();
+  },
 };

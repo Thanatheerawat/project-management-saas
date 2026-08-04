@@ -5,6 +5,114 @@ All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.6.0] - 2026-08-04 - Milestone 6: Admin Dashboard
+
+A platform-wide admin dashboard — the first real consumer of
+`PlatformRole` RBAC (`hasRole`/`requireRole`, built in Milestone 2, never
+called from a route until now), the first UI ever built to read
+`AuditLog` (recording since Milestone 2), and the first place
+`User.isActive` can be toggled from anywhere but a direct database edit.
+No schema or migration changes — every metric and record already
+existed. Reuses Milestone 5's aggregation pattern and
+`toIssueBreakdownResponse` directly for the overview's issue counts.
+Built and approved strictly increment-by-increment (9 increments plus a
+full pre-documentation repository audit), migrated on Neon and fully
+verified: unit, integration (the first `PlatformRole` RBAC boundary
+suite against real routes), and Playwright e2e tests including a real
+deactivate-then-login-fails round trip. See `docs/session-log.md` for
+the full history, including all five Decision Points.
+
+### Added
+
+- Repository extensions (no new `adminRepository`): `userRepository`
+  (`findManyForAdmin`/`countAll`/`findByIdForAdmin`/`updateRole`/
+  `updateActive`), `workspaceRepository`/`projectRepository`
+  (`findManyForAdmin`/`countAll`/`findByIdForAdmin`),
+  `issueRepository` (`countByStatusGlobal`/`countByPriorityGlobal`,
+  the unscoped counterparts of Milestone 5's `...ForWorkspace` methods),
+  `auditLogRepository` (`findMany`/`countAll` — the table's first read
+  access since Milestone 2). One deliberate exception:
+  `repositories/system/health.repository.ts` (`ping()`), needed to keep
+  `prisma.$queryRaw` inside `repositories/` for a check that isn't a
+  query against any of the five admin models — flagged and approved
+  explicitly, not a silent addition
+- Response mappers (`features/admin/`): `toAdminUserListItemResponse`/
+  `toAdminUserDetailResponse`, `toAdminWorkspaceResponse` (one function
+  shared by list and detail, since the dashboard is read-only for
+  workspaces this milestone). Reuses `toIssueBreakdownResponse`
+  (Milestone 5) verbatim for the overview endpoint
+- `src/lib/pagination.ts` — `parsePagination()`, offset/limit pagination
+  with a fixed `pageSize` of 20 (Decision Point B1), the first
+  pagination this app has needed anywhere
+- API (8 endpoints, all `ADMIN`+ unless noted): `GET /api/admin/overview`,
+  `GET /api/admin/workspaces` (+pagination), `GET
+/api/admin/workspaces/[id]`, `GET /api/admin/users`
+  (+pagination+email filter), `GET`/`PATCH /api/admin/users/[id]`
+  (role change requires `SUPER_ADMIN`; self-role-change and
+  self-deactivation rejected with `400` regardless of privilege —
+  Decision Points C2+C3), `GET /api/admin/audit-log`
+  (+pagination+action filter), `GET /api/admin/health`
+  (DB-reachability only — Decision Point E1)
+- `middleware.ts`: `/admin` added to the protected-path list, auth-only
+  (no role check — same rule as `/w` since Milestone 3); `app/admin/layout.tsx`
+  does the actual `PlatformRole` gate, `redirect("/profile")` for a
+  non-admin rather than `notFound()` (Decision Point A2 — `/admin` has no
+  enumeration concern to protect, unlike `/w/[slug]`)
+- TanStack Query hooks (`features/admin/hooks/`, 8 files):
+  `useAdminOverview`, `useAdminWorkspaces`/`useAdminWorkspace`,
+  `useAdminUsers`/`useAdminUser`, `useAdminAuditLog`, `useAdminHealth`
+  (the app's first polling hook — `refetchInterval` 30s), and
+  `useUpdateAdminUser` (invalidates immediately on success, not
+  `staleTime`-based). 30s `staleTime` across the board (tighter than
+  Analytics' 60s — an operator surface where stale data is a worse
+  failure mode than extra requests)
+- UI: 6 pages under `app/admin/` (overview, workspaces list/detail,
+  users list/detail, audit log), 8 components under
+  `features/admin/components/` including a reused
+  `StatusBreakdownChart`/`PriorityBreakdownChart` and a shared
+  `PaginationControls` (Prev/Next + "Page X of Y", no page-number
+  input). No `DataTable` abstraction, no new UI library, no
+  cross-section admin navigation this milestone — deep-link only,
+  accepted explicitly rather than building nav ahead of a UI-hierarchy
+  decision
+- Unit tests: `updateAdminUserSchema`, `parsePagination` — every
+  branch of its page-number validation (15 new, 77 total, `pnpm test`)
+- Integration tests: RBAC verified across all three `PlatformRole`s ×
+  all 8 endpoints, business rules (self-role-change/self-deactivation
+  400, `ADMIN` blocked from role changes, `SUPER_ADMIN` permitted,
+  `ADMIN` permitted for `isActive`), pagination + email filtering
+  against a controlled 22-user set, audit action filtering, a
+  `passwordHash`-leak guard on the user list response (18 new, 154
+  total, `pnpm test:integration`)
+- Playwright e2e: `admin-dashboard.spec.ts` — `SUPER_ADMIN` (overview
+  stats/charts, workspaces, users, audit log, deactivate a user,
+  confirmed by that user's next login attempt genuinely failing),
+  `ADMIN` (read access, role-change denied in both the UI and the API),
+  `USER` (`/admin` → `/profile` redirect) (10 new, 76 total,
+  `pnpm test:e2e`); `tests/e2e/scripts/promote-user.ts` added since
+  `register()` only ever creates `PlatformRole` `"USER"`
+
+### Verification
+
+- No schema or migration changes this milestone
+- A full repository-wide audit (duplicate/dead code, unused exports,
+  `any` usage, RBAC/auth coverage, repository-layer violations, mapper/
+  pagination/query-key consistency, invalidation correctness,
+  architecture consistency with Milestones 2-5) ran before documentation
+  — clean, nothing found that blocked release
+- Quality gate green end to end: `lint`, `typecheck`, `build`, `test`,
+  `test:integration`, `test:e2e` (the last run against a production
+  build and confirmed stable across two consecutive full-suite runs)
+- One e2e flake investigated during development (a strict-mode "2
+  elements match" error under full 76-test/12-worker parallel load,
+  never reproduced in isolation) — hardened by waiting for the target
+  page to settle before interacting post-navigation, then confirmed
+  stable, per this project's standing rule that a failure must
+  reproduce deterministically under a production build to count as a
+  real bug rather than flakiness
+- No new dependencies — zero changes to `package.json`/`pnpm-lock.yaml`
+  throughout the entire milestone
+
 ## [0.5.0] - 2026-08-04 - Milestone 5: Dashboard & Analytics
 
 A workspace dashboard and per-project analytics summary on top of the

@@ -32,4 +32,37 @@ export const workspaceRepository = {
   delete(id: string) {
     return prisma.workspace.delete({ where: { id } });
   },
+
+  // --- Milestone 6: Admin Dashboard --------------------------------
+  // Platform-wide (every workspace that exists), unlike
+  // findManyForUser/findBySlug above which are always scoped to "the
+  // current user" or "a specific known slug." Includes member/project
+  // counts and the OWNER's user row so the admin list/detail views don't
+  // need N+1 follow-up queries per workspace.
+
+  findManyForAdmin({ skip, take }: { skip: number; take: number }) {
+    return prisma.workspace.findMany({
+      skip,
+      take,
+      orderBy: { createdAt: "desc" },
+      include: {
+        _count: { select: { members: true, projects: true } },
+        members: { where: { role: "OWNER" }, include: { user: true } },
+      },
+    });
+  },
+
+  countAll() {
+    return prisma.workspace.count();
+  },
+
+  findByIdForAdmin(id: string) {
+    return prisma.workspace.findUnique({
+      where: { id },
+      include: {
+        _count: { select: { members: true, projects: true } },
+        members: { where: { role: "OWNER" }, include: { user: true } },
+      },
+    });
+  },
 };

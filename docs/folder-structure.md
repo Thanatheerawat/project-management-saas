@@ -171,6 +171,68 @@ body to validate:
   `repositories/issue/` above, which this milestone extended rather than
   splitting into a new `analyticsRepository`).
 
+## `app/admin/` and `features/admin/` (Milestone 6)
+
+`app/admin/` is a new top-level segment, the same structural choice as
+`app/w/[slug]/` in Milestone 3: its own `layout.tsx` (not nested under
+`(dashboard)`, which renders a different Navbar) does the `PlatformRole`
+gate once per request. Pages: `page.tsx` (overview), `workspaces/page.tsx`
+
+- `workspaces/[workspaceId]/page.tsx`, `users/page.tsx` +
+  `users/[userId]/page.tsx`, `audit-log/page.tsx` — six total, each a thin
+  Server Component with no repository calls (unlike most pages in this
+  app), since Increment 6 was explicitly scoped to "hooks only" for data.
+
+`features/admin/` follows the same shape as `features/analytics/` (no
+`schemas/` folder except the one PATCH endpoint that needs one) plus a
+`hooks/` folder sized like `features/issue/`'s:
+
+- `admin-user-response.ts`, `admin-workspace-response.ts`,
+  `audit-log-response.ts` — one mapper file per resource, same rule as
+  every other feature module. `toIssueBreakdownResponse` from
+  `features/analytics/` is reused unmodified for the overview endpoint's
+  issue counts rather than duplicated here.
+- `schemas/update-admin-user.schema.ts` — the only schema this feature
+  needs, since every other admin endpoint is a read-only `GET`.
+- `hooks/` — 8 files, one per query/mutation, same one-hook-per-file
+  convention as every other feature: `use-admin-overview`,
+  `use-admin-workspaces`/`use-admin-workspace`, `use-admin-users`/
+  `use-admin-user`, `use-admin-audit-log`, `use-admin-health`, and the
+  one mutation, `use-update-admin-user`. `use-admin-workspaces.ts` also
+  declares the shared `PaginatedResponse<T>` generic (the first
+  pagination this app has needed), imported by the other two paginated
+  list hooks rather than redeclared — the same "declare once, import
+  elsewhere" pattern `IssueBreakdownResponse` already established in
+  Milestone 5.
+- `components/` — 8 files: `stat-card.tsx` (the first plain
+  "label + big number" tile in the app), `admin-overview-section.tsx`
+  (stat tiles + the reused `StatusBreakdownChart`/`PriorityBreakdownChart`
+  - a health panel with its own two-state failure UI),
+    `pagination-controls.tsx` (Prev/Next + "Page X of Y", shared by all
+    three paginated list components — the one genuinely shared UI piece;
+    no `DataTable` abstraction was built, by explicit instruction),
+    `admin-workspace-list.tsx`/`admin-workspace-detail.tsx`,
+    `admin-user-list.tsx`/`admin-user-detail.tsx` (the role-change and
+    isActive-toggle controls, both UX-only guards backed by real
+    server-side enforcement — see `architecture.md`), `admin-audit-log-list.tsx`.
+
+`repositories/system/health.repository.ts` is the one file in this
+milestone that isn't a `features/admin/`-adjacent model repository — see
+`architecture.md`'s "Admin Dashboard" section for why it exists and why
+it isn't the `adminRepository` the Milestone 6 proposal explicitly ruled
+out.
+
+`src/lib/pagination.ts` — `parsePagination()`, the shared offset/limit
+parser for all three paginated admin endpoints (Decision Point B1). Lives
+in `lib/`, not `features/admin/`, since nothing about it is admin-specific;
+any future paginated list endpoint can reuse it directly.
+
+`tests/e2e/scripts/promote-user.ts` — a standalone script (same
+tsx-subprocess pattern as `delete-test-user.ts`/`delete-test-workspace.ts`)
+that promotes a test account's `PlatformRole` directly via Prisma, since
+`register()` only ever creates `USER` and Milestone 6 is the first
+milestone that needs `ADMIN`/`SUPER_ADMIN` test accounts.
+
 ## `components/ui/textarea.tsx` (Milestone 4)
 
 The first multi-line text input the app has needed — hand-built (not

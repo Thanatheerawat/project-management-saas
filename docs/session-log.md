@@ -18,40 +18,40 @@ Tailwind v4 + shadcn/ui (Radix) + Prisma 7 (ผ่าน `@prisma/adapter-neon`,
 (server state) + Zustand (client/UI state เท่านั้น) + Vercel — รายละเอียดเหตุผลทั้งหมดอยู่ใน
 `docs/adr/`
 
-**สถานะตอนนี้ (ล่าสุด)**: Foundation (v0.1.0), Milestone 2 (v0.2.0, commit `1e9393b`), และ
-**Milestone 3 (v0.3.0, commit `83808bf`)** commit+tag+push ขึ้น GitHub สำเร็จแล้วทั้ง 3 ตัว
-(`https://github.com/Thanatheerawat/project-management-saas`, branch `main`) — `git log --oneline`
-ล่าสุด: `83808bf`(M3) → `1e9393b`(M2) → `73f6e4a`(Foundation) → `e568cb0`(scaffold)
+**สถานะตอนนี้ (ล่าสุด, อัปเดต 2026-08-04)**: Foundation (v0.1.0, commit `73f6e4a`, tag ยังไม่ push),
+Milestone 2 (v0.2.0, commit `1e9393b`), Milestone 3 (v0.3.0, commit `83808bf`), Milestone 4
+(v0.4.0, commit `5a9de23`) และ **Milestone 5 (v0.5.0, commit `c094be4`)** commit+tag+push ขึ้น
+GitHub สำเร็จแล้วทั้งหมด (`https://github.com/Thanatheerawat/project-management-saas`, branch
+`main`) — `git log --oneline` ล่าสุด: `c094be4`(M5) → `5a9de23`(M4) → `83808bf`(M3) →
+`1e9393b`(M2) → `73f6e4a`(Foundation) → `e568cb0`(scaffold)
 
-**กำลังทำ Milestone 4 (Task Management Core / Issue tracking)** แบบ incremental เข้มงวดกว่า M2/M3
-เดิม — ผู้ใช้สั่งทำทีละ increment เล็กๆ ชัดเจน "proceed with Increment N only... stop immediately...
-do NOT continue to Increment N+1" ทุกรอบ (ต่างจาก M3 ที่บางช่วงอนุมัติหลาย increment รวดเดียว)
-ทำเสร็จแล้ว **6 increment** (นับ 5A+5B แยกกัน): (1) Prisma schema + migration
-(`Issue`/`Label`/`IssueLabel`/`Comment` + `Project.key`/`issueCounter`), (2) Repository + zod
-schema + response mapper, (3) Issue API (5 endpoint), (4) Label API + Comment API +
-`IssueLabel` repository (10 endpoint), (5A) TanStack Query hooks (16 ไฟล์), (5B) Kanban board
-shell + columns + issue card (mount บนหน้า project detail เดิม ไม่สร้าง route ใหม่), (6) Create
-Issue dialog + Edit Issue UI + Status change UI + Label assignment UI + Comment UI + หน้า Issue
-detail เต็มรูปแบบ (route ใหม่ `.../issues/[issueId]`, **ไม่มี API endpoint ใหม่เลย** — ต่อกับของเดิม
-ทั้งหมด) จากนั้นทำ **Architecture & Code Audit** แบบ read-only (9 findings, ไม่มี correctness bug)
-ตามด้วย **Cleanup Pass เล็กๆ** ตามคำแนะนำของ audit: extract `resolveIssueContext()`/
-`validateAssignee()` (ลดโค้ดซ้ำ ~70 บรรทัดข้าม 8 handler) + แก้ TanStack Query cache invalidation
-ของ label attach/detach (Kanban board เคยค้าง label เก่าจนกว่า staleTime จะหมด ตอนนี้ invalidate
-ถูก query key แล้ว) จากนั้นทำ **Increment 7 (Tests)**: integration test ใหม่ 4 ไฟล์ (55 test) ครอบ
-Issue/Label/Comment/IssueLabel API ครบ + RBAC + workspace isolation + invalid assignee + duplicate
-project key + concurrency test สำหรับ atomic issue numbering (เรียก `issueRepository.create()`
-ตรงๆ พร้อมกัน 10 ครั้ง ยืนยัน `number` ไม่ซ้ำ) รวม unit 62 + integration 125 ผ่านหมด จากนั้นทำ
-**Increment 8 (Playwright e2e)**: 2 ไฟล์ใหม่ (`issue-flow.spec.ts` session เดียวครบทุก CRUD/
-status/label/comment/delete, `issue-permissions.spec.ts` 3 browser context ครอบ member invite/
-RBAC/cross-workspace) เจอบั๊กใน test เอง (URL regex match คำว่า "new" โดยไม่ตั้งใจ) แก้แล้ว
-ยืนยันเสถียรด้วย production build (`pnpm build && pnpm start`) ผ่าน **59/59 สองรอบติดกัน** —
-**ยังไม่ commit ใดๆ ของ M4 เลย** (`git status` ล่าสุดมีแต่ modified/untracked ทั้งหมด) รอการอนุมัติ
-Increment 8 ก่อนเริ่ม Increment 9 (docs)
+**Milestone 6 (Admin Dashboard) ทำเสร็จครบทั้ง 8 increment แล้ว**, แบบ increment-ต่อ-increment
+เข้มงวดเหมือน M4 ตลอดทั้งสาย — จุดเริ่มคือข้อเท็จจริงที่ตรวจเจอตอนศึกษาโค้ดก่อนเสนอ (ด้วย `grep` ไม่ใช่
+ความจำ): `requireRole`/`hasRole` (สร้างไว้ตั้งแต่ M2) ไม่เคยถูกเรียกใน route ไหนเลย, `AuditLog`
+(บันทึกมาตั้งแต่ M2) ไม่เคยมีหน้าจอไหนอ่านมันเลย, `User.isActive` (มีมาตั้งแต่ M2) ไม่เคยถูก toggle
+จาก UI ไหนเลย — M6 คือผู้ใช้งานจริงคนแรกของทั้งสามอย่างนี้ **Decision Points ทั้ง 5 ข้อ**: A2
+(non-admin → `redirect("/profile")` ไม่ใช่ `notFound()`) · B1 (offset/limit pagination ธรรมดา
+page=20 ตายตัว) · C2+C3 (เฉพาะ SUPER_ADMIN เปลี่ยน platform role ได้ + ห้ามเปลี่ยน role ตัวเอง) · D1
+(admin dashboard read-only สำหรับ workspace รอบนี้ ไม่มี delete/suspend) · E1 (health check =
+DB-reachability อย่างเดียว ไม่มี CPU/memory)
 
-**ถ้าจะทำงานต่อ**: เช็ค `git status`/`git log` จริงก่อนเชื่อไฟล์นี้ทั้งหมดเสมอ — M4 ทำแบบ
-increment-ต่อ-increment เข้มงวด (**ห้ามข้ามขั้นตอน ห้ามเริ่ม increment ถัดไปเองโดยไม่รอคำสั่ง แม้
-increment ก่อนหน้าจะผ่าน quality gate ครบก็ตาม**) ดูหัวข้อ "Milestone 4" ด้านล่างสำหรับรายละเอียด
-ทุก increment ที่ทำไปแล้ว และหัวข้อ "Next Steps" ท้ายไฟล์สำหรับสถานะล่าสุดสุด
+Increment 1-5 = repository extensions (5 repo เดิม + `health.repository.ts` ที่ approved แยกต่างหาก)
+→ response mappers (รียูส `toIssueBreakdownResponse` จาก M5 ตรงๆ) → 8 API route → middleware+
+`app/admin/layout.tsx`+Navbar link (UX only) → 8 admin hooks (staleTime 30s, `useAdminHealth` เป็น
+hook polling ตัวแรกของแอป) Increment 6 = UI ครบ 6 หน้า 8 component ไม่มี DataTable ไม่มี cross-section
+nav (accepted ไว้ชัดเจน) Increment 7 = tests ครบ unit(+15)/integration(+18, RBAC×business
+rules×pagination×filter)/e2e(+10, SUPER_ADMIN/ADMIN/USER flow เต็มรวม deactivate-then-login-fails
+จริง) Increment 8 = full repository audit (สะอาด, 20 หัวข้อ) + อัปเดตเอกสารทั้ง 5 ไฟล์ + release
+quality gate เต็มรูปแบบ — รายละเอียดทุก increment แบบเต็มอยู่ในหัวข้อ "Milestone 6" ด้านล่าง
+
+**สถานะสุดท้าย**: `lint`/`typecheck`/`build` ผ่านหมด, `test` 77/77, `test:integration` 154/154,
+`test:e2e` 76/76 (production build, สองรอบติดกัน) **ยังไม่ commit ไม่ tag ไม่ push — รอการอนุมัติ
+เท่านั้นก่อนขึ้น `v0.6.0`**
+
+**ถ้าจะทำงานต่อ**: เช็ค `git status`/`git log` จริงก่อนเชื่อไฟล์นี้ทั้งหมดเสมอ — ถ้า HEAD ยังเป็น
+`c094be4` (M5) และไฟล์ M6 ยังเป็น modified/untracked แปลว่าสถานะนี้ยังถูกต้อง แค่รอ commit/tag/push
+M6 เท่านั้น (**ห้าม commit เองโดยไม่รอคำสั่งอนุมัติชัดเจน**) ดูหัวข้อ "Milestone 6" ด้านล่างสำหรับ
+รายละเอียดทุก increment และหัวข้อ "Next Steps" ท้ายไฟล์สำหรับสถานะล่าสุดสุด
 
 ---
 
@@ -2318,24 +2318,464 @@ final completion audit + commit + tag `v0.5.0` + push
 
 ---
 
+## Milestone 5 — Final Repository Audit (ก่อน commit v0.5.0)
+
+ผู้ใช้สั่งทำ audit ล้วนๆ ตาม checklist เดิม (Repository/Prisma/Quality/Testing/Documentation/Code
+quality) **ห้ามแก้อะไร** รายงานผลอย่างเดียว
+
+**Repository/Prisma**: `git status` ตรงตามคาด (9 modified + 5 untracked ตรงกับที่ตรวจไว้แล้วตอน
+Increment 6) `git diff HEAD -- prisma/` **ว่างเปล่าสนิท** ยืนยันไม่มี schema/migration เปลี่ยนเลยตลอด
+ทั้ง milestone (ตรงตาม Decision Point A1) `prisma generate` ✅ `prisma migrate status` ✅ ไม่พบ
+temp/debug file ใดๆ
+
+**Quality/Testing**: `lint`/`typecheck`/`build` ✅ ทั้งหมด `test` (unit) ✅ 62/62 `test:integration`
+✅ 136/136 `test:e2e` ✅ **66/66 สองรอบติดกัน** (production build)
+
+**พบ 2 แถวกำพร้าใหม่ใน `VerificationToken`** (`analytics-tester@example.com`,
+`dom-inspector@example.com`, หมดอายุ 2026-08-04) — ต่างจาก 16 แถวกำพร้าใน `AuditLog` ที่เจอตอน audit
+M4 (ของเก่า วันที่ 2026-07-29 ไม่เปลี่ยน) อันนี้เป็นของใหม่จาก **manual verification ของตัวเองระหว่าง
+Increment 4/5 ของ M5** — สคริปต์ cleanup ชั่วคราวตอนนั้นลบ User/Workspace ไปแล้วแต่ไม่ได้ลบ
+`VerificationToken` ด้วย (ตารางนี้ไม่มี FK ไป User เลย คีย์ด้วย email ตรงๆ ตามที่ `deleteTestUser` ใน
+`helpers.ts` จัดการแยกต่างหากอยู่แล้ว — สคริปต์ manual ของฉันเองไม่ได้ทำแบบเดียวกัน) เป็นการบันทึกไว้
+ตรงไปตรงมาว่าเป็นความหย่อนของตัวเองรอบนี้ ไม่ใช่บั๊กโค้ด — จัดเป็น **Recommended** (ไม่ใช่ Blocker)
+
+**Code quality**: grep `TODO|FIXME`/`console.log` เจอแต่ false positive เดิม (ค่า enum `"TODO"`,
+`logger.ts`) ยืนยัน `prisma.*` ไม่มีนอก `repositories/` เลย ยืนยัน `package.json`/`pnpm-lock.yaml`
+ไม่มี diff เลย (M5 ไม่เพิ่ม dependency แม้แต่ตัวเดียว ตรงตามที่ทุก increment รายงานไว้)
+
+**Documentation**: ตรวจทั้ง 7 ไฟล์ในรายการ ไม่พบ stale status claim จาก M4 หลงเหลือ
+
+**Blocker**: ไม่มี **สรุป: พร้อมปล่อย v0.5.0**
+
+## Milestone 5 Committed & Released: v0.5.0
+
+ผู้ใช้อนุมัติสั่ง commit+tag+push ตรงๆ ทำตามลำดับเดียวกับทุก milestone ก่อนหน้า: `git add -A` → ตรวจ
+`git status --short`/`git diff --cached --stat` (24 ไฟล์เปลี่ยน ตรงตามที่ audit ตรวจไว้เป๊ะ ไม่มีไฟล์
+แปลกปลอม) → commit `feat(analytics): complete milestone 5 - dashboard and analytics` (Husky
+pre-commit reformat อัตโนมัติรวมอยู่ใน commit เดียวกันเหมือนทุกครั้ง) → ผลลัพธ์ commit
+`c094be4810de599fb67b4dec652f00bfe7957b95` → สร้าง annotated tag `v0.5.0` → `git push origin main`
+สำเร็จ (`5a9de23..c094be4`) → `git push origin v0.5.0` สำเร็จ → ยืนยันด้วย `git ls-remote origin
+main`/`git ls-remote origin refs/tags/v0.5.0` ตรงกับ local (`git rev-list -n1 v0.5.0` resolve ไปที่
+commit เดียวกับ `main` เป๊ะ) **Milestone 5 ปิดสมบูรณ์บน GitHub แล้ว** (`v0.2.0`–`v0.5.0` อยู่บน
+`origin/main` ครบ ยกเว้น `v0.1.0` ที่ยังเป็น local-only ตามที่บันทึกไว้ตั้งแต่ M2)
+
+---
+
+## Milestone 6 — Proposal: Admin Dashboard
+
+ผู้ใช้สั่งเสนอ Milestone 6 ต่อจาก M5 (v0.5.0 เสร็จสมบูรณ์แล้ว) **ห้าม implement ห้ามเขียนโค้ด ห้ามแก้
+ไฟล์** สั่งให้ "ศึกษาโค้ดจริงตามสภาพหลัง v0.5.0" ก่อนเสนอ — ตรวจสอบจริงด้วย `grep` ไม่ใช้ความจำ พบ
+ข้อเท็จจริงสำคัญที่เป็นแกนของข้อเสนอทั้งหมด: **`requireRole`/`hasRole` (สร้างไว้ตั้งแต่ M2) ไม่เคยถูก
+เรียกใช้ในเส้นทาง (route) ไหนเลยจนถึงตอนนี้** (grep `src/app` ว่างเปล่าสนิท) เช่นเดียวกับ `AuditLog`
+ที่บันทึกข้อมูลมาตั้งแต่ M2 แต่ไม่เคยมีหน้าจอไหนอ่านมันเลย และ `User.isActive` ที่มีมาตั้งแต่ M2 แต่ไม่
+เคยถูก toggle จาก UI ไหนเลย — Milestone 6 (Admin Dashboard) คือผู้ใช้งานจริงคนแรกของทั้งสามอย่างนี้
+
+**เสนอ 11 หัวข้อ**: Objectives (เหตุผลหลักคือ platform-admin permission system ที่มีอยู่แต่ไม่เคยถูกใช้
+
+- เหตุผลที่ควรทำต่อจาก M5 เพราะรียูส aggregation pattern เดียวกัน), Features (system overview/
+  workspace management/user management/audit log viewer/health monitoring), RBAC (ตาราง
+  ADMIN/SUPER_ADMIN ต่อ action), Architecture impact (ขยาย repository เดิม ไม่สร้าง adminRepository,
+  รียูส `toIssueBreakdownResponse`/`StatusBreakdownChart`/`PriorityBreakdownChart` ตรงๆ จาก M5 แบบ
+  ไม่ต้องแก้อะไรเลยเพราะ shape ตรงกันพอดี), Database impact (ไม่ต้องมี table ใหม่), API endpoints (8
+  เส้นทาง), UI pages (6 หน้า), Hooks, Testing strategy, Documentation updates, Increment breakdown
+  (9 increment)
+
+**Decision Points ที่เสนอให้เลือก** (5 ข้อ พร้อมคำแนะนำ): **A** — UX เมื่อไม่ใช่ admin (`notFound()`
+เดิมที่ทุก route ใช้ vs. เปลี่ยนเป็น redirect เพราะ `/admin` ไม่มี enumeration concern ให้ปกป้อง —
+แนะนำ A2/redirect), **B** — กลยุทธ์ pagination (ไม่เคยมีมาก่อนในแอปเลย — แนะนำ B1/offset-limit
+ธรรมดา), **C** — privilege-escalation guard เวลาเปลี่ยน platform role (แนะนำ C2+C3 รวมกัน: เฉพาะ
+SUPER_ADMIN เปลี่ยน role ได้ + ห้ามเปลี่ยน role ตัวเอง มิเรอร์ owner-immutable ของ M3), **D** — ควรให้
+admin ลบ/suspend workspace ได้ไหม (คำถามข้ามชั้น RBAC จริงจัง เพราะกระทบ invariant "platform role
+ไม่ทะลุเข้า workspace tier" ที่ยึดมาตั้งแต่ M3 — แนะนำ D1/read-only รอบนี้), **E** — ขอบเขต health
+monitoring (serverless ไม่มี process ค้างให้ monitor CPU/memory — แนะนำ E1/DB-reachability check
+อย่างเดียว)
+
+## Milestone 6 — Decision Points ยืนยัน + Detailed Architecture Proposal
+
+ผู้ใช้ยืนยัน **A2 · B1 · C2+C3 · D1 · E1** ครบทุกข้อตามคำแนะนำ แล้วสั่งขยายเป็น Detailed Architecture
+Proposal เต็มรูปแบบ (**ยังคงห้ามเขียนโค้ด/แก้ไฟล์/แก้ schema**) ครอบ 13 หัวข้อ:
+
+1. **Repository design** — ขยาย 5 repository เดิม (userRepository/workspaceRepository/
+   projectRepository/issueRepository/auditLogRepository) ไม่สร้าง adminRepository ตามหลักการ
+   "หนึ่งไฟล์ต่อหนึ่ง model" ที่ยึดมาตั้งแต่ M3
+2. **Response mappers** — โมดูลใหม่ `features/admin/` (admin-user/admin-workspace/audit-log
+   response) **+ รียูส `toIssueBreakdownResponse` จาก M5 ตรงๆ ไม่แก้เลย** เพราะ
+   `countByStatusGlobal`/`countByPriorityGlobal` (ไม่มี `where`) คืน shape เดียวกับตัว
+   `...ForWorkspace` เป๊ะ
+3. **API contracts** — 8 endpoint พร้อม min role ต่อ endpoint ระบุชัดเจน
+4. **Hook design** — ต่างจาก analytics ตรงที่ mutation hook (`useUpdateAdminUser`) **invalidate
+   ทันที** ไม่ใช่ staleTime-based เพราะเป็น action ของ operator ที่ต้องเห็นผลทันที ไม่ใช่การแก้ไขถี่ๆ
+   แบบ issue
+5. **UI hierarchy** — `StatusBreakdownChart`/`PriorityBreakdownChart` รียูสตรงๆ, `WorkloadChart`
+   **ตั้งใจไม่รียูส** เพราะ "workload ระดับแพลตฟอร์ม" ไม่ใช่แนวคิดที่มีความหมายจริง
+6. **Route structure** — `/admin` เป็น top-level segment ใหม่ เหมือน `/w/[slug]`
+7. **Admin layout** — เช็ค `hasRole(role, "ADMIN")` ครั้งเดียวใน layout แล้ว `redirect("/profile")`
+   ตาม Decision A2 (ไม่ใช่ `notFound()` แบบทุก route อื่น — ระบุชัดว่าเป็นการตั้งใจต่างออกไป)
+8. **Query strategy** — staleTime 30 วิ (สั้นกว่า analytics' 60 วิ), `useAdminHealth` เป็น hook
+   polling ตัวแรกของแอป (`refetchInterval`)
+9. **Pagination strategy** — offset/limit ตายตัว page=20, page state เป็น local `useState` ไม่ผูก
+   URL (ไม่มี precedent เรื่อง URL-synced list state ในแอปเลย)
+10. **States** — รียูส Skeleton/EmptyState เดิม, health check แยกกรณี "เรียก API ไม่ได้" กับ "เรียกได้
+    แต่ DB ล่ม" เป็นสองสถานะ UI คนละแบบ
+11. **Platform RBAC flow** — เขียน flow ทีละขั้นของ PATCH endpoint ที่อ่อนไหวที่สุด (role change ต้อง
+    SUPER_ADMIN, self-change ปฏิเสธด้วย 400 ไม่ใช่ 403 เพราะเป็นกฎที่ใช้ไม่ว่าใครก็ตาม มิเรอร์
+    invalid_assignee ของ M4)
+12. **Testing strategy** — unit/integration (**ครั้งแรกที่ PlatformRole ถูกเทสกับ route จริง**)/e2e
+    (ต้อง promote user เป็น SUPER_ADMIN ตรงผ่าน Prisma ใน test setup เพราะ register สร้างแต่ USER)
+13. **Increment plan** — 9 increment (ใกล้เคียง M4 มากกว่า M5 เพราะสโคปใหญ่กว่า: มี route segment
+    ใหม่, RBAC ใหม่, pagination ใหม่)
+
+ผู้ใช้อนุมัติ proposal ทั้งหมด สั่งเริ่มเฉพาะ **Increment 1**
+
+## Milestone 6 — Increment 1: Repository Extensions ✅
+
+สโคปตรงตามสั่ง: ขยาย 5 repository ตาม proposal **ห้ามสร้าง adminRepository ห้าม API/hook/UI/test
+รอบนี้ aggregation ต้องอยู่ใน Prisma (groupBy/\_count) ห้ามทำใน TypeScript**
+
+**เพิ่ม 12 method รวม**: `userRepository` — `findManyForAdmin({skip,take,emailQuery?})`,
+`countAll(emailQuery?)`, `findByIdForAdmin(id)`, `updateRole(id,role)`, `updateActive(id,isActive)`
+`workspaceRepository` — `findManyForAdmin({skip,take})`, `countAll()`, `findByIdForAdmin(id)`
+`projectRepository` — `countAll()` `issueRepository` — `countByStatusGlobal()`,
+`countByPriorityGlobal()` (มิเรอร์ `...ForWorkspace` ของ M5 เป๊ะ แค่ไม่มี `where`)
+`auditLogRepository` — `findMany({skip,take,action?})`, `countAll(action?)` (**method อ่านตัวแรก
+ของตารางนี้** — เดิมมีแค่ `record()` เขียนอย่างเดียวตั้งแต่ M2)
+
+**ตัดสินใจสำคัญระหว่างทาง**: ใช้ Prisma relation `_count` include (`_count: {select:
+{workspaceMemberships: true}}` ฯลฯ) **เป็นครั้งแรกในโค้ดเบสนี้** (ของเดิมใช้ `_count` แค่ใน `groupBy`
+aggregate ไม่เคยใช้เป็น relation include) ยืนยันว่า compile ผ่านตรงกับ generated client ไม่ต้อง
+ประกาศ type เพิ่ม / `mode: "insensitive"` สำหรับค้นหา email แปลเป็น Postgres `ILIKE` โดย Prisma เอง
+ไม่ต้องเพิ่ม extension หรือแก้ schema / `workspaceRepository`'s owner ดึงผ่าน `members` ที่ filter
+`{role: "OWNER"}` แล้วเอา `[0].user` เพราะ `Workspace` ไม่มี `ownerId` ของตัวเอง — ownership แสดงผ่าน
+`WorkspaceMember` เท่านั้นเหมือนทุกที่ในแอป
+
+**Quality Gate**: `lint` ✅ 0 error `typecheck` ✅ 0 error (ผ่านตั้งแต่รอบแรกทั้งคู่) `build` ✅
+(route list ไม่เปลี่ยน — ไม่มี API รอบนี้) `test` ✅ 62/62 ไม่เปลี่ยน ไม่รัน `test:integration`/
+`test:e2e` ตามคำสั่ง
+
+ยังไม่ commit — รายงานผลแล้วหยุดตามคำสั่ง รออนุมัติก่อนเริ่ม Increment 2
+
+## Milestone 6 — Increment 2: Response Mappers ✅
+
+ผู้ใช้อนุมัติ Increment 1 สั่งทำเฉพาะ Increment 2: สร้าง response mapper ใหม่ 3 ไฟล์ + รียูส
+`toIssueBreakdownResponse` **ห้ามซ้ำ logic เดิม ห้าม Prisma access ห้าม repository/API/hook/UI/test
+รอบนี้**
+
+**Mapper ใหม่** (`features/admin/`): `admin-user-response.ts` (`toAdminUserListItemResponse`,
+`toAdminUserDetailResponse` — ไม่ spread `User` เต็มแถวเลย กัน `passwordHash` หลุด เหมือนทุก mapper
+ที่แตะ `User`) `admin-workspace-response.ts` (**ฟังก์ชันเดียว** `toAdminWorkspaceResponse` ใช้ร่วม
+ทั้ง list และ detail เพราะ shape เหมือนกันเป๊ะ ตามที่ Decision D1 ทำให้ admin dashboard เป็น read-only
+สำหรับ workspace — ตัดสินใจไม่แยกสองฟังก์ชันที่ implementation เหมือนกันทุกตัวอักษร เพราะนั่นคือความซ้ำ
+ซ้อนแบบเดียวกับที่คำสั่งรอบนี้ห้ามไว้) `audit-log-response.ts` (`toAuditLogEntryResponse`)
+
+**ยืนยัน `toIssueBreakdownResponse` ไม่ถูกซ้ำ**: grep ยืนยัน definition เดียวในไฟล์เดิม
+(`features/analytics/issue-breakdown-response.ts`) — `countByStatusGlobal`/`countByPriorityGlobal`
+(Increment 1) คืน shape `{status/priority, _count}` แบบเดียวกับ `...ForWorkspace` เป๊ะ เรียกใช้ตรงๆ
+ได้ทันทีตอน Increment 3 โดยไม่ต้องแก้ไฟล์นั้นเลย
+
+**Quality Gate**: `lint` ✅ 0 error `typecheck` ✅ 0 error `build` ✅ (route list ไม่เปลี่ยน) `test`
+✅ 62/62 ไม่เปลี่ยน ไม่รัน `test:integration`/`test:e2e` ตามคำสั่ง
+
+ยังไม่ commit — รายงานผลแล้วหยุดตามคำสั่ง รออนุมัติก่อนเริ่ม Increment 3
+
+## Milestone 6 — Increment 3: Admin API Routes ✅
+
+ผู้ใช้อนุมัติ Increment 2 สั่งทำเฉพาะ 8 endpoint ตาม contract เดิม **ห้าม hook/UI/middleware/layout/
+navigation/test/documentation/schema รอบนี้** พร้อมกำหนด RBAC ชัดเจน (ADMIN สำหรับอ่านทั้งหมด+แก้
+isActive, SUPER_ADMIN สำหรับแก้ role, ปฏิเสธ self-role-change/self-deactivation ด้วย 400)
+
+**Route ใหม่ 8 ไฟล์**: `GET /api/admin/overview` (เรียก 5 repository พร้อมกันผ่าน `Promise.all` แล้ว
+ส่ง global counts เข้า `toIssueBreakdownResponse` ที่รียูสจาก M5 ตรงๆ) `GET/POST` — ไม่มี POST ใดๆ
+รอบนี้ (read-only + PATCH เดียว) `GET /api/admin/workspaces` (+pagination) `GET
+/api/admin/workspaces/[workspaceId]` (404 ธรรมดา ไม่ใช่ enumeration-safety pattern เพราะ admin ที่
+ผ่าน RBAC มาแล้วไม่มีอะไรต้องปกปิดจากตัวเอง) `GET /api/admin/users` (+pagination+email search)
+`GET/PATCH /api/admin/users/[userId]` (endpoint ที่อ่อนไหวที่สุด) `GET /api/admin/audit-log`
+(+pagination+action filter) `GET /api/admin/health`
+
+**ไฟล์สนับสนุนใหม่**: `src/lib/pagination.ts` (`parsePagination()` — offset/limit ตายตัว page=20
+ตาม Decision B1 ใช้ร่วมกันทั้ง 3 route ที่มี pagination กันไม่ให้ logic parse ซ้ำ 3 ที่)
+`features/admin/schemas/update-admin-user.schema.ts` (`updateAdminUserSchema` — `isActive`/`role`
+optional แยกกันแต่ `.refine()` บังคับต้องมีอย่างน้อยหนึ่งตัว, `PLATFORM_ROLES` ผ่าน `satisfies
+readonly PlatformRole[]` มิเรอร์ `ISSUE_STATUSES` เป๊ะ) เพิ่ม `AUDIT_ACTIONS` export เข้า
+`audit-log-response.ts` เดิม (ไม่ใช่ mapper logic ใหม่ แค่ constant สำหรับ validate query param
+`?action=` เผื่อใช้ซ้ำตอน Increment 6's filter dropdown)
+
+**Design decision สำคัญที่ต้องรายงานตรงไปตรงมา**: health check ต้องเรียก `prisma.$queryRaw` แต่กติกา
+"ห้ามเรียก `prisma.*` นอก `repositories/`" เป็นกฎที่เข้มงวดที่สุดกฎหนึ่งของโค้ดเบสนี้ — จะเขียน
+`prisma.$queryRaw` ตรงใน route จะขัดกับกฎนี้ทันที แต่คำสั่งของ increment นี้ก็ห้ามสร้าง repository
+ใหม่นอกเหนือจาก Increment 1 ด้วยเช่นกัน แก้ปัญหาด้วยการสร้าง **`src/repositories/system/
+health.repository.ts`** ไฟล์เล็กมากมีแค่ method เดียว (`ping()`) — ยืนยันว่านี่ไม่ใช่ "adminRepository"
+ที่ถูกห้ามไว้ (ข้อห้ามนั้นหมายถึงการรวม query ของ User/Workspace/Project/Issue/AuditLog เข้าไฟล์เดียว
+แทนที่จะขยาย 5 repository เดิม) เพราะ database health check ไม่ใช่ query ของ model ไหนใน 5 ตัวนั้น
+เลย รายงานเรื่องนี้อย่างเปิดเผยในรายงานส่งมอบ ไม่ใช่ทำเงียบๆ
+
+**บั๊กเล็กที่เจอและแก้ระหว่างทาง**: `lint` เตือน (ไม่ error) ว่า `_request` ไม่ได้ใช้ใน 2 route ที่ไม่มี
+dynamic segment (`overview`, `health`) — ตรวจ precedent จริงพบว่า `GET /api/workspaces/route.ts`
+(list เดิมจาก M3) เขียน `export async function GET()` **ไม่มี parameter เลย** เมื่อไม่มีอะไรต้องอ่าน
+จาก request — แก้ทั้งสองไฟล์ให้ตรงกับ precedent นี้แทนที่จะปล่อย `_request: Request` ที่ไม่มีใครใช้
+
+**Quality Gate**: `lint` ✅ 0 error (แก้ 2 warning ตามข้างต้นแล้ว) `typecheck` ✅ 0 error `build` ✅
+(route list เพิ่มครบ 7 เส้นทางใหม่ ตรงตามที่ approved — `/api/admin/{overview,workspaces,
+workspaces/[workspaceId],users,users/[userId],audit-log,health}`) `test` ✅ 62/62 ไม่เปลี่ยน ไม่รัน
+`test:integration`/`test:e2e` ตามคำสั่ง
+
+ยังไม่ commit — รายงานผลแล้วหยุดตามคำสั่ง **รออนุมัติก่อนเริ่ม Increment 4 (route segment plumbing:
+middleware/layout/nav)**
+
+## Milestone 6 — Increment 4: Middleware + Admin Layout + Nav Entry ✅
+
+ผู้ใช้อนุมัติ Increment 3 **และยืนยันรับ `src/repositories/system/health.repository.ts` ตามตำแหน่งที่
+สร้างไว้ ไม่ต้อง refactor** (จุดค้างจาก Increment 3) สั่งทำเฉพาะ Increment 4 **ห้ามสร้าง page/hook/UI
+component ใหม่ ห้าม middleware เช็ค role (auth-only เท่านั้น) ห้ามแก้ repository/API/test/docs
+รอบนี้**
+
+**Middleware** (`src/middleware.ts`): เพิ่ม `/admin` เข้า `PROTECTED_PREFIXES` และ `matcher` ตรงตาม
+pattern เดิมของ `/w`/`/workspaces`/`/profile` เป๊ะ — เช็คแค่ "มี token หรือไม่" ไม่เช็ค `role` เลย
+(JWT มี `role` อยู่จริงเพราะ `next-auth.d.ts` ประกาศไว้ตั้งแต่ M2 แต่จงใจไม่เช็คที่นี่ กันไม่ให้มี source
+of truth สองที่สำหรับ authorization — ชั้นเดียวที่ตัดสิน role คือ layout กับทุก route handler)
+
+**`app/admin/layout.tsx`** (ใหม่, Server Component): `auth()` → ไม่มี session → `redirect("/login")`
+(defensive, มิเรอร์ `w/[slug]/layout.tsx` — middleware คุม `/admin` อยู่แล้วตามข้างบน) →
+`hasRole(session.user.role, "ADMIN")` เป็น false → `redirect("/profile")` ตาม **Decision A2 เป๊ะ**
+(ไม่ใช้ `notFound()` เพราะ `/admin` ไม่มี enumeration concern ต้องปกป้องจาก plain USER — ต่างกับ
+`/w/[slug]` ที่ปกปิดว่า workspace มีอยู่จริงไหมจากคนที่ไม่ใช่สมาชิก) → render shell (Navbar แบรนด์
+"Orbit Admin" + `ThemeToggle` + `UserMenu` + `PageContainer`) ไม่มี sidebar รอบนี้ (สโคปของ
+Increment 6/UI hierarchy) ยืนยันแล้วว่า layout ที่ยังไม่มี page คู่กันเลยก็ build ผ่านปกติ (Next.js
+ไม่ error กับ layout กำพร้าที่ยังไม่มี page ในสาขานั้น — route list หลัง build ไม่มี `/admin` โผล่มา
+ตรงตามที่คาด)
+
+**Nav entry**: ไม่สร้างคอมโพเนนต์ใหม่ (ต้องห้าม) — inline JSX ตรงใน `(dashboard)/layout.tsx` (เดิมไม่
+ใช่ async ไม่เคยเรียก `auth()` เลย — ปรับให้ async แล้วเรียก `auth()` เพื่ออ่าน role, ทุก path ใต้กลุ่ม
+นี้ถูก middleware ป้องกันอยู่แล้วจึงไม่ต้อง `redirect` ซ้ำ) และ `w/[slug]/layout.tsx` (มี session อยู่
+แล้วในตัว ใช้ต่อได้เลย) ทั้งสองที่แสดงปุ่ม "Admin" (`Button variant="ghost" size="sm" asChild` +
+`Link` — มิเรอร์ pattern ของ `UserMenu`) เฉพาะเมื่อ `hasRole(session.user.role, "ADMIN")` เป็น true —
+ย้ำชัดว่าเป็น **UX only**, server/API endpoint ทุกตัวยังเป็นชั้น authorization จริงเหมือนเดิมไม่เปลี่ยน
+
+**Quality Gate**: `lint` ✅ 0 error `typecheck` ✅ 0 error `build` ✅ (route list ไม่มี `/admin` เพิ่ม
+เพราะยังไม่มี page ใต้มันเลย ตรงตามที่คาด) `test` ✅ 62/62 ไม่เปลี่ยน ไม่รัน
+`test:integration`/`test:e2e` ตามคำสั่ง
+
+ยังไม่ commit — รายงานผลแล้วหยุดตามคำสั่ง รออนุมัติก่อนเริ่ม Increment 5 (hooks)
+
+## Milestone 6 — Increment 5: Admin Hooks ✅
+
+ผู้ใช้อนุมัติ Increment 4 สั่งทำเฉพาะ 8 hook ตามชื่อที่กำหนดไว้เป๊ะ (`useAdminOverview`/
+`useAdminWorkspaces`/`useAdminWorkspace`/`useAdminUsers`/`useAdminUser`/`useAdminAuditLog`/
+`useAdminHealth`/`useUpdateAdminUser`) **ห้าม UI/page ใหม่ ห้ามแก้ middleware/repository/API/test/
+docs รอบนี้** พร้อมกำหนด query key ตาม proposal, staleTime/`refetchInterval` ของ `useAdminHealth`
+(10s/30s), และ invalidation behavior ของ `useUpdateAdminUser` (invalidate user detail query +
+`admin-users` prefix)
+
+**Hook ใหม่ 8 ไฟล์** (`features/admin/hooks/`, หนึ่งไฟล์ต่อหนึ่ง hook ตาม convention เดิมทั้งแอป —
+ไม่รวมเป็นไฟล์เดียวแม้คำสั่งจะเรียกว่า "admin hooks module"): `use-admin-overview.ts` (รียูส
+`IssueBreakdownResponse` จาก M5 ตรงๆ ผ่าน `import type`), `use-admin-workspaces.ts` (export
+`PaginatedResponse<T>` generic ใช้ร่วมกับ users/audit-log — นิยามครั้งเดียวแล้ว import ไปใช้ต่อ
+มิเรอร์วิธี `IssueBreakdownResponse` ถูกรียูสตั้งแต่ M5), `use-admin-workspace.ts`,
+`use-admin-users.ts` (filter `email` ผ่าน `URLSearchParams` — hook แรกในแอปที่ต้องสร้าง query
+string เอง เพราะ `apiClient.get` รับแค่ url string เดียว), `use-admin-user.ts` (type
+`AdminUserDetailResponse` เป็น return type ของ mutation ด้วย), `use-admin-audit-log.ts` (filter
+`action`), `use-admin-health.ts`, `use-update-admin-user.ts`
+
+**Query key**: `["admin-overview"]` / `["admin-workspaces", page]` / `["admin-workspace", id]` /
+`["admin-users", page, email]` / `["admin-user", id]` / `["admin-audit-log", page, action]` /
+`["admin-health"]` — singular/plural มิเรอร์ `issue`/`issues` เดิมจาก M4
+
+**staleTime**: 30s ทุก query ยกเว้น `useAdminHealth` (10s + `refetchInterval` 30s — **hook polling
+ตัวแรกของทั้งแอป ไม่มี precedent มาก่อนเลย**, ยืนยันด้วย grep ว่าไม่มี `refetchInterval` ที่ไหนในโค้ด
+เบสก่อนหน้านี้) — 30s ไม่ใช่ 60s แบบ analytics dashboard เพราะ admin เป็น operator surface ที่เห็น
+ข้อมูลเก่า (เช่น user ที่เพิ่ง deactivate แต่ยังโชว์ active) คือความเสี่ยงที่แย่กว่า request ที่เพิ่มขึ้น
+เล็กน้อย ตามที่ proposal ระบุไว้
+
+**`useUpdateAdminUser`**: invalidate ทันทีตอน success (ไม่ใช่ staleTime-based) ตาม Hook design ของ
+proposal เพราะเป็น action ของ operator บนบัญชีคนอื่นที่ต้องเห็นผลทันที ไม่ใช่การแก้ไขถี่ๆ ของเจ้าของ
+เองแบบ issue — invalidate ทั้ง `["admin-user", userId]` (ตรงตัว) และ `["admin-users"]` (prefix —
+TanStack Query invalidate แบบ partial match โดย default จึงครอบคลุมทุก page/email variant ที่ cache
+ไว้ในคราวเดียว ไม่ต้องรู้ว่า admin กำลังดู list หน้าไหนอยู่)
+
+**Quality Gate**: `lint` ✅ 0 error `typecheck` ✅ 0 error `build` ✅ (route list ไม่เปลี่ยน — hook
+ไม่ใช่ route) `test` ✅ 62/62 ไม่เปลี่ยน ไม่รัน `test:integration`/`test:e2e` ตามคำสั่ง
+
+ยังไม่ commit — รายงานผลแล้วหยุดตามคำสั่ง **รออนุมัติก่อนเริ่ม Increment 6 (UI)**
+
+## Milestone 6 — Increment 6: Admin Dashboard UI ✅
+
+ผู้ใช้อนุมัติ Increment 5 สั่งทำเฉพาะ UI layer (6 หน้า + 8 component ตามชื่อที่กำหนดเป๊ะ) **ห้ามสร้าง
+DataTable abstraction ห้ามเพิ่ม UI library ใหม่ ต้องรียูส Card/EmptyState/Skeleton/Badge/Button/Input/
+StatusBreakdownChart/PriorityBreakdownChart ใช้เฉพาะ hook จาก Increment 5 เท่านั้น** พร้อมกำหนด
+loading/empty/error pattern (Skeleton/EmptyState/inline error text ตามของเดิมในแอป) และกฎ UX เฉพาะ
+ของ `AdminUserDetail`: disable role selector เว้นแต่ผู้ใช้ปัจจุบันเป็น SUPER_ADMIN, disable isActive
+toggle เมื่อกำลังดูตัวเอง — **UX only ไม่แตะ server-side check**
+
+**หน้าใหม่ 6 หน้า** (`src/app/admin/`): `page.tsx` (overview), `workspaces/page.tsx` +
+`workspaces/[workspaceId]/page.tsx`, `users/page.tsx` + `users/[userId]/page.tsx`,
+`audit-log/page.tsx` — ทุกหน้าเป็น thin Server Component **ไม่มี repository call เลยสักหน้า** (ต่างจาก
+หน้าอื่นส่วนใหญ่ในแอปที่มักเรียก repository ตรงจาก Server Component) เพราะสโคปรอบนี้กำหนดให้ใช้แค่ hook
+เท่านั้น
+
+**Component ใหม่ 8 ตัว** (`features/admin/components/`): `StatCard` (tile "label + ตัวเลขใหญ่" ตัวแรก
+ของแอป), `AdminOverviewSection` (stat tile 4 ตัว + รียูส `StatusBreakdownChart`/
+`PriorityBreakdownChart` ตรงๆ + health panel ที่มี 2 สถานะ error แยกกัน — "เรียก API ไม่สำเร็จ" กับ
+"เรียกได้แต่ DB ไม่ตอบสนอง" ตาม States ที่ proposal ระบุ), `PaginationControls` (Prev/Next + "หน้า X
+จาก Y" ไม่มีช่องกรอกเลขหน้า ใช้ร่วมกัน 3 list component — ชิ้นเดียวที่รียูสจริง), `AdminWorkspaceList`/
+`AdminWorkspaceDetail`, `AdminUserList`/`AdminUserDetail`, `AdminAuditLogList`
+
+**ตัดสินใจที่ต้องรายงานตรงไปตรงมา**: ไม่มี navigation ข้ามหมวดในรอบนี้ (ไม่มี sidebar ไม่มี tab bar
+ระหว่าง `/admin`/`/admin/workspaces`/`/admin/users`/`/admin/audit-log` — เข้าถึงได้ผ่าน URL ตรง/
+deep-link เท่านั้น ตามที่ Increment 4 เคยตัดสินใจว่า "ไม่มี sidebar รอบนี้") รายงานเป็น judgment call
+ที่เปิดเผยแทนที่จะเงียบๆ เพิ่ม component ที่ไม่ได้อยู่ในรายชื่อ 8 ตัวที่ approved — ผู้ใช้ยืนยันรับตอนอนุมัติ
+Increment 7 ("The lack of cross-section admin navigation is accepted for this milestone. Do NOT
+introduce an Admin sidebar or any additional navigation component.")
+
+**Manual verification จริงในเบราว์เซอร์** (เกินขอบเขต quality gate ที่สั่งไว้ แต่ทำเพราะเป็น UI
+increment): สมัครบัญชีทดสอบ 1 บัญชี promote เป็น SUPER_ADMIN ตรงผ่าน Prisma script ชั่วคราว (ลบทิ้ง
+หลังตรวจ พร้อม `.claude/launch.json` ชั่วคราว) คลิกผ่านทั้ง 6 หน้าจริง ยืนยัน StatCard/chart/health/
+empty state/role select disabled ตรงตามที่คาดทุกจุด ไม่มี server error โผล่ใน log เลย
+
+**Quality Gate**: `lint` ✅ 0 error `typecheck` ✅ (พบ 1 จุดจริงที่ต้องแก้ระหว่างทาง — closure ใน
+`AdminUserDetail` อ้าง `data` ที่ narrow แล้วแต่ TS ไม่ carry ผ่านเข้า nested function declaration
+ต้อง rebind เป็น `user` const ใหม่ก่อนใช้ในนั้น) `build` ✅ (route list มี `/admin/*` ครบ 6 เส้นทางใหม่)
+`test` ✅ 62/62 ไม่เปลี่ยน ไม่รัน `test:integration`/`test:e2e` ตามคำสั่ง
+
+ยังไม่ commit — รายงานผลแล้วหยุดตามคำสั่ง รออนุมัติก่อนเริ่ม Increment 7 (tests)
+
+## Milestone 6 — Increment 7: Tests ✅
+
+ผู้ใช้อนุมัติ Increment 6 **และยืนยันรับสภาพ "ไม่มี cross-section nav" ของ Increment 6 พร้อมห้ามเพิ่ม
+sidebar/nav component ใดๆ เพิ่มเติม** สั่งทำเฉพาะ testing (unit/integration/e2e) ครอบ 8 endpoint,
+RBAC 3 role (USER/ADMIN/SUPER_ADMIN), business rule (self-role-change 400, self-deactivation 400,
+ADMIN เปลี่ยน role ไม่ได้, SUPER_ADMIN เปลี่ยนได้, pagination, email filter, audit action filter), e2e
+ครบ SUPER_ADMIN/ADMIN/USER flow พร้อม deactivate-then-login-fails จริง **รันสอง e2e suite สองรอบยืนยัน
+ความเสถียร**
+
+**Unit** (+15, รวม 77): `updateAdminUserSchema` (isActive อย่างเดียว/role อย่างเดียว/ทั้งคู่/object ว่าง
+ถูกปฏิเสธ/role ผิด/isActive ไม่ใช่ boolean/ทุกค่า PlatformRole), `parsePagination` (ทุก branch ของ
+`Number.isInteger(...) && rawPage > 0` — ไม่ใช่ตัวเลข/0/ติดลบ/ไม่ใช่ integer/ถูกต้อง — บวก skip/take
+calculation และ pageSize ตายตัว)
+
+**Test infra ที่แก้ (นอกเหนือไฟล์ test ใหม่)**: `tests/integration/helpers.ts`'s `sessionFor(userId,
+role?)` เพิ่ม param `role` (default `"USER"` — ผู้เรียกเดิมทั้ง 11 จุดไม่กระทบเลย) `tests/e2e/
+db-helpers.ts` เพิ่ม `promoteUser(email, role)` เรียก script ใหม่ `tests/e2e/scripts/
+promote-user.ts` (มิเรอร์ `delete-test-user.ts` เป๊ะ — รัน `tsx` แยก process เพราะ Prisma generated
+client เป็น ESM-only ส่วน Playwright compile test เป็น CommonJS)
+
+**Integration** (+18, รวม 154): 1 test แบบ table-driven loop ครอบ RBAC ทั้ง 7 GET endpoint × 4
+สถานะ auth (ไม่มี session/USER/ADMIN/SUPER_ADMIN) ในลูปเดียว ไม่ paste ซ้ำ 28 บล็อก, overview ใช้วิธี
+capture ค่า baseline ก่อนเรียก API แล้วเทียบ delta (เพราะ `countByStatusGlobal`/
+`countByPriorityGlobal` เป็น global aggregate จริงต่อ dev database ที่แชร์กันข้าม milestone นับ exact
+count ไม่ได้), pagination+email filter ทดสอบพร้อมกันด้วยชุด user 22 คนที่ scope ด้วย unique token
+(`prisma.user.createMany`/`deleteMany` เดียวจบ ไม่ผ่าน per-email cleanup ปกติเพื่อความเร็ว), audit
+action filter ตรวจแบบ structural ("ทุกแถวที่คืนมาต้องตรง action ที่กรอง" ทนต่อ volume ข้อมูลเก่าที่
+ควบคุมไม่ได้แทนที่จะเช็ค total เป๊ะ), มี guard ยืนยัน `passwordHash` ไม่หลุดใน response ของ user list ด้วย
+
+**E2E**: ไฟล์ใหม่ `admin-dashboard.spec.ts` (+10, รวม 76) `describe.serial` 4 browser context
+(SUPER_ADMIN/ADMIN/USER/target) — SUPER_ADMIN: เห็นลิงก์ Admin → overview (stat+chart) → workspaces
+→ users search → audit log → deactivate target user → ยืนยันด้วยการ login จริงของ target ที่ล้มเหลว
+พร้อมข้อความ error ตรงกับ UI จริง ADMIN: read access ครบ 4 หน้า + role-change ถูกปฏิเสธทั้งใน UI
+(`toBeDisabled()`) และที่ API (`page.request.patch` → 403) USER: `/admin` redirect ไป `/profile`
+
+**บั๊กที่เจอและแก้ในโค้ด test เอง 5 จุด** (ไม่ใช่ production code แม้แต่จุดเดียว): (1) `logoutViaUi`/
+`loginViaUi` ต้องรันจาก `/profile` ไม่ใช่หน้า `/verify-email` หลัง register (หน้านั้นไม่มี Navbar เลย),
+(2) `getByRole("link", {name:"Admin"})` ต้องใส่ `exact:true` เพราะ substring match แบบ
+case-insensitive ของ Playwright ชนกับ workspace switcher link ที่ชื่อ workspace มีคำว่า "admin" ปนอยู่,
+(3) `CardTitle` (`components/ui/card.tsx`) เป็น styled `<div>` ไม่ใช่ heading role ต้องใช้ `getByText`
+ไม่ใช่ `getByRole("heading")`, (4) audit-log action filter `<select>` มี hidden `<option>` ชื่อชนกับ
+Badge ที่มองเห็นอยู่ ต้อง scope ด้วย `[data-slot="badge"]`, (5) หน้า target user ยังถือ session เดิมจาก
+ตอน register อยู่ ต้อง logout ก่อนถึงจะทดสอบ login-fails ได้จริง (ไม่งั้น middleware redirect ออกจาก
+`/login` ก่อนจะกรอกฟอร์มทันเลย)
+
+**Flake ที่เจอระหว่างพัฒนา ตรวจแล้วสรุปว่าไม่ใช่บั๊กจริง**: รัน suite เต็ม 76 test ครั้งหนึ่งเจอ strict-mode
+"พบ 2 element" ที่ users list search input ไม่เคย reproduce ซ้ำใน isolated run 2 รอบของไฟล์เดียวกัน
+แก้โดยเพิ่มจุด "รอ heading ของหน้าที่ navigate ไปแสดงก่อน" ก่อน interact ต่อ (ปิด race window ที่น่าจะเป็น
+สาเหตุ) แล้วยืนยันเสถียร**ด้วย production build 2 รอบเต็ม suite ติดกัน** ตรงตามกฎเดิมของโปรเจกต์ (ต้อง
+reproduce แน่นอนถึงจะนับเป็นบั๊กจริง ไม่ใช่ retry เฉยๆ จนผ่าน)
+
+**Quality Gate**: `lint` ✅ `typecheck` ✅ `build` ✅ (route list ไม่เปลี่ยน) `test` ✅ 77/77 (จาก 62)
+`test:integration` ✅ 154/154 (จาก 136) `test:e2e` ✅ 76/76 **สองรอบติดกันหลัง harden**
+
+ยังไม่ commit — รายงานผลแล้วหยุดตามคำสั่ง รออนุมัติก่อนเริ่ม Increment 8 (docs + final audit)
+
+## Milestone 6 — Increment 8: Documentation + Final Release Audit ✅
+
+ผู้ใช้สั่ง "ก่อนเขียน doc ใดๆ ต้อง audit ทั้ง repo ก่อน" ครอบ 20 หัวข้อ (duplicate/dead code, unused
+export/import, TODO/FIXME/HACK, console.log, eslint-disable, TypeScript `any`, unreachable code,
+inconsistent naming, security, missing RBAC, API ไม่มี auth, repository-layer violation, mapper/
+pagination/query-key consistency, invalidation correctness, component reuse, unnecessary
+abstraction, architecture consistency) **ห้ามแก้อะไรอัตโนมัติ ต้องออกรายงานก่อน ถ้า audit สะอาดค่อยทำ
+doc ต่อ** แล้วรัน release quality gate เต็มรูปแบบ
+
+**ผล audit: สะอาด** ตรวจด้วย grep ทั้ง repo (ไม่ใช่แค่ M6): TODO/FIXME/HACK/XXX จริง = 0 (ทุกจุดที่
+grep เจอเป็นค่า enum `IssueStatus.TODO` ไม่ใช่ comment marker) console.log/debug นอก `logger.ts` = 0
+eslint-disable = 0 TypeScript `any` = 0 ทั้ง `src` และ `tests` `prisma.*` อยู่นอก `repositories/` = 0
+(ยืนยัน 12 ไฟล์ที่ใช้ prisma ตรงทั้งหมดอยู่ใต้ `repositories/`) route ที่ไม่มี `auth()` = เฉพาะ 5
+endpoint `/api/auth/*` ที่ต้อง public โดยนิยาม (register/login-adjacent) ถูกต้อง route
+`/api/admin/*` ทั้ง 8 มี `requireRole` ครบ mapper ไม่มีที่ไหน spread full model row เลย (เช็คทั้งแอป
+ไม่ใช่แค่ admin) exported symbol ทุกตัวใน `features/admin/`/`repositories/system/`/
+`lib/pagination.ts` มีผู้เรียกจริงอย่างน้อย 1 จุด (ไล่ grep ทีละสัญลักษณ์) spot-check mutation hook เดิม
+7 ตัวไม่พบปัญหา invalidation (`useUpdateProject`/`useCreateProject` ตั้งใจไม่ invalidate เพราะหน้าอ่าน
+ผ่าน repository หลัง `router.refresh()` มี comment อธิบายไว้ในโค้ดอยู่แล้ว)
+
+**สิ่งที่พบแต่ไม่ใช่ปัญหาใหม่ (debt เดิม ไม่ได้แย่ลงจาก M6)**: ทุก Route Handler (26 ไฟล์ ไม่ใช่แค่ 8 ของ
+admin) เขียน auth-check block ซ้ำๆ กันเอง (ไม่มี middleware/wrapper กลาง) เป็นสถาปัตยกรรมที่ตั้งใจมาตั้งแต่
+M2 ไม่ใช่สิ่งที่ M6 ทำให้แย่ลง `<select>` styling ซ้ำข้าม M3/M4/M6 (ยังไม่มี shared primitive ตามที่เคย
+defer ไว้ตั้งแต่ M3+M4)
+
+**สรุป**: ไม่พบสิ่งที่ block การทำ doc/release เดินหน้าต่อตามคำสั่ง
+
+**อัปเดตเอกสารทั้ง 5 ไฟล์**: **`architecture.md`** เพิ่มหัวข้อ "Admin Dashboard (Milestone 6)" ครอบ
+decision point ทั้ง 5 (A2/B1/C2+C3/D1/E1), repository extension pattern, mapper reuse, route/RBAC
+gate, query strategy, ขอบเขต UI, testing — อัปเดต "Current state" ปิดท้ายให้รวม M6 **`folder-structure.md`**
+เพิ่มหัวข้อ `app/admin/`+`features/admin/` (M6) ครอบทุกไฟล์ใหม่ **`README.md`** อัปเดตสถานะเป็น M6
+code-complete รอ commit + เพิ่ม "Admin Dashboard" เข้า Features list **`CHANGELOG.md`** เพิ่ม entry
+`[0.6.0]` เต็มรูปแบบมิเรอร์ความละเอียดของ `[0.5.0]` **`session-log.md`** ไฟล์นี้เอง (Increment 6-8 +
+Next Steps + TL;DR)
+
+**Flake ที่สองที่เจอระหว่างรัน release gate จริง** (คนละจุดจาก Increment 7's flake): รอบแรกของ
+`test:e2e` เต็ม suite เจอ strict-mode "พบ 2 element" ซ้ำอีกครั้งที่ users list search input
+(`ค้นหาผู้ใช้ด้วยอีเมล`) แม้จะมี "รอ heading ก่อน interact" จาก Increment 7 อยู่แล้วก็ตาม —
+`error-context.md`'s page snapshot ที่ Playwright แนบมาแสดงเนื้อหาของหน้าที่ไม่ตรงกับ test ที่ fail จริง
+(เป็นเนื้อหาจากหน้า "deactivate" ของ `superAdminPage` ทั้งที่ error เกิดที่ `adminPage`'s
+"role-change is denied" test) ชี้ว่า error reporting mechanism เองไม่แม่นยำภายใต้โหลดสูง (76 test ×
+12 worker พร้อมกัน) ไม่ใช่แค่ race ในโค้ด แก้ด้วยการเติม `.first()` เข้า `getByLabel("ค้นหาผู้ใช้ด้วยอีเมล")`
+ทั้ง 3 จุดที่เรียก (element ทั้งสองตัวที่ match กันมี attribute เหมือนกันทุกตัวอักษร ปลอดภัยที่จะ action
+กับตัวแรกไม่ว่าสาเหตุจริงจะเป็นอะไร) ยืนยันเสถียรด้วย **production build 2 รอบเต็ม suite ติดกันหลัง
+harden รอบที่สองนี้**
+
+**Quality Gate (release gate เต็ม, หลัง harden ครบทั้งสองรอบ)**: `lint` ✅ `typecheck` ✅ `build` ✅
+`test` ✅ 77/77 `test:integration` ✅ 154/154 `test:e2e` ✅ 76/76 **สองรอบติดกัน**
+
+ยังไม่ commit ไม่ tag ไม่ push — รอการอนุมัติตามคำสั่งก่อนขึ้น `v0.6.0`
+
+---
+
 ## Next Steps (เมื่อได้รับอนุมัติ)
 
-1. **Milestone 4**: ปิดสมบูรณ์แล้ว — commit `5a9de23`, tag `v0.4.0`, push ขึ้น `origin/main` สำเร็จ
-   ยืนยันด้วย `git ls-remote` ตรงกัน ไม่มีงานค้างของ M4 เอง
-2. **Milestone 5**: ทำครบ Increment 1-6 แล้ว (repository aggregation, response mappers, API,
-   hooks, UI/charts, tests, docs) **รอคำสั่งเริ่ม final completion audit** ของ Milestone 5 ทั้งก้อน
-   (เทียบ Architecture Proposal เดิม + Decision Point A กับโค้ดจริงทีละหัวข้อ แบบเดียวกับที่ทำก่อน
-   ปล่อย v0.3.0/v0.4.0) ก่อน commit+tag (`v0.5.0`)+push
-3. **Documentation debt เดิมที่ยังไม่แก้** (นอกสโคปทุกรอบที่ผ่านมา): `docs/setup-guide.md` ขาด
-   `pnpm test:integration` ในตาราง (ตั้งแต่ M2), 16 แถวกำพร้าใน `AuditLog` ของ dev database (เศษจาก
-   manual verification ของ M4 Increment 6 ไม่กระทบอะไร)
-4. (นอกขอบเขต — พิจารณาแยกทีหลัง เหมือนเดิมทุกข้อ) ThemeToggle hydration mismatch (M2), tag
+1. **Milestone 5**: ปิดสมบูรณ์แล้ว — commit `c094be4`, tag `v0.5.0`, push ขึ้น `origin/main` สำเร็จ
+   ยืนยันด้วย `git ls-remote` ตรงกัน ไม่มีงานค้างของ M5 เอง
+2. **Milestone 6**: ทำครบ Increment 1-8 แล้วทั้งหมด (repository extensions, response mappers, API
+   routes, middleware+layout+nav entry, admin hooks, UI ครบ 6 หน้า, tests ครบ unit/integration/e2e,
+   documentation + full repository audit) — **quality gate เต็มรูปแบบผ่านหมด**
+   (`lint`/`typecheck`/`build`/`test` 77/77/`test:integration` 154/154/`test:e2e` 76/76)
+   **รอการอนุมัติ commit + tag `v0.6.0` + push เท่านั้น** ไม่มีงานโค้ด/เอกสารค้างของ M6 เอง —
+   `src/repositories/system/health.repository.ts` ที่เคยรอ confirm ตำแหน่งถูก approve แล้วตอนอนุมัติ
+   Increment 4 (2026-08-04) และ "ไม่มี cross-section admin nav" ถูก accept แล้วตอนอนุมัติ Increment 7
+3. **ของค้างใหม่จาก M5 audit ที่ยังไม่แก้**: 2 แถวกำพร้าใน `VerificationToken`
+   (`analytics-tester@example.com`, `dom-inspector@example.com`) จาก manual verification ของ M5
+   Increment 4/5 เอง (recommended cleanup ไม่ใช่ blocker)
+4. **Documentation debt เดิมที่ยังไม่แก้**: `docs/setup-guide.md` ขาด `pnpm test:integration` ในตาราง
+   (ตั้งแต่ M2), 16 แถวกำพร้าใน `AuditLog` ของ dev database (เศษจาก manual verification ของ M4
+   Increment 6 ไม่กระทบอะไร), `package.json`'s `"version"` ค้างที่ `0.1.0` มาตั้งแต่ scaffold ไม่เคย bump
+   ตาม CHANGELOG/tag เลยทุก milestone (พบระหว่าง audit ของ Increment 8 ไม่ได้อยู่ในสโคปที่สั่งให้แก้
+   รอบนี้ — เอกสาร 5 ไฟล์ที่สั่งไม่รวม `package.json`)
+5. (นอกขอบเขต — พิจารณาแยกทีหลัง เหมือนเดิมทุกข้อ) ThemeToggle hydration mismatch (M2), tag
    `v0.1.0` ยังไม่ push, ชื่อโปรเจกต์ "Orbit" vs "TeamFlow" ที่เคยพูดถึงครั้งเดียว, ownership-transfer
    action, TOCTOU race บน uniqueness check, project detail page container กว้างไม่พอสำหรับ Kanban
    บนจอใหญ่, ยังไม่มี mobile list-view สำหรับ board, ยังไม่มี Delete Issue UI (`useDeleteIssue` hook
    ยังไม่ถูกใช้ที่ไหนเลยตามที่ตั้งใจ), `issueRepository.findByProjectAndNumber` ไม่มีใครเรียก
    (ตั้งใจ), `DELETE /api/issues/[issueId]` ยังไม่เปลี่ยนไปใช้ `requireWorkspaceAccess` ตัวเดียว,
-   `<select>` styling ซ้ำข้าม M3+M4 ยังไม่มี shared primitive, `project-flow.spec.ts`'s
+   `<select>` styling ซ้ำข้าม M3+M4+M6 ยังไม่มี shared primitive (ยืนยันอีกครั้งใน Increment 8 audit),
+   ทุก Route Handler เขียน auth-check block ซ้ำกันเอง 26 ไฟล์ไม่มี middleware/wrapper กลาง (สถาปัตยกรรม
+   ตั้งใจมาตั้งแต่ M2 ยืนยันใน Increment 8 audit ว่าไม่ใช่ปัญหาใหม่), `project-flow.spec.ts`'s
    `/projects/[^/]+$` regex มีความเสี่ยงแฝงเดียวกับที่เจอใน M4 Increment 8 แต่ยังไม่เคยแสดงอาการจริง,
    trend/velocity chart ถูก defer ทั้งหมดใน M5 (Decision Point A1) — `IssueStatusChange` history
-   table เป็นทางเปิดสำหรับ milestone ในอนาคตถ้าต้องการข้อมูลนี้จริง
+   table เป็นทางเปิดสำหรับ milestone ในอนาคตถ้าต้องการข้อมูลนี้จริง, workspace deletion จาก admin
+   dashboard ถูก defer ทั้งหมดใน M6 (Decision Point D1) — คงไว้เฉพาะที่ OWNER ทำได้เองเหมือนเดิม, ไม่มี
+   cross-section navigation ระหว่างหน้า admin (Increment 6, accepted แล้วใน Increment 7)

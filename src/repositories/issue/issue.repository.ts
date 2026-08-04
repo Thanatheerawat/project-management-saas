@@ -153,4 +153,22 @@ export const issueRepository = {
       _count: true,
     });
   },
+
+  // --- Milestone 6: Admin Dashboard ---------------------------------
+  // Platform-wide equivalent of countByStatusForWorkspace/
+  // countByPriorityForWorkspace above — same groupBy shape, no `where`
+  // at all, feeding the same toIssueBreakdownResponse mapper unchanged.
+  countByStatusGlobal() {
+    return prisma.issue.groupBy({
+      by: ["status"],
+      _count: true,
+    });
+  },
+
+  countByPriorityGlobal() {
+    return prisma.issue.groupBy({
+      by: ["priority"],
+      _count: true,
+    });
+  },
 };

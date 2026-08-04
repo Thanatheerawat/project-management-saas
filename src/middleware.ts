@@ -15,7 +15,14 @@ import { getToken } from "next-auth/jwt";
 // `/w/[slug]` (Increment 5) and already lives in every workspace/project
 // Route Handler (Increment 3) — this file only ever answers "logged in
 // or not."
-const PROTECTED_PREFIXES = ["/profile", "/workspaces", "/w"];
+//
+// `/admin` (Milestone 6 Increment 4) follows the identical rule: middleware
+// only checks for a session, never PlatformRole. The `getToken` JWT does
+// carry `role`, but a role check here would duplicate — and risk drifting
+// from — the single source of truth in `app/admin/layout.tsx`
+// (`hasRole(role, "ADMIN")`, Decision A2) and every `/api/admin/*` route's
+// own `requireRole` call.
+const PROTECTED_PREFIXES = ["/profile", "/workspaces", "/w", "/admin"];
 const AUTH_PAGES = ["/login", "/register"];
 
 function isProtectedPath(pathname: string): boolean {
@@ -42,5 +49,12 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/profile/:path*", "/workspaces/:path*", "/w/:path*", "/login", "/register"],
+  matcher: [
+    "/profile/:path*",
+    "/workspaces/:path*",
+    "/w/:path*",
+    "/admin/:path*",
+    "/login",
+    "/register",
+  ],
 };
