@@ -11,16 +11,22 @@ const WITH_LABELS = { labels: { include: { label: true } } } as const;
 
 // The only place `prisma.issue.*` is called from.
 export const issueRepository = {
-  // Wrapped in $transaction (not nested-create, unlike
-  // workspaceRepository.createWithOwner — Issue isn't created alongside a
-  // brand-new parent row, the Project already exists) so the
-  // issueCounter increment and the Issue insert either both happen or
-  // neither does. The increment itself is what's actually safe against
-  // concurrent creates (Postgres's row-level `UPDATE x = x + 1` is
-  // atomic); the transaction only protects against a crash between the
-  // two statements leaving a permanently-skipped number, which is
-  // harmless (see the Project.issueCounter comment in schema.prisma).
-  create(data: {
+  // Deliberately NOT wrapped in $transaction. The increment alone is what's
+  // safe against concurrent creates (Postgres's row-level
+  // `UPDATE x = x + 1` is atomic and fully serializes concurrent callers
+  // regardless of whether it runs inside an explicit transaction — see the
+  // Project.issueCounter comment in schema.prisma), so a wrapping
+  // transaction was never load-bearing for uniqueness. It only guarded
+  // against a crash between these two statements leaving a
+  // permanently-skipped number, which the same schema comment already
+  // documents as harmless — and `Issue`'s `@@unique([projectId, number])`
+  // constraint backstops uniqueness independently either way. Dropping the
+  // wrapper also drops the interactive-transaction timeout entirely: under
+  // a burst of concurrent creates against the same project, each call now
+  // holds the row lock for one round trip instead of two-plus-COMMIT,
+  // which is what was pushing queued callers past Prisma's timeout under
+  // CI's network latency to Neon (see git history on this file).
+  async create(data: {
     projectId: string;
     title: string;
     description?: string;
@@ -29,26 +35,15 @@ export const issueRepository = {
     reporterId: string;
     assigneeId?: string;
   }) {
-    return prisma.$transaction(
-      async (tx) => {
-        const project = await tx.project.update({
-          where: { id: data.projectId },
-          data: { issueCounter: { increment: 1 } },
-        });
+    const project = await prisma.project.update({
+      where: { id: data.projectId },
+      data: { issueCounter: { increment: 1 } },
+    });
 
-        return tx.issue.create({
-          data: { ...data, number: project.issueCounter },
-          include: WITH_LABELS,
-        });
-      },
-      // Prisma's 5000ms default is tight enough that a burst of concurrent
-      // creates against the same project can queue behind each other's row
-      // lock long enough to exceed it once real network latency (CI ->
-      // Neon) is in the mix, even though each transaction is only ever two
-      // statements. 10s gives that queue enough room without masking a
-      // genuinely stuck transaction.
-      { timeout: 10000 },
-    );
+    return prisma.issue.create({
+      data: { ...data, number: project.issueCounter },
+      include: WITH_LABELS,
+    });
   },
 
   findById(id: string) {
