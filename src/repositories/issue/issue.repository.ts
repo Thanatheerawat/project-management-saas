@@ -29,17 +29,26 @@ export const issueRepository = {
     reporterId: string;
     assigneeId?: string;
   }) {
-    return prisma.$transaction(async (tx) => {
-      const project = await tx.project.update({
-        where: { id: data.projectId },
-        data: { issueCounter: { increment: 1 } },
-      });
+    return prisma.$transaction(
+      async (tx) => {
+        const project = await tx.project.update({
+          where: { id: data.projectId },
+          data: { issueCounter: { increment: 1 } },
+        });
 
-      return tx.issue.create({
-        data: { ...data, number: project.issueCounter },
-        include: WITH_LABELS,
-      });
-    });
+        return tx.issue.create({
+          data: { ...data, number: project.issueCounter },
+          include: WITH_LABELS,
+        });
+      },
+      // Prisma's 5000ms default is tight enough that a burst of concurrent
+      // creates against the same project can queue behind each other's row
+      // lock long enough to exceed it once real network latency (CI ->
+      // Neon) is in the mix, even though each transaction is only ever two
+      // statements. 10s gives that queue enough room without masking a
+      // genuinely stuck transaction.
+      { timeout: 10000 },
+    );
   },
 
   findById(id: string) {
