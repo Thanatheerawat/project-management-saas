@@ -13,9 +13,14 @@ interface NavbarProps {
 export function Navbar({ brand, actions }: NavbarProps) {
   return (
     <header className="border-border bg-surface border-b">
-      <PageContainer className="flex h-14 items-center justify-between">
-        <div className="flex items-center gap-2">{brand}</div>
-        <div className="flex items-center gap-2">{actions}</div>
+      <PageContainer className="flex h-14 items-center justify-between gap-2">
+        {/* min-w-0 lets this side shrink/truncate its content (e.g. a long
+            workspace name) instead of forcing the row wider than the
+            viewport — flex children default to a min-width equal to their
+            content's intrinsic width, which is the actual mechanism behind
+            unwanted horizontal scroll on narrow viewports here. */}
+        <div className="flex min-w-0 items-center gap-2">{brand}</div>
+        <div className="flex shrink-0 items-center gap-1 sm:gap-2">{actions}</div>
       </PageContainer>
     </header>
   );

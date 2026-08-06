@@ -10,10 +10,13 @@ import { Button } from "@/components/ui/button";
 // picker page instead of introducing a new dropdown-menu UI primitive.
 export function WorkspaceSwitcher({ name }: { name: string }) {
   return (
-    <Button variant="ghost" size="sm" asChild>
-      <Link href="/workspaces" className="flex items-center gap-1.5">
-        <span className="text-foreground text-sm font-bold">{name}</span>
-        <ChevronsUpDown className="text-muted-foreground size-3.5" strokeWidth={1.5} />
+    <Button variant="ghost" size="sm" asChild className="min-w-0">
+      <Link href="/workspaces" className="flex min-w-0 items-center gap-1.5">
+        <span className="text-foreground min-w-0 truncate text-sm font-bold">{name}</span>
+        <ChevronsUpDown
+          className="text-muted-foreground size-3.5 shrink-0"
+          strokeWidth={1.5}
+        />
       </Link>
     </Button>
   );

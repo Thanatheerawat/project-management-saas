@@ -3,6 +3,7 @@ import { notFound, redirect } from "next/navigation";
 
 import { Navbar } from "@/components/layout/navbar";
 import { PageContainer } from "@/components/layout/page-container";
+import { SidebarMobileTrigger } from "@/components/layout/sidebar";
 import { ThemeToggle } from "@/components/layout/theme-toggle";
 import { Button } from "@/components/ui/button";
 import { UserMenu } from "@/features/user/components/user-menu";
@@ -44,7 +45,12 @@ export default async function WorkspaceLayout({
   return (
     <div className="flex min-h-screen flex-col">
       <Navbar
-        brand={<WorkspaceSwitcher name={resolved.workspace.name} />}
+        brand={
+          <>
+            <SidebarMobileTrigger />
+            <WorkspaceSwitcher name={resolved.workspace.name} />
+          </>
+        }
         actions={
           <>
             {isAdmin && (
