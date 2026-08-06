@@ -3,10 +3,12 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
-import { Badge } from "@/components/ui/badge";
-import { Card, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
 import { WorkspaceAnalyticsSection } from "@/features/analytics/components/workspace-analytics-section";
+import { RecentActivitySection } from "@/features/workspace/components/recent-activity-section";
+import { RecentProjectCard } from "@/features/workspace/components/recent-project-card";
+import { WorkspaceKpiCards } from "@/features/workspace/components/workspace-kpi-cards";
 import { auth } from "@/lib/auth/auth";
 import { resolveWorkspaceForRequest } from "@/lib/auth/workspace-membership";
 import { projectRepository } from "@/repositories/workspace/project.repository";
@@ -41,30 +43,37 @@ export default async function WorkspaceDashboardPage({
         )}
       </div>
 
+      <WorkspaceKpiCards workspaceId={workspace.id} projectCount={projects.length} />
+
       <div>
-        <h2 className="text-foreground mb-3 text-sm font-semibold">โปรเจกต์</h2>
+        <h2 className="text-foreground mb-3 text-sm font-semibold">โปรเจกต์ล่าสุด</h2>
         {projects.length === 0 ? (
           <EmptyState
             icon={FolderKanban}
             title="ยังไม่มีโปรเจกต์"
             description="โปรเจกต์ใน Workspace นี้จะแสดงที่นี่"
+            action={
+              <Button size="sm" asChild>
+                <Link href={`/w/${slug}/projects/new`}>สร้างโปรเจกต์แรก</Link>
+              </Button>
+            }
           />
         ) : (
           <div className="flex flex-col gap-2">
             {projects.map((project) => (
-              <Link key={project.id} href={`/w/${slug}/projects/${project.id}`}>
-                <Card size="sm" className="hover:bg-muted/50 transition-colors">
-                  <CardHeader>
-                    <div className="flex items-center justify-between gap-2">
-                      <CardTitle>{project.name}</CardTitle>
-                      <Badge variant="outline">{project.status}</Badge>
-                    </div>
-                  </CardHeader>
-                </Card>
-              </Link>
+              <RecentProjectCard
+                key={project.id}
+                project={project}
+                href={`/w/${slug}/projects/${project.id}`}
+              />
             ))}
           </div>
         )}
+      </div>
+
+      <div>
+        <h2 className="text-foreground mb-3 text-sm font-semibold">กิจกรรมล่าสุด</h2>
+        <RecentActivitySection />
       </div>
 
       <div>
