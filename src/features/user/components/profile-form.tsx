@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -52,8 +53,11 @@ function ProfileFields({ data }: { data: ProfileResponse }) {
     try {
       await updateProfile.mutateAsync(parsed.data);
       setSaved(true);
+      toast.success("บันทึกโปรไฟล์แล้ว");
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : "บันทึกไม่สำเร็จ");
+      const message = err instanceof ApiError ? err.message : "บันทึกไม่สำเร็จ";
+      setError(message);
+      toast.error(message);
     }
   }
 

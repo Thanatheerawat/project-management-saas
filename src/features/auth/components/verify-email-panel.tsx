@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
+import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
 import { useVerifyEmail } from "@/features/auth/hooks/use-verify-email";
@@ -39,7 +40,15 @@ export function VerifyEmailPanel() {
         <p className="text-destructive text-sm">ลิงก์นี้ใช้ไม่ได้หรือหมดอายุแล้ว</p>
       )}
       <Button
-        onClick={() => verifyEmail.mutate({ email, token })}
+        onClick={() =>
+          verifyEmail.mutate(
+            { email, token },
+            {
+              onSuccess: () => toast.success("ยืนยันอีเมลแล้ว"),
+              onError: () => toast.error("ยืนยันอีเมลไม่สำเร็จ"),
+            },
+          )
+        }
         disabled={!email || !token || verifyEmail.isPending}
       >
         {verifyEmail.isPending ? "กำลังยืนยัน..." : "ยืนยันอีเมล"}

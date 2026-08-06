@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -65,10 +66,13 @@ export function CreateIssueDialog({
 
     try {
       await createIssue.mutateAsync(parsed.data);
+      toast.success("สร้าง Issue แล้ว");
       reset();
       setOpen(false);
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : "สร้าง Issue ไม่สำเร็จ");
+      const message = err instanceof ApiError ? err.message : "สร้าง Issue ไม่สำเร็จ";
+      setError(message);
+      toast.error(message);
     }
   }
 

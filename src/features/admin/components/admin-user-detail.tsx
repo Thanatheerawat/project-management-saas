@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { toast } from "sonner";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -58,17 +59,24 @@ export function AdminUserDetail({
     setError(null);
     try {
       await updateUser.mutateAsync({ role: role as PlatformRole });
+      toast.success("เปลี่ยน Role แล้ว");
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : "เปลี่ยน Role ไม่สำเร็จ");
+      const message = err instanceof ApiError ? err.message : "เปลี่ยน Role ไม่สำเร็จ";
+      setError(message);
+      toast.error(message);
     }
   }
 
   async function handleToggleActive() {
     setError(null);
     try {
-      await updateUser.mutateAsync({ isActive: !user.isActive });
+      const wasActive = user.isActive;
+      await updateUser.mutateAsync({ isActive: !wasActive });
+      toast.success(wasActive ? "ปิดใช้งานบัญชีแล้ว" : "เปิดใช้งานบัญชีแล้ว");
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : "เปลี่ยนสถานะไม่สำเร็จ");
+      const message = err instanceof ApiError ? err.message : "เปลี่ยนสถานะไม่สำเร็จ";
+      setError(message);
+      toast.error(message);
     }
   }
 

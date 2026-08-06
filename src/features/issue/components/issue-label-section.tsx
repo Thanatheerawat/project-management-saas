@@ -2,6 +2,7 @@
 
 import { XIcon } from "lucide-react";
 import { useState } from "react";
+import { toast } from "sonner";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -52,8 +53,11 @@ export function IssueLabelSection({
     try {
       await attachLabel.mutateAsync({ labelId: selectedLabelId });
       setSelectedLabelId("");
+      toast.success("แนบ Label แล้ว");
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : "แนบ Label ไม่สำเร็จ");
+      const message = err instanceof ApiError ? err.message : "แนบ Label ไม่สำเร็จ";
+      setError(message);
+      toast.error(message);
     }
   }
 
@@ -61,8 +65,11 @@ export function IssueLabelSection({
     setError(null);
     try {
       await detachLabel.mutateAsync(labelId);
+      toast.success("ลบ Label แล้ว");
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : "ลบ Label ไม่สำเร็จ");
+      const message = err instanceof ApiError ? err.message : "ลบ Label ไม่สำเร็จ";
+      setError(message);
+      toast.error(message);
     }
   }
 
@@ -83,8 +90,11 @@ export function IssueLabelSection({
       await createLabel.mutateAsync(parsed.data);
       setNewLabelName("");
       setNewLabelColor("#6B7280");
+      toast.success("สร้าง Label แล้ว");
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : "สร้าง Label ไม่สำเร็จ");
+      const message = err instanceof ApiError ? err.message : "สร้าง Label ไม่สำเร็จ";
+      setError(message);
+      toast.error(message);
     }
   }
 

@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useState } from "react";
+import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -23,7 +24,12 @@ export function ForgotPasswordForm() {
       return;
     }
 
-    await forgotPassword.mutateAsync(parsed.data);
+    try {
+      await forgotPassword.mutateAsync(parsed.data);
+      toast.success("หากมีบัญชีนี้ ระบบได้ส่งลิงก์แล้ว");
+    } catch {
+      toast.error("ส่งคำขอไม่สำเร็จ ลองใหม่อีกครั้ง");
+    }
   }
 
   // Same confirmation shown whether or not the email exists — the API

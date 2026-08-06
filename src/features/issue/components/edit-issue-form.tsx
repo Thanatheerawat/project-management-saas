@@ -66,7 +66,9 @@ export function EditIssueForm({
       await updateIssue.mutateAsync(parsed.data);
       toast.success("บันทึก Issue แล้ว");
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : "บันทึกไม่สำเร็จ");
+      const message = err instanceof ApiError ? err.message : "บันทึกไม่สำเร็จ";
+      setError(message);
+      toast.error(message);
     }
   }
 

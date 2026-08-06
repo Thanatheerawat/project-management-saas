@@ -2,6 +2,7 @@
 
 import { Users } from "lucide-react";
 import { useState } from "react";
+import { toast } from "sonner";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -91,8 +92,11 @@ function MemberRow({
         memberId: member.id,
         data: { role: role as (typeof ASSIGNABLE_WORKSPACE_ROLES)[number] },
       });
+      toast.success("เปลี่ยน Role แล้ว");
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : "เปลี่ยน Role ไม่สำเร็จ");
+      const message = err instanceof ApiError ? err.message : "เปลี่ยน Role ไม่สำเร็จ";
+      setError(message);
+      toast.error(message);
     }
   }
 
@@ -101,8 +105,11 @@ function MemberRow({
     try {
       await removeMember.mutateAsync(member.id);
       setConfirmOpen(false);
+      toast.success(isSelf ? "ออกจาก Workspace แล้ว" : "ลบสมาชิกแล้ว");
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : "ลบสมาชิกไม่สำเร็จ");
+      const message = err instanceof ApiError ? err.message : "ลบสมาชิกไม่สำเร็จ";
+      setError(message);
+      toast.error(message);
       setConfirmOpen(false);
     }
   }

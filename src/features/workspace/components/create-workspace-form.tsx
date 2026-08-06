@@ -2,6 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -31,10 +32,13 @@ export function CreateWorkspaceForm() {
 
     try {
       const workspace = await createWorkspace.mutateAsync(parsed.data);
+      toast.success("สร้าง Workspace แล้ว");
       router.push(`/w/${workspace.slug}`);
       router.refresh();
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : "สร้าง Workspace ไม่สำเร็จ");
+      const message = err instanceof ApiError ? err.message : "สร้าง Workspace ไม่สำเร็จ";
+      setError(message);
+      toast.error(message);
     }
   }
 

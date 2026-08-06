@@ -2,6 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -37,10 +38,13 @@ export function CreateProjectForm({
 
     try {
       const project = await createProject.mutateAsync(parsed.data);
+      toast.success("สร้างโปรเจกต์แล้ว");
       router.push(`/w/${slug}/projects/${project.id}`);
       router.refresh();
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : "สร้างโปรเจกต์ไม่สำเร็จ");
+      const message = err instanceof ApiError ? err.message : "สร้างโปรเจกต์ไม่สำเร็จ";
+      setError(message);
+      toast.error(message);
     }
   }
 

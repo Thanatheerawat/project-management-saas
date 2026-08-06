@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -51,8 +52,11 @@ export function CommentSection({
     try {
       await createComment.mutateAsync(parsed.data);
       setBody("");
+      toast.success("แสดงความคิดเห็นแล้ว");
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : "แสดงความคิดเห็นไม่สำเร็จ");
+      const message = err instanceof ApiError ? err.message : "แสดงความคิดเห็นไม่สำเร็จ";
+      setError(message);
+      toast.error(message);
     }
   }
 
@@ -132,8 +136,11 @@ function CommentRow({
     try {
       await updateComment.mutateAsync({ commentId: comment.id, data: parsed.data });
       setIsEditing(false);
+      toast.success("บันทึกความคิดเห็นแล้ว");
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : "บันทึกไม่สำเร็จ");
+      const message = err instanceof ApiError ? err.message : "บันทึกไม่สำเร็จ";
+      setError(message);
+      toast.error(message);
     }
   }
 
@@ -142,8 +149,11 @@ function CommentRow({
     try {
       await deleteComment.mutateAsync(comment.id);
       setConfirmOpen(false);
+      toast.success("ลบความคิดเห็นแล้ว");
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : "ลบไม่สำเร็จ");
+      const message = err instanceof ApiError ? err.message : "ลบไม่สำเร็จ";
+      setError(message);
+      toast.error(message);
       setConfirmOpen(false);
     }
   }

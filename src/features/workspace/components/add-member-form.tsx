@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -32,10 +33,13 @@ export function AddMemberForm({ workspaceId }: { workspaceId: string }) {
 
     try {
       await addMember.mutateAsync(parsed.data);
+      toast.success("เพิ่มสมาชิกแล้ว");
       setEmail("");
       setRole("MEMBER");
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : "เพิ่มสมาชิกไม่สำเร็จ");
+      const message = err instanceof ApiError ? err.message : "เพิ่มสมาชิกไม่สำเร็จ";
+      setError(message);
+      toast.error(message);
     }
   }
 

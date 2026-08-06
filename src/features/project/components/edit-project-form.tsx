@@ -2,6 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -53,10 +54,13 @@ export function EditProjectForm({
 
     try {
       await updateProject.mutateAsync(parsed.data);
+      toast.success("บันทึกโปรเจกต์แล้ว");
       router.push(`/w/${slug}/projects/${projectId}`);
       router.refresh();
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : "บันทึกไม่สำเร็จ");
+      const message = err instanceof ApiError ? err.message : "บันทึกไม่สำเร็จ";
+      setError(message);
+      toast.error(message);
     }
   }
 

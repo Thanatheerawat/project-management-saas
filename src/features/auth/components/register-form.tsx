@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { signIn } from "next-auth/react";
 import { useState } from "react";
+import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -39,10 +40,13 @@ export function RegisterForm() {
         password: parsed.data.password,
         redirect: false,
       });
+      toast.success("สมัครสมาชิกสำเร็จ");
       router.push(result.mockVerifyUrl);
       router.refresh();
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : "สมัครสมาชิกไม่สำเร็จ");
+      const message = err instanceof ApiError ? err.message : "สมัครสมาชิกไม่สำเร็จ";
+      setError(message);
+      toast.error(message);
     }
   }
 

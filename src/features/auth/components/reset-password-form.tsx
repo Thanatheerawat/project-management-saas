@@ -2,6 +2,7 @@
 
 import { useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";
+import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -29,11 +30,13 @@ export function ResetPasswordForm() {
 
     try {
       await resetPassword.mutateAsync(parsed.data);
+      toast.success("ตั้งรหัสผ่านใหม่แล้ว");
       router.push("/login");
     } catch (err) {
-      setError(
-        err instanceof ApiError ? err.message : "ลิงก์นี้ใช้ไม่ได้หรือหมดอายุแล้ว",
-      );
+      const message =
+        err instanceof ApiError ? err.message : "ลิงก์นี้ใช้ไม่ได้หรือหมดอายุแล้ว";
+      setError(message);
+      toast.error(message);
     }
   }
 

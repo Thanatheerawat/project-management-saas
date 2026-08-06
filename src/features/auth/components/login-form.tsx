@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";
+import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -29,12 +30,15 @@ export function LoginForm() {
 
     try {
       await login.mutateAsync(parsed.data);
+      toast.success("เข้าสู่ระบบสำเร็จ");
       router.push(searchParams.get("callbackUrl") ?? "/profile");
       router.refresh();
     } catch {
       // Same message regardless of whether the email exists or the
       // password was wrong — see docs/security.md (A04).
-      setError("อีเมลหรือรหัสผ่านไม่ถูกต้อง");
+      const message = "อีเมลหรือรหัสผ่านไม่ถูกต้อง";
+      setError(message);
+      toast.error(message);
     }
   }
 

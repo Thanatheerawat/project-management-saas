@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { toast } from "sonner";
 
 import { ISSUE_STATUS_COLOR } from "@/constants/issue";
 import { useUpdateIssue } from "@/features/issue/hooks/use-update-issue";
@@ -29,8 +30,11 @@ export function IssueStatusSelect({
     setError(null);
     try {
       await updateIssue.mutateAsync({ status });
+      toast.success(`เปลี่ยนสถานะเป็น ${status} แล้ว`);
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : "เปลี่ยนสถานะไม่สำเร็จ");
+      const message = err instanceof ApiError ? err.message : "เปลี่ยนสถานะไม่สำเร็จ";
+      setError(message);
+      toast.error(message);
     }
   }
 
