@@ -34,6 +34,7 @@ export function ProjectAnalyticsSummary({ projectId }: { projectId: string }) {
         icon={BarChart3}
         title="ยังไม่มีข้อมูลให้วิเคราะห์"
         description="สร้าง issue ในโปรเจกต์นี้เพื่อดูสรุปภาพรวม"
+        className="border-border rounded-xl border border-dashed"
       />
     );
   }

@@ -92,7 +92,7 @@ export default async function ProjectDetailPage({
           <h2 className="text-foreground text-sm font-semibold">Issue</h2>
           <CreateIssueDialog projectId={project.id} workspaceId={workspace.id} />
         </div>
-        <KanbanBoard projectId={project.id} slug={slug} />
+        <KanbanBoard projectId={project.id} slug={slug} workspaceId={workspace.id} />
       </div>
     </div>
   );

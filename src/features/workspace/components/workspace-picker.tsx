@@ -36,6 +36,7 @@ export function WorkspacePicker() {
             <Link href="/workspaces/new">สร้าง Workspace</Link>
           </Button>
         }
+        className="border-border rounded-xl border border-dashed"
       />
     );
   }

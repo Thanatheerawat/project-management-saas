@@ -14,6 +14,7 @@ export function RecentActivitySection() {
       icon={Activity}
       title="ยังไม่มีกิจกรรมล่าสุด"
       description="กิจกรรมของทีมใน Workspace นี้จะแสดงที่นี่เมื่อพร้อมใช้งาน"
+      className="border-border rounded-xl border border-dashed"
     />
   );
 }

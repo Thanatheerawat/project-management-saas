@@ -57,6 +57,7 @@ export default async function WorkspaceDashboardPage({
                 <Link href={`/w/${slug}/projects/new`}>สร้างโปรเจกต์แรก</Link>
               </Button>
             }
+            className="border-border rounded-xl border border-dashed"
           />
         ) : (
           <div className="flex flex-col gap-2">

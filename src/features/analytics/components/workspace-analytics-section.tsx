@@ -43,6 +43,7 @@ export function WorkspaceAnalyticsSection({ workspaceId }: { workspaceId: string
         icon={BarChart3}
         title="ยังไม่มีข้อมูลให้วิเคราะห์"
         description="สร้าง issue ในโปรเจกต์ของ workspace นี้เพื่อดูสรุปภาพรวม"
+        className="border-border rounded-xl border border-dashed"
       />
     );
   }

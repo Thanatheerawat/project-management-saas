@@ -44,7 +44,13 @@ export function MemberList({ workspaceId, currentUserId, canManage }: MemberList
   }
 
   if (!members.data || members.data.length === 0) {
-    return <EmptyState icon={Users} title="ไม่พบสมาชิก" />;
+    return (
+      <EmptyState
+        icon={Users}
+        title="ไม่พบสมาชิก"
+        className="border-border rounded-xl border border-dashed"
+      />
+    );
   }
 
   return (

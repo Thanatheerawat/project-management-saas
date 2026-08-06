@@ -57,6 +57,7 @@ export default async function ProjectsPage({
               </Button>
             ) : undefined
           }
+          className="border-border rounded-xl border border-dashed"
         />
       ) : (
         <div className="flex flex-col gap-2">
