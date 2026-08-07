@@ -131,7 +131,7 @@ export function CreateIssueDialog({
                 onChange={(e) =>
                   setPriority(e.target.value as (typeof ISSUE_PRIORITIES)[number])
                 }
-                className="border-input dark:bg-input/30 h-8 rounded-lg border bg-transparent px-2.5 text-sm outline-none"
+                className="border-input dark:bg-input/30 focus-visible:border-ring focus-visible:ring-ring/50 h-8 rounded-lg border bg-transparent px-2.5 text-sm outline-none focus-visible:ring-[3px]"
               >
                 {ISSUE_PRIORITIES.map((p) => (
                   <option key={p} value={p}>
@@ -152,7 +152,7 @@ export function CreateIssueDialog({
                 value={assigneeId}
                 onChange={(e) => setAssigneeId(e.target.value)}
                 disabled={members.isLoading}
-                className="border-input dark:bg-input/30 h-8 rounded-lg border bg-transparent px-2.5 text-sm outline-none"
+                className="border-input dark:bg-input/30 focus-visible:border-ring focus-visible:ring-ring/50 h-8 rounded-lg border bg-transparent px-2.5 text-sm outline-none focus-visible:ring-[3px]"
               >
                 <option value="">ไม่มอบหมาย</option>
                 {members.data?.map((member) => (

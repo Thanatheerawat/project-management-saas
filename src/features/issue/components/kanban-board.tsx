@@ -43,7 +43,7 @@ export function KanbanBoard({
     );
   }
 
-  if (!issues.data) {
+  if (issues.isError || !issues.data) {
     return <p className="text-destructive text-sm">โหลดข้อมูล issue ไม่สำเร็จ</p>;
   }
 

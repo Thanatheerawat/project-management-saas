@@ -36,7 +36,7 @@ export default async function WorkspaceDashboardPage({
 
   return (
     <div className="flex flex-col gap-6">
-      <div>
+      <div className="flex flex-col gap-1">
         <h1 className="text-foreground text-xl font-bold">{workspace.name}</h1>
         {workspace.description && (
           <p className="text-muted-foreground text-sm">{workspace.description}</p>
@@ -45,8 +45,8 @@ export default async function WorkspaceDashboardPage({
 
       <WorkspaceKpiCards workspaceId={workspace.id} projectCount={projects.length} />
 
-      <div>
-        <h2 className="text-foreground mb-3 text-sm font-semibold">โปรเจกต์ล่าสุด</h2>
+      <div className="flex flex-col gap-3">
+        <h2 className="text-foreground text-sm font-semibold">โปรเจกต์ล่าสุด</h2>
         {projects.length === 0 ? (
           <EmptyState
             icon={FolderKanban}
@@ -72,13 +72,13 @@ export default async function WorkspaceDashboardPage({
         )}
       </div>
 
-      <div>
-        <h2 className="text-foreground mb-3 text-sm font-semibold">กิจกรรมล่าสุด</h2>
+      <div className="flex flex-col gap-3">
+        <h2 className="text-foreground text-sm font-semibold">กิจกรรมล่าสุด</h2>
         <RecentActivitySection />
       </div>
 
-      <div>
-        <h2 className="text-foreground mb-3 text-sm font-semibold">ภาพรวม</h2>
+      <div className="flex flex-col gap-3">
+        <h2 className="text-foreground text-sm font-semibold">ภาพรวม</h2>
         <WorkspaceAnalyticsSection workspaceId={workspace.id} />
       </div>
     </div>

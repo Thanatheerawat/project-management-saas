@@ -5,7 +5,7 @@ import Link from "next/link";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Card, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardDescription, CardHeader } from "@/components/ui/card";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useWorkspaces } from "@/features/workspace/hooks/use-workspaces";
@@ -44,12 +44,24 @@ export function WorkspacePicker() {
   return (
     <div className="flex flex-col gap-3">
       {data.map((workspace) => (
-        <Link key={workspace.id} href={`/w/${workspace.slug}`}>
-          <Card className="hover:bg-muted/50 transition-colors">
+        <Link
+          key={workspace.id}
+          href={`/w/${workspace.slug}`}
+          className="focus-visible:ring-ring/50 block rounded-xl outline-none focus-visible:ring-[3px]"
+        >
+          <Card size="sm" className="hover:bg-muted/50 transition-colors">
             <CardHeader>
               <div className="flex items-center justify-between gap-2">
-                <CardTitle>{workspace.name}</CardTitle>
-                <Badge variant="outline">{workspace.role}</Badge>
+                {/* Not CardTitle/a heading: identical text to the
+                  workspace dashboard's own <h1> once navigated to — see
+                  issue-card.tsx's comment for why a heading here would
+                  break e2e navigation assertions. */}
+                <p className="text-foreground min-w-0 truncate text-base leading-snug font-medium">
+                  {workspace.name}
+                </p>
+                <Badge variant="outline" className="shrink-0">
+                  {workspace.role}
+                </Badge>
               </div>
               {workspace.description && (
                 <CardDescription>{workspace.description}</CardDescription>

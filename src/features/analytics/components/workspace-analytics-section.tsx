@@ -29,7 +29,7 @@ export function WorkspaceAnalyticsSection({ workspaceId }: { workspaceId: string
     );
   }
 
-  if (!overview.data || !workload.data) {
+  if (overview.isError || workload.isError || !overview.data || !workload.data) {
     return <p className="text-destructive text-sm">โหลดข้อมูลวิเคราะห์ไม่สำเร็จ</p>;
   }
 
@@ -50,7 +50,7 @@ export function WorkspaceAnalyticsSection({ workspaceId }: { workspaceId: string
 
   return (
     <div className="grid gap-4 sm:grid-cols-2">
-      <Card>
+      <Card size="sm">
         <CardHeader>
           <CardTitle>สถานะ Issue</CardTitle>
         </CardHeader>
@@ -59,7 +59,7 @@ export function WorkspaceAnalyticsSection({ workspaceId }: { workspaceId: string
         </CardContent>
       </Card>
 
-      <Card>
+      <Card size="sm">
         <CardHeader>
           <CardTitle>ระดับความสำคัญ</CardTitle>
         </CardHeader>
@@ -68,7 +68,7 @@ export function WorkspaceAnalyticsSection({ workspaceId }: { workspaceId: string
         </CardContent>
       </Card>
 
-      <Card className="sm:col-span-2">
+      <Card size="sm" className="sm:col-span-2">
         <CardHeader>
           <CardTitle>ภาระงานตามผู้รับผิดชอบ</CardTitle>
         </CardHeader>

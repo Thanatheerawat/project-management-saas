@@ -50,7 +50,7 @@ export function IssueStatusSelect({
           value={currentStatus}
           onChange={(e) => handleChange(e.target.value as IssueStatus)}
           disabled={updateIssue.isPending}
-          className="border-input dark:bg-input/30 h-7 rounded-lg border bg-transparent px-2 text-xs outline-none"
+          className="border-input dark:bg-input/30 focus-visible:border-ring focus-visible:ring-ring/50 h-7 rounded-lg border bg-transparent px-2 text-xs outline-none focus-visible:ring-[3px]"
         >
           {ISSUE_STATUSES.map((status) => (
             <option key={status} value={status}>

@@ -46,6 +46,7 @@ export function AdminWorkspaceList() {
       <EmptyState
         icon={Building2}
         title="ไม่พบ Workspace"
+        description="Workspace ที่สร้างในระบบจะแสดงที่นี่"
         className="border-border rounded-xl border border-dashed"
       />
     );
@@ -54,7 +55,7 @@ export function AdminWorkspaceList() {
   return (
     <div className="flex flex-col gap-3">
       <div className="border-border overflow-hidden rounded-xl border">
-        <Table>
+        <Table aria-label="รายชื่อ Workspace ทั้งหมด">
           <TableHeader>
             <TableRow>
               <TableHead>Workspace</TableHead>

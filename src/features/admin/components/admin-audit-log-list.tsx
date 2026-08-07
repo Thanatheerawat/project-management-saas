@@ -41,7 +41,7 @@ export function AdminAuditLogList() {
         aria-label="กรองตาม Action"
         value={action ?? ""}
         onChange={(e) => handleActionChange(e.target.value)}
-        className="border-input dark:bg-input/30 h-8 w-fit rounded-lg border bg-transparent px-2.5 text-sm outline-none"
+        className="border-input dark:bg-input/30 focus-visible:border-ring focus-visible:ring-ring/50 h-8 w-fit rounded-lg border bg-transparent px-2.5 text-sm outline-none focus-visible:ring-[3px]"
       >
         <option value="">ทุก Action</option>
         {AUDIT_ACTIONS.map((a) => (
@@ -63,12 +63,13 @@ export function AdminAuditLogList() {
         <EmptyState
           icon={ScrollText}
           title="ไม่พบ Audit Log"
+          description="ลองเปลี่ยนตัวกรอง Action"
           className="border-border rounded-xl border border-dashed"
         />
       ) : (
         <div className="flex flex-col gap-3">
           <div className="border-border overflow-hidden rounded-xl border">
-            <Table>
+            <Table aria-label="Audit Log ทั้งหมด">
               <TableHeader>
                 <TableRow>
                   <TableHead>Action</TableHead>

@@ -1,11 +1,13 @@
 "use client";
 
+import { Users } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { EmptyState } from "@/components/ui/empty-state";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useAdminUser } from "@/features/admin/hooks/use-admin-user";
 import { useUpdateAdminUser } from "@/features/admin/hooks/use-update-admin-user";
@@ -82,7 +84,7 @@ export function AdminUserDetail({
 
   return (
     <div className="flex flex-col gap-6">
-      <div>
+      <div className="flex flex-col gap-1">
         <h1 className="text-foreground text-xl font-bold">
           {data.name ?? data.email}
           {isSelf && <span className="text-muted-foreground"> (คุณ)</span>}
@@ -102,7 +104,7 @@ export function AdminUserDetail({
               value={data.role}
               onChange={(e) => handleRoleChange(e.target.value)}
               disabled={!isSuperAdmin || updateUser.isPending}
-              className="border-input dark:bg-input/30 h-8 w-fit rounded-lg border bg-transparent px-2.5 text-sm outline-none disabled:cursor-not-allowed disabled:opacity-50"
+              className="border-input dark:bg-input/30 focus-visible:border-ring focus-visible:ring-ring/50 h-8 w-fit rounded-lg border bg-transparent px-2.5 text-sm outline-none focus-visible:ring-[3px] disabled:cursor-not-allowed disabled:opacity-50"
             >
               {PLATFORM_ROLES.map((role) => (
                 <option key={role} value={role}>
@@ -150,9 +152,7 @@ export function AdminUserDetail({
         </CardHeader>
         <CardContent>
           {data.workspaces.length === 0 ? (
-            <p className="text-muted-foreground text-sm">
-              ไม่ได้เป็นสมาชิก Workspace ใดเลย
-            </p>
+            <EmptyState icon={Users} title="ไม่ได้เป็นสมาชิก Workspace ใดเลย" />
           ) : (
             <div className="flex flex-col gap-2">
               {data.workspaces.map((workspace) => (

@@ -14,9 +14,9 @@ export default function Home() {
         actions={<ThemeToggle />}
       />
       <main className="flex flex-1 items-center">
-        <PageContainer className="py-24 text-center">
-          <h1 className="text-foreground text-2xl font-bold">Orbit</h1>
-          <p className="text-muted-foreground mt-2 text-sm">
+        <PageContainer className="flex flex-col gap-1 py-24 text-center">
+          <h1 className="text-foreground text-xl font-bold">Orbit</h1>
+          <p className="text-muted-foreground text-sm">
             Project &amp; issue tracker for software teams — foundation in progress.
           </p>
         </PageContainer>

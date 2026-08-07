@@ -48,6 +48,7 @@ export function MemberList({ workspaceId, currentUserId, canManage }: MemberList
       <EmptyState
         icon={Users}
         title="ไม่พบสมาชิก"
+        description="สมาชิกใน Workspace นี้จะแสดงที่นี่"
         className="border-border rounded-xl border border-dashed"
       />
     );
@@ -136,7 +137,7 @@ function MemberRow({
             value={member.role}
             onChange={(e) => handleRoleChange(e.target.value)}
             disabled={updateRole.isPending}
-            className="border-input dark:bg-input/30 h-7 rounded-lg border bg-transparent px-2 text-xs outline-none"
+            className="border-input dark:bg-input/30 focus-visible:border-ring focus-visible:ring-ring/50 h-7 rounded-lg border bg-transparent px-2 text-xs outline-none focus-visible:ring-[3px]"
           >
             {ASSIGNABLE_WORKSPACE_ROLES.map((r) => (
               <option key={r} value={r}>

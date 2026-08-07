@@ -58,16 +58,19 @@ export function IssueDetailPanel({
           <Skeleton className="h-32 w-full" />
           <Skeleton className="h-24 w-full" />
         </div>
-        <div className="flex flex-col gap-3">
-          <Skeleton className="h-20 w-full" />
-          <Skeleton className="h-20 w-full" />
-          <Skeleton className="h-20 w-full" />
+        <div className="flex flex-col gap-4">
+          <Skeleton className="h-16 w-full" />
+          <Skeleton className="h-16 w-full" />
+          <Skeleton className="h-16 w-full" />
+          <Skeleton className="h-16 w-full" />
+          <Skeleton className="h-16 w-full" />
+          <Skeleton className="h-16 w-full" />
         </div>
       </div>
     );
   }
 
-  if (!issue.data) {
+  if (issue.isError || !issue.data) {
     return <p className="text-destructive text-sm">โหลดข้อมูล Issue ไม่สำเร็จ</p>;
   }
 
@@ -108,7 +111,7 @@ export function IssueDetailPanel({
           </section>
         </div>
 
-        <aside className="flex flex-col gap-4 lg:col-span-1">
+        <aside className="flex min-w-0 flex-col gap-4 lg:col-span-1">
           <SidebarField label="สถานะ">
             <IssueStatusSelect
               issueId={issueId}
@@ -119,7 +122,7 @@ export function IssueDetailPanel({
 
           <SidebarField label="Priority">
             {data.priority === "NONE" ? (
-              <span className="text-faint text-sm">ไม่ระบุ</span>
+              <span className="text-muted-foreground text-sm">ไม่ระบุ</span>
             ) : (
               <Badge variant="outline">{data.priority}</Badge>
             )}
@@ -139,7 +142,7 @@ export function IssueDetailPanel({
                 </span>
               </div>
             ) : (
-              <span className="text-faint text-sm">ไม่มอบหมาย</span>
+              <span className="text-muted-foreground text-sm">ไม่มอบหมาย</span>
             )}
           </SidebarField>
 
@@ -176,7 +179,7 @@ export function IssueDetailPanel({
 function SidebarField({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <div className="border-border flex flex-col gap-1.5 rounded-xl border p-3">
-      <span className="text-muted-foreground text-xs font-medium">{label}</span>
+      <span className="text-muted-foreground text-xs">{label}</span>
       {children}
     </div>
   );

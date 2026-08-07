@@ -1,7 +1,7 @@
 import Link from "next/link";
 
 import { Badge } from "@/components/ui/badge";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import type { Project } from "@/generated/prisma/client";
 
 // Issue count is deliberately not shown here — Increment 3 only surfaces
@@ -18,16 +18,25 @@ export function RecentProjectCard({
   href: string;
 }) {
   return (
-    <Link href={href}>
+    <Link
+      href={href}
+      className="focus-visible:ring-ring/50 block rounded-xl outline-none focus-visible:ring-[3px]"
+    >
       <Card size="sm" className="hover:bg-muted/50 transition-colors">
         <CardHeader>
           <div className="flex items-start justify-between gap-2">
             <div className="flex min-w-0 flex-col gap-0.5">
               <div className="flex items-center gap-2">
-                <CardTitle className="truncate">{project.name}</CardTitle>
+                {/* Not CardTitle/a heading: identical text to the project
+                  detail page's own <h1> once navigated to — see
+                  issue-card.tsx's comment for why a heading here would
+                  break e2e navigation assertions. */}
+                <p className="text-foreground truncate text-base leading-snug font-medium">
+                  {project.name}
+                </p>
                 <Badge
                   variant="outline"
-                  className="text-faint shrink-0 font-mono text-[10px]"
+                  className="text-muted-foreground shrink-0 font-mono text-[10px]"
                 >
                   {project.key}
                 </Badge>

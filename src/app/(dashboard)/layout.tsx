@@ -42,7 +42,7 @@ export default async function DashboardLayout({
         }
       />
       <main className="flex-1">
-        <PageContainer className="max-w-2xl py-10">{children}</PageContainer>
+        <PageContainer className="max-w-5xl py-10">{children}</PageContainer>
       </main>
     </div>
   );

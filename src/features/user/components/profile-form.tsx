@@ -23,7 +23,7 @@ export function ProfileForm() {
     );
   }
 
-  if (!profile.data) {
+  if (profile.isError || !profile.data) {
     return <p className="text-destructive text-sm">โหลดข้อมูลโปรไฟล์ไม่สำเร็จ</p>;
   }
 

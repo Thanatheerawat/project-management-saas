@@ -52,10 +52,12 @@ export default async function ProjectDetailPage({
       />
 
       <div className="flex items-center justify-between gap-2">
-        <div>
-          <h1 className="text-foreground text-xl font-bold">{project.name}</h1>
+        <div className="flex min-w-0 flex-col gap-1">
+          <h1 className="text-foreground truncate text-xl font-bold">{project.name}</h1>
           {project.description && (
-            <p className="text-muted-foreground text-sm">{project.description}</p>
+            <p className="text-muted-foreground truncate text-sm">
+              {project.description}
+            </p>
           )}
         </div>
         {canEdit && (

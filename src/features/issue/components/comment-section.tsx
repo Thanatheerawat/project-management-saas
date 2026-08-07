@@ -69,6 +69,10 @@ export function CommentSection({
         </div>
       )}
 
+      {comments.isError && (
+        <p className="text-destructive text-sm">โหลดความคิดเห็นไม่สำเร็จ</p>
+      )}
+
       {comments.data?.length === 0 && (
         <p className="text-muted-foreground text-sm">ยังไม่มีความคิดเห็น</p>
       )}

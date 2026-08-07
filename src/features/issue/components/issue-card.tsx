@@ -2,7 +2,7 @@ import Link from "next/link";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { ISSUE_PRIORITY_COLOR } from "@/constants/issue";
 import type { IssueResponse } from "@/features/issue/hooks/use-issues";
@@ -56,7 +56,16 @@ export function IssueCard({
                 </Badge>
               )}
             </div>
-            <CardTitle className="text-sm font-medium">{issue.title}</CardTitle>
+            {/* Deliberately not CardTitle/a heading element: this card's
+              title text is identical to the issue detail page's own <h1>
+              once navigated to, and e2e specs assert
+              `getByRole("heading", { name: issueTitle })` to detect that
+              navigation actually completed — a heading here would let
+              that assertion resolve against the still-visible Kanban
+              card mid-navigation instead of waiting for the real page. */}
+            <p className="text-foreground text-sm leading-snug font-medium">
+              {issue.title}
+            </p>
             {issue.labels.length > 0 && (
               <div className="flex flex-wrap gap-1">
                 {issue.labels.map((label) => (
@@ -91,7 +100,7 @@ export function IssueCard({
               </Tooltip>
             </>
           ) : (
-            <span className="text-faint text-xs">ไม่มอบหมาย</span>
+            <span className="text-muted-foreground text-xs">ไม่มอบหมาย</span>
           )}
         </CardContent>
       </Card>

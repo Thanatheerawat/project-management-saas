@@ -24,7 +24,7 @@ export function ProjectAnalyticsSummary({ projectId }: { projectId: string }) {
     );
   }
 
-  if (!overview.data) {
+  if (overview.isError || !overview.data) {
     return <p className="text-destructive text-sm">โหลดข้อมูลวิเคราะห์ไม่สำเร็จ</p>;
   }
 

@@ -28,7 +28,7 @@ export default async function WorkspaceSettingsPage({
   const canEdit = hasWorkspaceRole(membership.role, "ADMIN");
 
   return (
-    <div className="flex flex-col gap-6">
+    <div className="flex max-w-lg flex-col gap-6">
       <h1 className="text-foreground text-xl font-bold">ตั้งค่า Workspace</h1>
 
       {canEdit ? (
@@ -39,7 +39,7 @@ export default async function WorkspaceSettingsPage({
           initialDescription={workspace.description ?? ""}
         />
       ) : (
-        <div className="flex flex-col gap-4">
+        <div className="flex flex-col gap-3">
           <p className="text-muted-foreground text-sm">
             เฉพาะ Owner หรือ Admin เท่านั้นที่แก้ไขการตั้งค่า Workspace ได้
           </p>

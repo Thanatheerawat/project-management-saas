@@ -26,7 +26,7 @@ export default async function NewProjectPage({
   const { workspace, membership } = resolved;
   if (!hasWorkspaceRole(membership.role, "ADMIN")) {
     return (
-      <div className="flex flex-col gap-4">
+      <div className="flex max-w-lg flex-col gap-6">
         <h1 className="text-foreground text-xl font-bold">สร้างโปรเจกต์</h1>
         <p className="text-muted-foreground text-sm">
           เฉพาะ Owner หรือ Admin เท่านั้นที่สร้างโปรเจกต์ได้
@@ -36,7 +36,7 @@ export default async function NewProjectPage({
   }
 
   return (
-    <div className="flex flex-col gap-6">
+    <div className="flex max-w-lg flex-col gap-6">
       <h1 className="text-foreground text-xl font-bold">สร้างโปรเจกต์ใหม่</h1>
       <CreateProjectForm workspaceId={workspace.id} slug={slug} />
     </div>

@@ -65,8 +65,8 @@ export default async function WorkspaceLayout({
       />
       <div className="flex flex-1">
         <WorkspaceSidebar slug={slug} />
-        <main className="flex-1">
-          <PageContainer className="max-w-3xl py-10">{children}</PageContainer>
+        <main className="min-w-0 flex-1">
+          <PageContainer className="max-w-5xl py-10">{children}</PageContainer>
         </main>
       </div>
     </div>

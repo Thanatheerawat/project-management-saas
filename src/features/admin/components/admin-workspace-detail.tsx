@@ -27,7 +27,7 @@ export function AdminWorkspaceDetail({ workspaceId }: { workspaceId: string }) {
 
   return (
     <div className="flex flex-col gap-6">
-      <div>
+      <div className="flex flex-col gap-1">
         <h1 className="text-foreground text-xl font-bold">{data.name}</h1>
         <p className="text-muted-foreground text-sm">/{data.slug}</p>
       </div>

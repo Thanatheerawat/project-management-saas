@@ -134,7 +134,7 @@ export function IssueLabelSection({
           value={selectedLabelId}
           onChange={(e) => setSelectedLabelId(e.target.value)}
           disabled={workspaceLabels.isLoading || availableToAttach.length === 0}
-          className="border-input dark:bg-input/30 h-7 rounded-lg border bg-transparent px-2 text-xs outline-none"
+          className="border-input dark:bg-input/30 focus-visible:border-ring focus-visible:ring-ring/50 h-7 rounded-lg border bg-transparent px-2 text-xs outline-none focus-visible:ring-[3px]"
         >
           <option value="">
             {availableToAttach.length === 0 ? "ไม่มี Label ให้แนบ" : "เลือก Label"}
@@ -162,7 +162,10 @@ export function IssueLabelSection({
           className="border-border flex items-end gap-2 rounded-lg border border-dashed p-2"
         >
           <div className="flex flex-1 flex-col gap-1">
-            <label htmlFor="new-label-name" className="text-muted-foreground text-xs">
+            <label
+              htmlFor="new-label-name"
+              className="text-foreground text-sm font-medium"
+            >
               ชื่อ Label ใหม่
             </label>
             <Input
@@ -173,7 +176,10 @@ export function IssueLabelSection({
             />
           </div>
           <div className="flex flex-col gap-1">
-            <label htmlFor="new-label-color" className="text-muted-foreground text-xs">
+            <label
+              htmlFor="new-label-color"
+              className="text-foreground text-sm font-medium"
+            >
               สี (hex)
             </label>
             <Input

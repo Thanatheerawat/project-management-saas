@@ -98,7 +98,7 @@ export function EditProjectForm({
           id="project-status"
           value={status}
           onChange={(e) => setStatus(e.target.value as (typeof PROJECT_STATUSES)[number])}
-          className="border-input dark:bg-input/30 h-8 w-fit rounded-lg border bg-transparent px-2.5 text-sm outline-none"
+          className="border-input dark:bg-input/30 focus-visible:border-ring focus-visible:ring-ring/50 h-8 w-fit rounded-lg border bg-transparent px-2.5 text-sm outline-none focus-visible:ring-[3px]"
         >
           {PROJECT_STATUSES.map((s) => (
             <option key={s} value={s}>

@@ -5,7 +5,7 @@ import { notFound } from "next/navigation";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Card, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardHeader } from "@/components/ui/card";
 import { EmptyState } from "@/components/ui/empty-state";
 import { auth } from "@/lib/auth/auth";
 import { resolveWorkspaceForRequest } from "@/lib/auth/workspace-membership";
@@ -62,12 +62,24 @@ export default async function ProjectsPage({
       ) : (
         <div className="flex flex-col gap-2">
           {projects.map((project) => (
-            <Link key={project.id} href={`/w/${slug}/projects/${project.id}`}>
+            <Link
+              key={project.id}
+              href={`/w/${slug}/projects/${project.id}`}
+              className="focus-visible:ring-ring/50 block rounded-xl outline-none focus-visible:ring-[3px]"
+            >
               <Card size="sm" className="hover:bg-muted/50 transition-colors">
                 <CardHeader>
                   <div className="flex items-center justify-between gap-2">
-                    <CardTitle>{project.name}</CardTitle>
-                    <Badge variant="outline">{project.status}</Badge>
+                    {/* Not CardTitle/a heading: identical text to the
+                      project detail page's own <h1> once navigated to —
+                      see issue-card.tsx's comment for why a heading here
+                      would break e2e navigation assertions. */}
+                    <p className="text-foreground min-w-0 truncate text-base leading-snug font-medium">
+                      {project.name}
+                    </p>
+                    <Badge variant="outline" className="shrink-0">
+                      {project.status}
+                    </Badge>
                   </div>
                 </CardHeader>
               </Card>

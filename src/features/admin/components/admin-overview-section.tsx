@@ -22,11 +22,11 @@ export function AdminOverviewSection() {
   if (overview.isLoading) {
     return (
       <div className="flex flex-col gap-4">
-        <div className="grid gap-3 sm:grid-cols-4">
-          <Skeleton className="h-20" />
-          <Skeleton className="h-20" />
-          <Skeleton className="h-20" />
-          <Skeleton className="h-20" />
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
+          <Skeleton className="h-[68px]" />
+          <Skeleton className="h-[68px]" />
+          <Skeleton className="h-[68px]" />
+          <Skeleton className="h-[68px]" />
         </div>
         <div className="grid gap-4 sm:grid-cols-2">
           <Skeleton className="h-56" />
@@ -36,7 +36,7 @@ export function AdminOverviewSection() {
     );
   }
 
-  if (!overview.data) {
+  if (overview.isError || !overview.data) {
     return <p className="text-destructive text-sm">โหลดข้อมูลภาพรวมไม่สำเร็จ</p>;
   }
 
@@ -44,7 +44,7 @@ export function AdminOverviewSection() {
 
   return (
     <div className="flex flex-col gap-4">
-      <div className="grid gap-3 sm:grid-cols-4">
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
         <StatCard label="ผู้ใช้ทั้งหมด" value={userCount} icon={Users} />
         <StatCard label="Workspace ทั้งหมด" value={workspaceCount} icon={Building2} />
         <StatCard label="โปรเจกต์ทั้งหมด" value={projectCount} icon={FolderKanban} />
@@ -52,7 +52,7 @@ export function AdminOverviewSection() {
       </div>
 
       <div className="grid gap-4 sm:grid-cols-2">
-        <Card>
+        <Card size="sm">
           <CardHeader>
             <CardTitle>สถานะ Issue</CardTitle>
           </CardHeader>
@@ -61,7 +61,7 @@ export function AdminOverviewSection() {
           </CardContent>
         </Card>
 
-        <Card>
+        <Card size="sm">
           <CardHeader>
             <CardTitle>ระดับความสำคัญ</CardTitle>
           </CardHeader>

@@ -76,7 +76,7 @@ export function AdminUserList() {
       ) : (
         <div className="flex flex-col gap-3">
           <div className="border-border overflow-hidden rounded-xl border">
-            <Table>
+            <Table aria-label="รายชื่อผู้ใช้ทั้งหมด">
               <TableHeader>
                 <TableRow>
                   <TableHead>ผู้ใช้</TableHead>

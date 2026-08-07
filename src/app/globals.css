@@ -45,8 +45,8 @@
 
   --priority-urgent: #c0392b;
   --priority-high: #b2551e;
-  --priority-medium: #c9a227;
-  --priority-low: #8b9296;
+  --priority-medium: #8a6d1a;
+  --priority-low: #6e7578;
   --priority-none: #c7cbc9;
 
   --radius-sm: 4px;
@@ -87,7 +87,7 @@
   --status-done: #3fb6a4;
   --status-cancelled: #c07f7f;
 
-  --priority-urgent: #d9584a;
+  --priority-urgent: #e05f50;
   --priority-high: #e08a4c;
   --priority-medium: #dbb949;
   --priority-low: #9aa0a3;
@@ -149,4 +149,20 @@ body {
     -apple-system,
     "Segoe UI",
     sans-serif;
+}
+
+/* M6.5 final polish: a user with prefers-reduced-motion set gets every
+   CSS transition/animation in the app (Radix open/close, hover
+   transitions, the loading spinner) collapsed to effectively-instant,
+   the standard universal override — rather than hand-adding
+   `motion-reduce:` to dozens of individual utility classes. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }

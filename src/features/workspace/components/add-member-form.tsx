@@ -71,7 +71,7 @@ export function AddMemberForm({ workspaceId }: { workspaceId: string }) {
           onChange={(e) =>
             setRole(e.target.value as (typeof ASSIGNABLE_WORKSPACE_ROLES)[number])
           }
-          className="border-input dark:bg-input/30 h-8 rounded-lg border bg-transparent px-2.5 text-sm outline-none"
+          className="border-input dark:bg-input/30 focus-visible:border-ring focus-visible:ring-ring/50 h-8 rounded-lg border bg-transparent px-2.5 text-sm outline-none focus-visible:ring-[3px]"
         >
           {ASSIGNABLE_WORKSPACE_ROLES.map((r) => (
             <option key={r} value={r}>
