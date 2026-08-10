@@ -173,7 +173,13 @@ test.describe.serial("Admin dashboard", () => {
     await targetPage.getByLabel("รหัสผ่าน").fill(password);
     await targetPage.getByRole("button", { name: "เข้าสู่ระบบ" }).click();
 
-    await expect(targetPage.getByText("อีเมลหรือรหัสผ่านไม่ถูกต้อง")).toBeVisible();
+    // Scoped to the form, not just getByText: the same message also
+    // appears in a toast (both are the app's established error-feedback
+    // convention — see login-form.tsx), so an unscoped getByText resolves
+    // to two elements.
+    await expect(
+      targetPage.locator("form").getByText("อีเมลหรือรหัสผ่านไม่ถูกต้อง"),
+    ).toBeVisible();
     await expect(targetPage).toHaveURL(/\/login$/);
   });
 

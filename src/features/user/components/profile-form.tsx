@@ -37,12 +37,10 @@ function ProfileFields({ data }: { data: ProfileResponse }) {
   const updateProfile = useUpdateProfile();
   const [name, setName] = useState(data.name ?? "");
   const [error, setError] = useState<string | null>(null);
-  const [saved, setSaved] = useState(false);
 
   async function handleSubmit(event: React.FormEvent) {
     event.preventDefault();
     setError(null);
-    setSaved(false);
 
     const parsed = profileSchema.safeParse({ name });
     if (!parsed.success) {
@@ -52,7 +50,6 @@ function ProfileFields({ data }: { data: ProfileResponse }) {
 
     try {
       await updateProfile.mutateAsync(parsed.data);
-      setSaved(true);
       toast.success("บันทึกโปรไฟล์แล้ว");
     } catch (err) {
       const message = err instanceof ApiError ? err.message : "บันทึกไม่สำเร็จ";
@@ -79,7 +76,6 @@ function ProfileFields({ data }: { data: ProfileResponse }) {
         />
       </div>
       {error && <p className="text-destructive text-sm">{error}</p>}
-      {saved && <p className="text-status-done text-sm">บันทึกโปรไฟล์แล้ว</p>}
       <Button type="submit" disabled={updateProfile.isPending} className="self-start">
         {updateProfile.isPending ? "กำลังบันทึก..." : "บันทึก"}
       </Button>
