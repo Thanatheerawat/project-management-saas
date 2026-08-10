@@ -22,6 +22,13 @@ export function UserMenu() {
 
   return (
     <div className="flex items-center gap-2">
+      {/* Previously missing: Profile had no link back to the app itself,
+          only Logout. "/workspaces" resolves 0/1/many memberships the
+          same way login does, so it's always a valid "back to the app"
+          destination regardless of which workspace the user is in. */}
+      <Button variant="ghost" size="sm" asChild>
+        <Link href="/workspaces">Workspace</Link>
+      </Button>
       <Button variant="ghost" size="sm" asChild>
         <Link href="/profile">โปรไฟล์</Link>
       </Button>

@@ -16,8 +16,12 @@
   --muted-foreground: #62696c;
   --faint: #9aa0a3;
 
-  --accent: #b2551e;
-  --accent-hover: #9a481a;
+  /* Violet brand accent (contrast-verified against WCAG relative-luminance
+     math, not guessed): #7c3aed on white text = 5.70:1, and on this
+     theme's --background = 5.26:1 — both comfortably clear AA's 4.5:1 for
+     normal-size text. */
+  --accent: #7c3aed;
+  --accent-hover: #6d28d9;
   --accent-foreground: #ffffff;
 
   /* shadcn/ui component tokens — mapped onto Orbit's own palette above,
@@ -55,17 +59,25 @@
 }
 
 .dark {
-  --background: #14171a;
-  --surface: #1b1f23;
-  --border: #2c3236;
-  --foreground: #e6e8e6;
-  --muted: #242a2f;
-  --muted-foreground: #9aa3a6;
-  --faint: #6f797c;
+  /* Near-black premium background, not the previous dark-gray — the
+     portfolio-inspired direction calls for genuine near-black, not just
+     "dark mode." */
+  --background: #0a0a0f;
+  --surface: #121218;
+  --border: #26262f;
+  --foreground: #f1f1f5;
+  --muted: #1c1c24;
+  --muted-foreground: #9d9daa;
+  --faint: #6d6d7a;
 
-  --accent: #e08a4c;
-  --accent-hover: #c97a3f;
-  --accent-foreground: #14171a;
+  /* Lighter violet than the light theme's, same convention the previous
+     orange accent already used (dark-mode accents get lighter + paired
+     with dark text, not white) — verified #a78bfa with --accent-foreground
+     below = 7.26:1, and directly as text on this theme's --background =
+     7.26:1 too (same pair, contrast is symmetric). */
+  --accent: #a78bfa;
+  --accent-hover: #8b6ef0;
+  --accent-foreground: #0a0a0f;
 
   --primary: var(--accent);
   --primary-foreground: var(--accent-foreground);
@@ -149,6 +161,23 @@ body {
     -apple-system,
     "Segoe UI",
     sans-serif;
+}
+
+/* Portfolio-inspired public-page texture — pure CSS, no images/deps.
+   Restrained on purpose: low-opacity dots, a single soft glow. Opt-in via
+   class, not applied globally, so the authenticated app's dense data
+   tables/forms stay visually quiet. */
+.bg-dot-grid {
+  background-image: radial-gradient(var(--color-border) 1px, transparent 1px);
+  background-size: 24px 24px;
+}
+
+.bg-hero-glow {
+  background-image: radial-gradient(
+    640px circle at 50% 0%,
+    color-mix(in oklch, var(--color-accent) 16%, transparent),
+    transparent 70%
+  );
 }
 
 /* M6.5 final polish: a user with prefers-reduced-motion set gets every

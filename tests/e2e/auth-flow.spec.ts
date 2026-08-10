@@ -61,9 +61,12 @@ test.describe.serial("Full authentication journey", () => {
     await expect(page).toHaveURL(/\/login\?callbackUrl=%2Fprofile/);
   });
 
-  test("logging back in with the verified account redirects to /profile", async () => {
+  test("logging back in with the verified account redirects to /workspaces", async () => {
     await loginViaUi(page, { email, password });
-    await expect(page).toHaveURL(/\/profile$/);
+    // 0 workspaces throughout this journey (none is ever created), so
+    // login lands on /workspaces itself rather than auto-redirecting into
+    // a specific one.
+    await expect(page).toHaveURL(/\/workspaces$/);
   });
 
   test("profile update persists the new name", async () => {

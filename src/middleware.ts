@@ -42,7 +42,12 @@ export async function middleware(request: NextRequest) {
   }
 
   if (token && AUTH_PAGES.includes(pathname)) {
-    return NextResponse.redirect(new URL("/profile", request.url));
+    // "/workspaces", not "/profile" — same fix as login-form.tsx and
+    // verify-email-panel.tsx: an already-authenticated visitor to /login
+    // or /register belongs in the actual app, not stranded on a settings
+    // page. Only the redirect target changed; the token check itself
+    // (this file's actual job) is untouched.
+    return NextResponse.redirect(new URL("/workspaces", request.url));
   }
 
   return NextResponse.next();

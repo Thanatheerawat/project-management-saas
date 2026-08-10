@@ -31,7 +31,12 @@ export function LoginForm() {
     try {
       await login.mutateAsync(parsed.data);
       toast.success("เข้าสู่ระบบสำเร็จ");
-      router.push(searchParams.get("callbackUrl") ?? "/profile");
+      // "/workspaces" (not "/profile") — it already resolves 0/1/many
+      // memberships correctly (see workspaces/page.tsx), so a plain login
+      // lands the user in the actual app instead of a dead-end settings
+      // page. Only an explicit callbackUrl (e.g. a protected link someone
+      // followed while signed out) overrides this.
+      router.push(searchParams.get("callbackUrl") ?? "/workspaces");
       router.refresh();
     } catch {
       // Same message regardless of whether the email exists or the

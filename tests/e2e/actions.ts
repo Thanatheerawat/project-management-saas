@@ -23,7 +23,11 @@ export async function loginViaUi(
   await page.getByLabel("อีเมล").fill(opts.email);
   await page.getByLabel("รหัสผ่าน").fill(opts.password);
   await page.getByRole("button", { name: "เข้าสู่ระบบ" }).click();
-  await page.waitForURL(/\/profile$/);
+  // "/workspaces" (0 memberships) or straight through to "/w/<slug>" (the
+  // server-side auto-redirect when the user has exactly one membership) —
+  // both are valid post-login landing spots depending on which fixture
+  // called this helper; "/profile" is no longer the destination at all.
+  await page.waitForURL(/\/(workspaces|w\/)/);
 }
 
 export async function logoutViaUi(page: Page): Promise<void> {

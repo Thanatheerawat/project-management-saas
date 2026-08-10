@@ -21,8 +21,11 @@ export function VerifyEmailPanel() {
     return (
       <div className="flex flex-col gap-4">
         <p className="text-foreground text-sm">ยืนยันอีเมลสำเร็จแล้ว</p>
+        {/* "/workspaces", not "/profile" — same reasoning as login-form.tsx:
+            it already resolves 0/1/many memberships into the actual app
+            instead of stranding a brand-new user on a settings page. */}
         <Button asChild>
-          <Link href="/profile">ไปที่โปรไฟล์</Link>
+          <Link href="/workspaces">ไปที่ Workspace</Link>
         </Button>
       </div>
     );

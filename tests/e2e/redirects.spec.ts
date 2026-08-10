@@ -13,7 +13,7 @@ test.describe("Auth redirects", () => {
     await expect(page.getByRole("heading", { name: "เข้าสู่ระบบ" })).toBeVisible();
   });
 
-  test("an authenticated user visiting /login is redirected straight to /profile", async ({
+  test("an authenticated user visiting /login is redirected straight to /workspaces", async ({
     page,
   }) => {
     const email = uniqueEmail("e2e-redirect-login");
@@ -26,13 +26,16 @@ test.describe("Auth redirects", () => {
 
       await page.goto("/login");
 
-      await expect(page).toHaveURL(/\/profile$/);
+      // 0 workspaces at this point (registration alone doesn't create
+      // one), so /workspaces stays put rather than auto-redirecting
+      // further into a specific workspace.
+      await expect(page).toHaveURL(/\/workspaces$/);
     } finally {
       await deleteTestUser(email);
     }
   });
 
-  test("an authenticated user visiting /register is redirected straight to /profile", async ({
+  test("an authenticated user visiting /register is redirected straight to /workspaces", async ({
     page,
   }) => {
     const email = uniqueEmail("e2e-redirect-register");
@@ -45,7 +48,7 @@ test.describe("Auth redirects", () => {
 
       await page.goto("/register");
 
-      await expect(page).toHaveURL(/\/profile$/);
+      await expect(page).toHaveURL(/\/workspaces$/);
     } finally {
       await deleteTestUser(email);
     }

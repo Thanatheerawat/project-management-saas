@@ -28,7 +28,11 @@ export default async function DashboardLayout({
   return (
     <div className="flex min-h-screen flex-col">
       <Navbar
-        brand={<span className="text-foreground text-sm font-bold">Orbit</span>}
+        brand={
+          <Link href="/workspaces" className="text-foreground text-sm font-bold">
+            Orbit
+          </Link>
+        }
         actions={
           <>
             {isAdmin && (
