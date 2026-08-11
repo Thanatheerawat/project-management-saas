@@ -29,11 +29,11 @@ export function WorkspacePicker() {
     return (
       <EmptyState
         icon={FolderKanban}
-        title="ยังไม่มี Workspace"
-        description="สร้าง Workspace แรกของคุณเพื่อเริ่มจัดการโปรเจกต์"
+        title="No workspaces yet"
+        description="Create your first workspace to start managing projects"
         action={
           <Button asChild>
-            <Link href="/workspaces/new">สร้าง Workspace</Link>
+            <Link href="/workspaces/new">Create Workspace</Link>
           </Button>
         }
         className="border-border rounded-xl border border-dashed"
@@ -71,7 +71,7 @@ export function WorkspacePicker() {
         </Link>
       ))}
       <Button variant="outline" asChild className="self-start">
-        <Link href="/workspaces/new">+ สร้าง Workspace ใหม่</Link>
+        <Link href="/workspaces/new">+ Create New Workspace</Link>
       </Button>
     </div>
   );

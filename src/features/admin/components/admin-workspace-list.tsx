@@ -38,15 +38,15 @@ export function AdminWorkspaceList() {
   }
 
   if (isError || !data) {
-    return <p className="text-destructive text-sm">โหลดรายชื่อ Workspace ไม่สำเร็จ</p>;
+    return <p className="text-destructive text-sm">Failed to load workspaces</p>;
   }
 
   if (data.items.length === 0) {
     return (
       <EmptyState
         icon={Building2}
-        title="ไม่พบ Workspace"
-        description="Workspace ที่สร้างในระบบจะแสดงที่นี่"
+        title="No workspaces found"
+        description="Workspaces created in the system will appear here"
         className="border-border rounded-xl border border-dashed"
       />
     );
@@ -55,14 +55,14 @@ export function AdminWorkspaceList() {
   return (
     <div className="flex flex-col gap-3">
       <div className="border-border overflow-hidden rounded-xl border">
-        <Table aria-label="รายชื่อ Workspace ทั้งหมด">
+        <Table aria-label="All workspaces">
           <TableHeader>
             <TableRow>
               <TableHead>Workspace</TableHead>
-              <TableHead>เจ้าของ</TableHead>
-              <TableHead className="text-right">สมาชิก</TableHead>
-              <TableHead className="text-right">โปรเจกต์</TableHead>
-              <TableHead className="text-right">สร้างเมื่อ</TableHead>
+              <TableHead>Owner</TableHead>
+              <TableHead className="text-right">Members</TableHead>
+              <TableHead className="text-right">Projects</TableHead>
+              <TableHead className="text-right">Created</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -91,7 +91,7 @@ export function AdminWorkspaceList() {
                   {workspace.projectCount}
                 </TableCell>
                 <TableCell className="text-muted-foreground text-right text-xs">
-                  {new Date(workspace.createdAt).toLocaleDateString("th-TH")}
+                  {new Date(workspace.createdAt).toLocaleDateString("en-US")}
                 </TableCell>
               </TableRow>
             ))}

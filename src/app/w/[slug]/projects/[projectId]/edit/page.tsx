@@ -7,7 +7,7 @@ import { resolveWorkspaceForRequest } from "@/lib/auth/workspace-membership";
 import { hasWorkspaceRole } from "@/lib/auth/workspace-rbac";
 import { projectRepository } from "@/repositories/workspace/project.repository";
 
-export const metadata: Metadata = { title: "แก้ไขโปรเจกต์ — Orbit" };
+export const metadata: Metadata = { title: "Edit Project — Orbit" };
 
 export default async function EditProjectPage({
   params,
@@ -33,10 +33,10 @@ export default async function EditProjectPage({
     return (
       <div className="flex max-w-lg flex-col gap-6">
         <h1 className="text-foreground text-2xl font-bold tracking-tight">
-          แก้ไขโปรเจกต์
+          Edit Project
         </h1>
         <p className="text-muted-foreground text-sm">
-          เฉพาะ Owner หรือ Admin เท่านั้นที่แก้ไขโปรเจกต์ได้
+          Only the Owner or Admin can edit this project
         </p>
       </div>
     );
@@ -44,7 +44,7 @@ export default async function EditProjectPage({
 
   return (
     <div className="flex max-w-lg flex-col gap-6">
-      <h1 className="text-foreground text-2xl font-bold tracking-tight">แก้ไขโปรเจกต์</h1>
+      <h1 className="text-foreground text-2xl font-bold tracking-tight">Edit Project</h1>
       <EditProjectForm
         slug={slug}
         projectId={project.id}

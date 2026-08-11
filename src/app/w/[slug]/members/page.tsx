@@ -7,7 +7,7 @@ import { auth } from "@/lib/auth/auth";
 import { resolveWorkspaceForRequest } from "@/lib/auth/workspace-membership";
 import { hasWorkspaceRole } from "@/lib/auth/workspace-rbac";
 
-export const metadata: Metadata = { title: "สมาชิก — Orbit" };
+export const metadata: Metadata = { title: "Members — Orbit" };
 
 export default async function WorkspaceMembersPage({
   params,
@@ -26,7 +26,7 @@ export default async function WorkspaceMembersPage({
 
   return (
     <div className="flex flex-col gap-6">
-      <h1 className="text-foreground text-2xl font-bold tracking-tight">สมาชิก</h1>
+      <h1 className="text-foreground text-2xl font-bold tracking-tight">Members</h1>
 
       {canManage && <AddMemberForm workspaceId={workspace.id} />}
 

@@ -3,6 +3,7 @@
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
+import { ISSUE_PRIORITY_LABEL } from "@/constants/issue";
 import { CommentSection } from "@/features/issue/components/comment-section";
 import { EditIssueForm } from "@/features/issue/components/edit-issue-form";
 import { IssueLabelSection } from "@/features/issue/components/issue-label-section";
@@ -71,7 +72,7 @@ export function IssueDetailPanel({
   }
 
   if (issue.isError || !issue.data) {
-    return <p className="text-destructive text-sm">โหลดข้อมูล Issue ไม่สำเร็จ</p>;
+    return <p className="text-destructive text-sm">Failed to load issue</p>;
   }
 
   const data = issue.data;
@@ -91,7 +92,7 @@ export function IssueDetailPanel({
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
         <div className="flex min-w-0 flex-col gap-6 lg:col-span-2">
           <section className="flex flex-col gap-2">
-            <h2 className="text-foreground text-sm font-semibold">แก้ไข Issue</h2>
+            <h2 className="text-foreground text-sm font-semibold">Edit Issue</h2>
             <EditIssueForm
               issueId={issueId}
               projectId={projectId}
@@ -104,7 +105,7 @@ export function IssueDetailPanel({
           </section>
 
           <section className="flex flex-col gap-2">
-            <h2 className="text-foreground text-sm font-semibold">ความคิดเห็น</h2>
+            <h2 className="text-foreground text-sm font-semibold">Comments</h2>
             <CommentSection
               issueId={issueId}
               currentUserId={currentUserId}
@@ -114,7 +115,7 @@ export function IssueDetailPanel({
         </div>
 
         <aside className="flex min-w-0 flex-col gap-4 lg:col-span-1">
-          <SidebarField label="สถานะ">
+          <SidebarField label="Status">
             <IssueStatusSelect
               issueId={issueId}
               projectId={projectId}
@@ -124,13 +125,13 @@ export function IssueDetailPanel({
 
           <SidebarField label="Priority">
             {data.priority === "NONE" ? (
-              <span className="text-muted-foreground text-sm">ไม่ระบุ</span>
+              <span className="text-muted-foreground text-sm">None</span>
             ) : (
-              <Badge variant="outline">{data.priority}</Badge>
+              <Badge variant="outline">{ISSUE_PRIORITY_LABEL[data.priority]}</Badge>
             )}
           </SidebarField>
 
-          <SidebarField label="ผู้รับผิดชอบ">
+          <SidebarField label="Assignee">
             {assignee ? (
               <div className="flex items-center gap-2">
                 <Avatar className="size-6">
@@ -144,7 +145,7 @@ export function IssueDetailPanel({
                 </span>
               </div>
             ) : (
-              <span className="text-muted-foreground text-sm">ไม่มอบหมาย</span>
+              <span className="text-muted-foreground text-sm">Unassigned</span>
             )}
           </SidebarField>
 
@@ -157,15 +158,15 @@ export function IssueDetailPanel({
             />
           </SidebarField>
 
-          <SidebarField label="สร้างเมื่อ">
+          <SidebarField label="Created">
             <span className="text-foreground text-sm">
-              {new Date(data.createdAt).toLocaleString("th-TH")}
+              {new Date(data.createdAt).toLocaleString("en-US")}
             </span>
           </SidebarField>
 
-          <SidebarField label="อัปเดตล่าสุด">
+          <SidebarField label="Updated">
             <span className="text-foreground text-sm">
-              {new Date(data.updatedAt).toLocaleString("th-TH")}
+              {new Date(data.updatedAt).toLocaleString("en-US")}
             </span>
           </SidebarField>
         </aside>

@@ -31,26 +31,26 @@ test.describe.serial("Workspace settings", () => {
     await registerViaUi(page, { name: "Settings Flow User", email, password });
 
     await page.goto("/workspaces/new");
-    await page.getByLabel("ชื่อ Workspace").fill(originalName);
-    await page.getByRole("button", { name: "สร้าง Workspace" }).click();
+    await page.getByLabel("Workspace Name").fill(originalName);
+    await page.getByRole("button", { name: "Create Workspace" }).click();
     await expect(page).toHaveURL(new RegExp(`/w/${originalName}$`));
   });
 
   test("the settings form is pre-filled with the current name, slug, and blank description", async () => {
     await page.goto(`/w/${originalName}/settings`);
 
-    await expect(page.getByLabel("ชื่อ Workspace")).toHaveValue(originalName);
+    await expect(page.getByLabel("Workspace Name")).toHaveValue(originalName);
     await expect(page.getByLabel("Slug (URL)")).toHaveValue(originalName);
   });
 
   test("editing name, slug, and description saves and follows the rename to the new URL", async () => {
-    await page.getByLabel("ชื่อ Workspace").fill(renamedName);
+    await page.getByLabel("Workspace Name").fill(renamedName);
     await page.getByLabel("Slug (URL)").fill(renamedName);
-    await page.getByLabel("คำอธิบาย (ถ้ามี)").fill("Updated via e2e");
-    await page.getByRole("button", { name: "บันทึก" }).click();
+    await page.getByLabel("Description (optional)").fill("Updated via e2e");
+    await page.getByRole("button", { name: "Save" }).click();
 
     await expect(page).toHaveURL(new RegExp(`/w/${renamedName}/settings$`));
-    await expect(page.getByText("บันทึกการตั้งค่าแล้ว")).toBeVisible();
+    await expect(page.getByText("Settings saved")).toBeVisible();
   });
 
   test("the dashboard reflects the new name and description after the rename", async () => {
@@ -68,6 +68,6 @@ test.describe.serial("Workspace settings", () => {
 
   test("the old slug no longer resolves (404, since the workspace was renamed, not duplicated)", async () => {
     await page.goto(`/w/${originalName}`);
-    await expect(page.getByRole("heading", { name: "ไม่พบหน้านี้" })).toBeVisible();
+    await expect(page.getByRole("heading", { name: "Page Not Found" })).toBeVisible();
   });
 });

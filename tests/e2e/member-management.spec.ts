@@ -47,15 +47,15 @@ test.describe.serial("Member management", () => {
     });
 
     await ownerPage.goto("/workspaces/new");
-    await ownerPage.getByLabel("ชื่อ Workspace").fill(workspaceName);
-    await ownerPage.getByRole("button", { name: "สร้าง Workspace" }).click();
+    await ownerPage.getByLabel("Workspace Name").fill(workspaceName);
+    await ownerPage.getByRole("button", { name: "Create Workspace" }).click();
     await expect(ownerPage).toHaveURL(new RegExp(`/w/${workspaceName}$`));
   });
 
   test("the owner adds the target user as a MEMBER by email", async () => {
     await ownerPage.goto(`/w/${workspaceName}/members`);
-    await ownerPage.getByLabel("อีเมลสมาชิก").fill(memberEmail);
-    await ownerPage.getByRole("button", { name: "เพิ่มสมาชิก" }).click();
+    await ownerPage.getByLabel("Member Email").fill(memberEmail);
+    await ownerPage.getByRole("button", { name: "Add Member" }).click();
 
     await expect(ownerPage.getByText("Member Mgmt Target")).toBeVisible();
   });
@@ -63,32 +63,34 @@ test.describe.serial("Member management", () => {
   test("the member sees themselves in the list but not the add-member form (MEMBER has no manage rights)", async () => {
     await memberPage.goto(`/w/${workspaceName}/members`);
 
-    await expect(memberPage.getByText("(คุณ)")).toBeVisible();
+    await expect(memberPage.getByText("(you)")).toBeVisible();
     await expect(
-      memberPage.getByRole("button", { name: "ออกจาก Workspace" }),
+      memberPage.getByRole("button", { name: "Leave Workspace" }),
     ).toBeVisible();
-    await expect(memberPage.getByLabel("อีเมลสมาชิก")).toHaveCount(0);
+    await expect(memberPage.getByLabel("Member Email")).toHaveCount(0);
   });
 
   test("the owner promotes the member to ADMIN", async () => {
-    await ownerPage.getByLabel(/เปลี่ยน role ของ/).selectOption("ADMIN");
-    await expect(ownerPage.getByLabel(/เปลี่ยน role ของ/)).toHaveValue("ADMIN");
+    await ownerPage.getByLabel(/Change role for/).selectOption("ADMIN");
+    await expect(ownerPage.getByLabel(/Change role for/)).toHaveValue("ADMIN");
   });
 
   test("after promotion, the member now sees the add-member form", async () => {
     await memberPage.reload();
-    await expect(memberPage.getByLabel("อีเมลสมาชิก")).toBeVisible();
+    await expect(memberPage.getByLabel("Member Email")).toBeVisible();
   });
 
   test("the owner removes the member via the confirm dialog", async () => {
-    await ownerPage.getByRole("button", { name: "ลบ" }).click();
-    await ownerPage.getByRole("button", { name: "ยืนยัน" }).click();
+    await ownerPage.getByRole("button", { name: "Remove" }).click();
+    await ownerPage.getByRole("button", { name: "Confirm" }).click();
 
     await expect(ownerPage.getByText("Member Mgmt Target")).toHaveCount(0);
   });
 
   test("the removed member loses access to the workspace entirely (404, not a permission error)", async () => {
     await memberPage.goto(`/w/${workspaceName}/members`);
-    await expect(memberPage.getByRole("heading", { name: "ไม่พบหน้านี้" })).toBeVisible();
+    await expect(
+      memberPage.getByRole("heading", { name: "Page Not Found" }),
+    ).toBeVisible();
   });
 });

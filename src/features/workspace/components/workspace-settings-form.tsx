@@ -44,7 +44,7 @@ export function WorkspaceSettingsForm({
       description: description || undefined,
     });
     if (!parsed.success) {
-      setError(parsed.error.issues[0]?.message ?? "ข้อมูลไม่ถูกต้อง");
+      setError(parsed.error.issues[0]?.message ?? "Invalid input");
       return;
     }
 
@@ -54,7 +54,7 @@ export function WorkspaceSettingsForm({
       // slug changes, router.push swaps in a whole new /w/[slug]/settings
       // page (different dynamic param, so this component remounts fresh
       // and any local "saved" state would be lost before it ever rendered).
-      toast.success("บันทึกการตั้งค่าแล้ว");
+      toast.success("Settings saved");
       if (updated.slug !== initialSlug) {
         // The URL (/w/[slug]/settings) is keyed on the old slug — follow the
         // rename to the new one instead of leaving the page on a stale URL.
@@ -62,7 +62,7 @@ export function WorkspaceSettingsForm({
       }
       router.refresh();
     } catch (err) {
-      const message = err instanceof ApiError ? err.message : "บันทึกไม่สำเร็จ";
+      const message = err instanceof ApiError ? err.message : "Failed to save";
       setError(message);
       toast.error(message);
     }
@@ -72,7 +72,7 @@ export function WorkspaceSettingsForm({
     <form onSubmit={handleSubmit} className="flex flex-col gap-4">
       <div className="flex flex-col gap-1.5">
         <label htmlFor="name" className="text-foreground text-sm font-medium">
-          ชื่อ Workspace
+          Workspace Name
         </label>
         <Input
           id="name"
@@ -94,7 +94,7 @@ export function WorkspaceSettingsForm({
       </div>
       <div className="flex flex-col gap-1.5">
         <label htmlFor="description" className="text-foreground text-sm font-medium">
-          คำอธิบาย (ถ้ามี)
+          Description (optional)
         </label>
         <Input
           id="description"
@@ -104,7 +104,7 @@ export function WorkspaceSettingsForm({
       </div>
       {error && <p className="text-destructive text-sm">{error}</p>}
       <Button type="submit" disabled={updateWorkspace.isPending} className="self-start">
-        {updateWorkspace.isPending ? "กำลังบันทึก..." : "บันทึก"}
+        {updateWorkspace.isPending ? "Saving..." : "Save"}
       </Button>
     </form>
   );

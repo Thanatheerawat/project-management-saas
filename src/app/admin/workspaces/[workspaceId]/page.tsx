@@ -3,7 +3,7 @@ import type { Metadata } from "next";
 import { Breadcrumb } from "@/components/layout/breadcrumb";
 import { AdminWorkspaceDetail } from "@/features/admin/components/admin-workspace-detail";
 
-export const metadata: Metadata = { title: "รายละเอียด Workspace — Orbit Admin" };
+export const metadata: Metadata = { title: "Workspace Details — Orbit Admin" };
 
 export default async function AdminWorkspaceDetailPage({
   params,
@@ -15,10 +15,7 @@ export default async function AdminWorkspaceDetailPage({
   return (
     <div className="flex flex-col gap-6">
       <Breadcrumb
-        items={[
-          { label: "Workspace", href: "/admin/workspaces" },
-          { label: "รายละเอียด" },
-        ]}
+        items={[{ label: "Workspace", href: "/admin/workspaces" }, { label: "Details" }]}
       />
       <AdminWorkspaceDetail workspaceId={workspaceId} />
     </div>

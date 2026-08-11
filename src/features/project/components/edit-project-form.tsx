@@ -6,6 +6,7 @@ import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { PROJECT_STATUS_LABEL } from "@/constants/project";
 import { useUpdateProject } from "@/features/project/hooks/use-update-project";
 import {
   PROJECT_STATUSES,
@@ -48,17 +49,17 @@ export function EditProjectForm({
       status,
     });
     if (!parsed.success) {
-      setError(parsed.error.issues[0]?.message ?? "ข้อมูลไม่ถูกต้อง");
+      setError(parsed.error.issues[0]?.message ?? "Invalid input");
       return;
     }
 
     try {
       await updateProject.mutateAsync(parsed.data);
-      toast.success("บันทึกโปรเจกต์แล้ว");
+      toast.success("Project saved");
       router.push(`/w/${slug}/projects/${projectId}`);
       router.refresh();
     } catch (err) {
-      const message = err instanceof ApiError ? err.message : "บันทึกไม่สำเร็จ";
+      const message = err instanceof ApiError ? err.message : "Failed to save";
       setError(message);
       toast.error(message);
     }
@@ -68,7 +69,7 @@ export function EditProjectForm({
     <form onSubmit={handleSubmit} className="flex flex-col gap-4">
       <div className="flex flex-col gap-1.5">
         <label htmlFor="project-name" className="text-foreground text-sm font-medium">
-          ชื่อโปรเจกต์
+          Project Name
         </label>
         <Input
           id="project-name"
@@ -82,7 +83,7 @@ export function EditProjectForm({
           htmlFor="project-description"
           className="text-foreground text-sm font-medium"
         >
-          คำอธิบาย (ถ้ามี)
+          Description (optional)
         </label>
         <Input
           id="project-description"
@@ -92,7 +93,7 @@ export function EditProjectForm({
       </div>
       <div className="flex flex-col gap-1.5">
         <label htmlFor="project-status" className="text-foreground text-sm font-medium">
-          สถานะ
+          Status
         </label>
         <select
           id="project-status"
@@ -102,14 +103,14 @@ export function EditProjectForm({
         >
           {PROJECT_STATUSES.map((s) => (
             <option key={s} value={s}>
-              {s}
+              {PROJECT_STATUS_LABEL[s]}
             </option>
           ))}
         </select>
       </div>
       {error && <p className="text-destructive text-sm">{error}</p>}
       <Button type="submit" disabled={updateProject.isPending} className="self-start">
-        {updateProject.isPending ? "กำลังบันทึก..." : "บันทึก"}
+        {updateProject.isPending ? "Saving..." : "Save"}
       </Button>
     </form>
   );

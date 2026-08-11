@@ -17,10 +17,10 @@ export function WorkspaceSidebar({ slug }: { slug: string }) {
   return (
     <Sidebar
       items={[
-        { label: "แดชบอร์ด", href: `/w/${slug}`, icon: LayoutDashboard },
-        { label: "โปรเจกต์", href: `/w/${slug}/projects`, icon: FolderKanban },
-        { label: "สมาชิก", href: `/w/${slug}/members`, icon: Users },
-        { label: "ตั้งค่า", href: `/w/${slug}/settings`, icon: Settings },
+        { label: "Dashboard", href: `/w/${slug}`, icon: LayoutDashboard },
+        { label: "Projects", href: `/w/${slug}/projects`, icon: FolderKanban },
+        { label: "Members", href: `/w/${slug}/members`, icon: Users },
+        { label: "Settings", href: `/w/${slug}/settings`, icon: Settings },
       ]}
       activeHref={pathname}
     />

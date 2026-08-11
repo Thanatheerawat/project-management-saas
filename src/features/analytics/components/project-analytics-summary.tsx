@@ -25,15 +25,15 @@ export function ProjectAnalyticsSummary({ projectId }: { projectId: string }) {
   }
 
   if (overview.isError || !overview.data) {
-    return <p className="text-destructive text-sm">โหลดข้อมูลวิเคราะห์ไม่สำเร็จ</p>;
+    return <p className="text-destructive text-sm">Failed to load analytics</p>;
   }
 
   if (overview.data.total === 0) {
     return (
       <EmptyState
         icon={BarChart3}
-        title="ยังไม่มีข้อมูลให้วิเคราะห์"
-        description="สร้าง issue ในโปรเจกต์นี้เพื่อดูสรุปภาพรวม"
+        title="No data to analyze yet"
+        description="Create issues in this project to see an overview"
         className="border-border rounded-xl border border-dashed"
       />
     );
@@ -43,7 +43,7 @@ export function ProjectAnalyticsSummary({ projectId }: { projectId: string }) {
     <div className="grid gap-4 sm:grid-cols-2">
       <Card size="sm">
         <CardHeader>
-          <CardTitle>สถานะ Issue</CardTitle>
+          <CardTitle>Issue Status</CardTitle>
         </CardHeader>
         <CardContent>
           <StatusBreakdownChart data={overview.data.byStatus} />
@@ -52,7 +52,7 @@ export function ProjectAnalyticsSummary({ projectId }: { projectId: string }) {
 
       <Card size="sm">
         <CardHeader>
-          <CardTitle>ระดับความสำคัญ</CardTitle>
+          <CardTitle>Priority</CardTitle>
         </CardHeader>
         <CardContent>
           <PriorityBreakdownChart data={overview.data.byPriority} />

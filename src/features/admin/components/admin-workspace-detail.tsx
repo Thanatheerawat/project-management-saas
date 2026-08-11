@@ -22,7 +22,7 @@ export function AdminWorkspaceDetail({ workspaceId }: { workspaceId: string }) {
   }
 
   if (isError || !data) {
-    return <p className="text-destructive text-sm">โหลดข้อมูล Workspace ไม่สำเร็จ</p>;
+    return <p className="text-destructive text-sm">Failed to load workspace</p>;
   }
 
   return (
@@ -34,16 +34,16 @@ export function AdminWorkspaceDetail({ workspaceId }: { workspaceId: string }) {
 
       <Card>
         <CardHeader>
-          <CardTitle>รายละเอียด</CardTitle>
+          <CardTitle>Details</CardTitle>
         </CardHeader>
         <CardContent className="flex flex-col gap-3">
-          <DetailRow label="เจ้าของ" value={data.ownerName ?? "—"} />
-          <DetailRow label="อีเมลเจ้าของ" value={data.ownerEmail ?? "—"} />
-          <DetailRow label="จำนวนสมาชิก" value={String(data.memberCount)} />
-          <DetailRow label="จำนวนโปรเจกต์" value={String(data.projectCount)} />
+          <DetailRow label="Owner" value={data.ownerName ?? "—"} />
+          <DetailRow label="Owner Email" value={data.ownerEmail ?? "—"} />
+          <DetailRow label="Member Count" value={String(data.memberCount)} />
+          <DetailRow label="Project Count" value={String(data.projectCount)} />
           <DetailRow
-            label="สร้างเมื่อ"
-            value={new Date(data.createdAt).toLocaleDateString("th-TH")}
+            label="Created"
+            value={new Date(data.createdAt).toLocaleDateString("en-US")}
           />
         </CardContent>
       </Card>

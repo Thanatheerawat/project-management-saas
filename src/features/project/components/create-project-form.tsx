@@ -32,17 +32,17 @@ export function CreateProjectForm({
       description: description || undefined,
     });
     if (!parsed.success) {
-      setError(parsed.error.issues[0]?.message ?? "ข้อมูลไม่ถูกต้อง");
+      setError(parsed.error.issues[0]?.message ?? "Invalid input");
       return;
     }
 
     try {
       const project = await createProject.mutateAsync(parsed.data);
-      toast.success("สร้างโปรเจกต์แล้ว");
+      toast.success("Project created");
       router.push(`/w/${slug}/projects/${project.id}`);
       router.refresh();
     } catch (err) {
-      const message = err instanceof ApiError ? err.message : "สร้างโปรเจกต์ไม่สำเร็จ";
+      const message = err instanceof ApiError ? err.message : "Failed to create project";
       setError(message);
       toast.error(message);
     }
@@ -52,7 +52,7 @@ export function CreateProjectForm({
     <form onSubmit={handleSubmit} className="flex flex-col gap-4">
       <div className="flex flex-col gap-1.5">
         <label htmlFor="project-name" className="text-foreground text-sm font-medium">
-          ชื่อโปรเจกต์
+          Project Name
         </label>
         <Input
           id="project-name"
@@ -66,7 +66,7 @@ export function CreateProjectForm({
           htmlFor="project-description"
           className="text-foreground text-sm font-medium"
         >
-          คำอธิบาย (ถ้ามี)
+          Description (optional)
         </label>
         <Input
           id="project-description"
@@ -76,7 +76,7 @@ export function CreateProjectForm({
       </div>
       {error && <p className="text-destructive text-sm">{error}</p>}
       <Button type="submit" disabled={createProject.isPending} className="self-start">
-        {createProject.isPending ? "กำลังสร้าง..." : "สร้างโปรเจกต์"}
+        {createProject.isPending ? "Creating..." : "Create Project"}
       </Button>
     </form>
   );

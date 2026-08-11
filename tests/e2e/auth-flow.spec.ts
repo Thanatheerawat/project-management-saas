@@ -26,10 +26,10 @@ test.describe.serial("Full authentication journey", () => {
 
   test("register creates an account, signs the user in, and lands on the mock verify-email link", async () => {
     await page.goto("/register");
-    await page.getByLabel("ชื่อ").fill("E2E Journey User");
-    await page.getByLabel("อีเมล").fill(email);
-    await page.getByLabel("รหัสผ่าน").fill(password);
-    await page.getByRole("button", { name: "สร้างบัญชี" }).click();
+    await page.getByLabel("Name").fill("E2E Journey User");
+    await page.getByLabel("Email").fill(email);
+    await page.getByLabel("Password").fill(password);
+    await page.getByRole("button", { name: "Create Account" }).click();
 
     await page.waitForURL(/\/verify-email\?/);
     const url = new URL(page.url());
@@ -41,13 +41,13 @@ test.describe.serial("Full authentication journey", () => {
   test("the freshly registered session already has access to the protected profile route", async () => {
     await page.goto("/profile");
     await expect(page).toHaveURL(/\/profile$/);
-    await expect(page.getByRole("heading", { name: "โปรไฟล์" })).toBeVisible();
+    await expect(page.getByRole("heading", { name: "Profile" })).toBeVisible();
   });
 
   test("email verification (mock) succeeds", async () => {
     await page.goto(mockVerifyPath);
-    await page.getByRole("button", { name: "ยืนยันอีเมล" }).click();
-    await expect(page.getByText("ยืนยันอีเมลสำเร็จแล้ว")).toBeVisible();
+    await page.getByRole("button", { name: "Verify Email" }).click();
+    await expect(page.getByText("Email verified successfully")).toBeVisible();
   });
 
   test("logout ends the session", async () => {
@@ -71,14 +71,14 @@ test.describe.serial("Full authentication journey", () => {
 
   test("profile update persists the new name", async () => {
     await page.goto("/profile");
-    const nameInput = page.getByLabel("ชื่อ");
+    const nameInput = page.getByLabel("Name");
     await nameInput.fill("Updated E2E Name");
-    await page.getByRole("button", { name: "บันทึก" }).click();
+    await page.getByRole("button", { name: "Save" }).click();
 
-    await expect(page.getByText("บันทึกโปรไฟล์แล้ว")).toBeVisible();
+    await expect(page.getByText("Profile saved")).toBeVisible();
 
     await page.reload();
-    await expect(page.getByLabel("ชื่อ")).toHaveValue("Updated E2E Name");
+    await expect(page.getByLabel("Name")).toHaveValue("Updated E2E Name");
   });
 
   test("final logout blocks protected route access again", async () => {

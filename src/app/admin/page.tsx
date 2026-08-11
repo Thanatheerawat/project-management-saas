@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 
 import { AdminOverviewSection } from "@/features/admin/components/admin-overview-section";
 
-export const metadata: Metadata = { title: "ภาพรวมระบบ — Orbit Admin" };
+export const metadata: Metadata = { title: "System Overview — Orbit Admin" };
 
 // Thin Server Component — data comes entirely from the Increment 5 hooks
 // inside AdminOverviewSection, no repository call here (unlike most other
@@ -10,7 +10,9 @@ export const metadata: Metadata = { title: "ภาพรวมระบบ — O
 export default function AdminOverviewPage() {
   return (
     <div className="flex flex-col gap-6">
-      <h1 className="text-foreground text-2xl font-bold tracking-tight">ภาพรวมระบบ</h1>
+      <h1 className="text-foreground text-2xl font-bold tracking-tight">
+        System Overview
+      </h1>
       <AdminOverviewSection />
     </div>
   );

@@ -38,14 +38,14 @@ test.describe.serial("Workspace creation, picker, and switcher", () => {
     await registerViaUi(page, { name: "Workspace Flow User", email, password });
 
     await page.goto("/workspaces");
-    await expect(page.getByText("ยังไม่มี Workspace")).toBeVisible();
-    await expect(page.getByRole("link", { name: "สร้าง Workspace" })).toBeVisible();
+    await expect(page.getByText("No workspaces yet")).toBeVisible();
+    await expect(page.getByRole("link", { name: "Create Workspace" })).toBeVisible();
   });
 
   test("creating the first workspace redirects straight to its dashboard", async () => {
     await page.goto("/workspaces/new");
-    await page.getByLabel("ชื่อ Workspace").fill(firstName);
-    await page.getByRole("button", { name: "สร้าง Workspace" }).click();
+    await page.getByLabel("Workspace Name").fill(firstName);
+    await page.getByRole("button", { name: "Create Workspace" }).click();
 
     await expect(page).toHaveURL(new RegExp(`/w/${firstName}$`));
     await expect(page.getByRole("heading", { name: firstName })).toBeVisible();
@@ -58,8 +58,8 @@ test.describe.serial("Workspace creation, picker, and switcher", () => {
 
   test("creating a second workspace, then /workspaces shows the picker listing both with role badges", async () => {
     await page.goto("/workspaces/new");
-    await page.getByLabel("ชื่อ Workspace").fill(secondName);
-    await page.getByRole("button", { name: "สร้าง Workspace" }).click();
+    await page.getByLabel("Workspace Name").fill(secondName);
+    await page.getByRole("button", { name: "Create Workspace" }).click();
     await expect(page).toHaveURL(new RegExp(`/w/${secondName}$`));
 
     await page.goto("/workspaces");

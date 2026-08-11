@@ -6,7 +6,7 @@ import { AdminUserDetail } from "@/features/admin/components/admin-user-detail";
 import { auth } from "@/lib/auth/auth";
 import { hasRole } from "@/lib/auth/rbac";
 
-export const metadata: Metadata = { title: "รายละเอียดผู้ใช้ — Orbit Admin" };
+export const metadata: Metadata = { title: "User Details — Orbit Admin" };
 
 // Only page in this increment that needs `auth()` itself — the current
 // caller's id (for the "isActive toggle when viewing yourself" rule) and
@@ -27,7 +27,7 @@ export default async function AdminUserDetailPage({
   return (
     <div className="flex flex-col gap-6">
       <Breadcrumb
-        items={[{ label: "ผู้ใช้", href: "/admin/users" }, { label: "รายละเอียด" }]}
+        items={[{ label: "Users", href: "/admin/users" }, { label: "Details" }]}
       />
       <AdminUserDetail
         userId={userId}

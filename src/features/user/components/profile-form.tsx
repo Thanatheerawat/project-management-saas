@@ -24,7 +24,7 @@ export function ProfileForm() {
   }
 
   if (profile.isError || !profile.data) {
-    return <p className="text-destructive text-sm">โหลดข้อมูลโปรไฟล์ไม่สำเร็จ</p>;
+    return <p className="text-destructive text-sm">Failed to load profile</p>;
   }
 
   // A separate component so `name` initializes directly from the loaded
@@ -44,15 +44,15 @@ function ProfileFields({ data }: { data: ProfileResponse }) {
 
     const parsed = profileSchema.safeParse({ name });
     if (!parsed.success) {
-      setError(parsed.error.issues[0]?.message ?? "ข้อมูลไม่ถูกต้อง");
+      setError(parsed.error.issues[0]?.message ?? "Invalid input");
       return;
     }
 
     try {
       await updateProfile.mutateAsync(parsed.data);
-      toast.success("บันทึกโปรไฟล์แล้ว");
+      toast.success("Profile saved");
     } catch (err) {
-      const message = err instanceof ApiError ? err.message : "บันทึกไม่สำเร็จ";
+      const message = err instanceof ApiError ? err.message : "Failed to save";
       setError(message);
       toast.error(message);
     }
@@ -61,12 +61,12 @@ function ProfileFields({ data }: { data: ProfileResponse }) {
   return (
     <form onSubmit={handleSubmit} className="flex flex-col gap-4">
       <div className="flex flex-col gap-1.5">
-        <span className="text-muted-foreground text-sm">อีเมล</span>
+        <span className="text-muted-foreground text-sm">Email</span>
         <p className="text-foreground text-sm">{data.email}</p>
       </div>
       <div className="flex flex-col gap-1.5">
         <label htmlFor="name" className="text-foreground text-sm font-medium">
-          ชื่อ
+          Name
         </label>
         <Input
           id="name"
@@ -77,7 +77,7 @@ function ProfileFields({ data }: { data: ProfileResponse }) {
       </div>
       {error && <p className="text-destructive text-sm">{error}</p>}
       <Button type="submit" disabled={updateProfile.isPending} className="self-start">
-        {updateProfile.isPending ? "กำลังบันทึก..." : "บันทึก"}
+        {updateProfile.isPending ? "Saving..." : "Save"}
       </Button>
     </form>
   );

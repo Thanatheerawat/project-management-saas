@@ -33,10 +33,10 @@ export function PaginationControls({
         onClick={() => onPageChange(page - 1)}
         disabled={page <= 1}
       >
-        ก่อนหน้า
+        Previous
       </Button>
       <span className="text-muted-foreground text-xs">
-        หน้า {page} จาก {totalPages}
+        Page {page} of {totalPages}
       </span>
       <Button
         type="button"
@@ -45,7 +45,7 @@ export function PaginationControls({
         onClick={() => onPageChange(page + 1)}
         disabled={page >= totalPages}
       >
-        ถัดไป
+        Next
       </Button>
     </div>
   );

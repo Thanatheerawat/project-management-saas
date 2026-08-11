@@ -42,8 +42,16 @@ export default async function WorkspaceLayout({
   // `app/admin/layout.tsx` and every `/api/admin/*` route.
   const isAdmin = hasRole(session.user.role, "ADMIN");
 
+  // M6.5 responsive pass: `h-dvh` (fixed, not `min-h-screen`'s min-height)
+  // + `overflow-hidden` on the shell, then `overflow-y-auto` on `main`
+  // only, is what makes the sidebar always reach the bottom of the
+  // viewport regardless of page content height — the previous
+  // `min-h-screen` + default flex-stretch approach depended on content
+  // height indirectly and visibly fell short on short pages. `main` is now
+  // the one scrolling element; Navbar and the sidebar's own column
+  // (nav links + collapse button) stay pinned at exactly viewport height.
   return (
-    <div className="flex min-h-screen flex-col">
+    <div className="flex h-dvh flex-col overflow-hidden">
       <Navbar
         brand={
           <>
@@ -54,18 +62,18 @@ export default async function WorkspaceLayout({
         actions={
           <>
             {isAdmin && (
-              <Button variant="ghost" size="sm" asChild>
+              <Button variant="ghost" size="sm" asChild className="hidden md:inline-flex">
                 <Link href="/admin">Admin</Link>
               </Button>
             )}
             <ThemeToggle />
-            <UserMenu />
+            <UserMenu isAdmin={isAdmin} />
           </>
         }
       />
-      <div className="flex flex-1">
+      <div className="flex flex-1 overflow-hidden">
         <WorkspaceSidebar slug={slug} />
-        <main className="min-w-0 flex-1">
+        <main className="min-w-0 flex-1 overflow-y-auto">
           <PageContainer className="max-w-5xl py-10">{children}</PageContainer>
         </main>
       </div>

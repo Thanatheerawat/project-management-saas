@@ -96,15 +96,15 @@ async function createIssueViaDialog(
   page: Page,
   opts: { title: string; priority?: string; assignee?: string },
 ): Promise<void> {
-  await page.getByRole("button", { name: "Issue ใหม่" }).click();
-  await page.getByLabel("ชื่อ Issue").fill(opts.title);
+  await page.getByRole("button", { name: "New Issue" }).click();
+  await page.getByLabel("Issue Title").fill(opts.title);
   if (opts.priority) {
     await page.getByLabel("Priority").selectOption(opts.priority);
   }
   if (opts.assignee) {
     await page.getByLabel("Assignee").selectOption({ label: opts.assignee });
   }
-  await page.getByRole("button", { name: "สร้าง Issue" }).click();
+  await page.getByRole("button", { name: "Create Issue" }).click();
   await expect(page.getByRole("link", { name: new RegExp(opts.title) })).toBeVisible();
 }
 
@@ -131,13 +131,13 @@ test.describe.serial("Analytics dashboard: workspace and project summaries", () 
     await registerViaUi(page, { name: userName, email, password });
 
     await page.goto("/workspaces/new");
-    await page.getByLabel("ชื่อ Workspace").fill(workspaceName);
-    await page.getByRole("button", { name: "สร้าง Workspace" }).click();
+    await page.getByLabel("Workspace Name").fill(workspaceName);
+    await page.getByRole("button", { name: "Create Workspace" }).click();
     await expect(page).toHaveURL(new RegExp(`/w/${workspaceName}$`));
 
     await page.goto(`/w/${workspaceName}/projects/new`);
-    await page.getByLabel("ชื่อโปรเจกต์").fill(projectOneName);
-    await page.getByRole("button", { name: "สร้างโปรเจกต์" }).click();
+    await page.getByLabel("Project Name").fill(projectOneName);
+    await page.getByRole("button", { name: "Create Project" }).click();
     await expect(page).toHaveURL(
       new RegExp(`/w/${workspaceName}/projects/[0-9a-f-]{36}$`),
     );
@@ -157,8 +157,8 @@ test.describe.serial("Analytics dashboard: workspace and project summaries", () 
 
     await page.getByRole("link", { name: /Issue B/ }).click();
     await expect(page.getByRole("heading", { name: "Issue B" })).toBeVisible();
-    await page.getByLabel("สถานะ Issue").selectOption("DONE");
-    await expect(page.getByLabel("สถานะ Issue")).toHaveValue("DONE");
+    await page.getByLabel("Issue Status").selectOption("DONE");
+    await expect(page.getByLabel("Issue Status")).toHaveValue("DONE");
   });
 
   test("the workspace dashboard's status/priority breakdown reflects the exact issue mix", async () => {
@@ -189,8 +189,8 @@ test.describe.serial("Analytics dashboard: workspace and project summaries", () 
 
   test("creating a second project with a different issue mix", async () => {
     await page.goto(`/w/${workspaceName}/projects/new`);
-    await page.getByLabel("ชื่อโปรเจกต์").fill(projectTwoName);
-    await page.getByRole("button", { name: "สร้างโปรเจกต์" }).click();
+    await page.getByLabel("Project Name").fill(projectTwoName);
+    await page.getByRole("button", { name: "Create Project" }).click();
     await expect(page).toHaveURL(
       new RegExp(`/w/${workspaceName}/projects/[0-9a-f-]{36}$`),
     );

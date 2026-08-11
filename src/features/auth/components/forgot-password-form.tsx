@@ -20,15 +20,15 @@ export function ForgotPasswordForm() {
 
     const parsed = forgotPasswordSchema.safeParse({ email });
     if (!parsed.success) {
-      setError(parsed.error.issues[0]?.message ?? "ข้อมูลไม่ถูกต้อง");
+      setError(parsed.error.issues[0]?.message ?? "Invalid input");
       return;
     }
 
     try {
       await forgotPassword.mutateAsync(parsed.data);
-      toast.success("หากมีบัญชีนี้ ระบบได้ส่งลิงก์แล้ว");
+      toast.success("If an account exists, a link has been sent");
     } catch {
-      toast.error("ส่งคำขอไม่สำเร็จ ลองใหม่อีกครั้ง");
+      toast.error("Request failed, please try again");
     }
   }
 
@@ -37,7 +37,7 @@ export function ForgotPasswordForm() {
   if (forgotPassword.isSuccess) {
     return (
       <p className="text-muted-foreground text-sm">
-        ถ้ามีบัญชีที่ใช้อีเมลนี้ เราได้ส่งลิงก์สำหรับตั้งรหัสผ่านใหม่ไปแล้ว
+        If an account exists for this email, we&apos;ve sent a password reset link.
       </p>
     );
   }
@@ -46,7 +46,7 @@ export function ForgotPasswordForm() {
     <form onSubmit={handleSubmit} className="flex flex-col gap-4">
       <div className="flex flex-col gap-1.5">
         <label htmlFor="email" className="text-foreground text-sm font-medium">
-          อีเมล
+          Email
         </label>
         <Input
           id="email"
@@ -59,11 +59,11 @@ export function ForgotPasswordForm() {
       </div>
       {error && <p className="text-destructive text-sm">{error}</p>}
       <Button type="submit" disabled={forgotPassword.isPending}>
-        {forgotPassword.isPending ? "กำลังส่ง..." : "ส่งลิงก์รีเซ็ตรหัสผ่าน"}
+        {forgotPassword.isPending ? "Sending..." : "Send Reset Link"}
       </Button>
       <p className="text-center text-sm">
         <Link href="/login" className="text-muted-foreground hover:text-foreground">
-          กลับไปหน้าเข้าสู่ระบบ
+          Back to sign in
         </Link>
       </p>
     </form>

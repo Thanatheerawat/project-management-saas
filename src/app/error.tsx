@@ -24,13 +24,13 @@ export default function Error({
     <div className="flex flex-1 flex-col items-center justify-center gap-2 px-6 text-center">
       <AlertTriangle className="text-faint mb-1 size-8" strokeWidth={1.5} />
       <h1 className="text-foreground text-2xl font-bold tracking-tight">
-        เกิดข้อผิดพลาด
+        Something went wrong
       </h1>
       <p className="text-muted-foreground max-w-sm text-sm">
-        มีบางอย่างผิดพลาดระหว่างโหลดหน้านี้ ลองใหม่อีกครั้งได้
+        An error occurred while loading this page. Please try again.
       </p>
       <div className="mt-2">
-        <Button onClick={reset}>ลองอีกครั้ง</Button>
+        <Button onClick={reset}>Try again</Button>
       </div>
     </div>
   );

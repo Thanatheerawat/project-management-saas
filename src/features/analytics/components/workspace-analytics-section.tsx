@@ -30,7 +30,7 @@ export function WorkspaceAnalyticsSection({ workspaceId }: { workspaceId: string
   }
 
   if (overview.isError || workload.isError || !overview.data || !workload.data) {
-    return <p className="text-destructive text-sm">โหลดข้อมูลวิเคราะห์ไม่สำเร็จ</p>;
+    return <p className="text-destructive text-sm">Failed to load analytics</p>;
   }
 
   // Empty state reserved strictly for "no issues at all" — a workspace
@@ -41,8 +41,8 @@ export function WorkspaceAnalyticsSection({ workspaceId }: { workspaceId: string
     return (
       <EmptyState
         icon={BarChart3}
-        title="ยังไม่มีข้อมูลให้วิเคราะห์"
-        description="สร้าง issue ในโปรเจกต์ของ workspace นี้เพื่อดูสรุปภาพรวม"
+        title="No data to analyze yet"
+        description="Create issues in this workspace's projects to see an overview"
         className="border-border rounded-xl border border-dashed"
       />
     );
@@ -52,7 +52,7 @@ export function WorkspaceAnalyticsSection({ workspaceId }: { workspaceId: string
     <div className="grid gap-4 sm:grid-cols-2">
       <Card size="sm">
         <CardHeader>
-          <CardTitle>สถานะ Issue</CardTitle>
+          <CardTitle>Issue Status</CardTitle>
         </CardHeader>
         <CardContent>
           <StatusBreakdownChart data={overview.data.byStatus} />
@@ -61,7 +61,7 @@ export function WorkspaceAnalyticsSection({ workspaceId }: { workspaceId: string
 
       <Card size="sm">
         <CardHeader>
-          <CardTitle>ระดับความสำคัญ</CardTitle>
+          <CardTitle>Priority</CardTitle>
         </CardHeader>
         <CardContent>
           <PriorityBreakdownChart data={overview.data.byPriority} />
@@ -70,7 +70,7 @@ export function WorkspaceAnalyticsSection({ workspaceId }: { workspaceId: string
 
       <Card size="sm" className="sm:col-span-2">
         <CardHeader>
-          <CardTitle>ภาระงานตามผู้รับผิดชอบ</CardTitle>
+          <CardTitle>Workload by Assignee</CardTitle>
         </CardHeader>
         <CardContent>
           <WorkloadChart data={workload.data.workload} />

@@ -6,6 +6,7 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { ISSUE_PRIORITY_LABEL } from "@/constants/issue";
 import { useUpdateIssue } from "@/features/issue/hooks/use-update-issue";
 import { ISSUE_PRIORITIES } from "@/features/issue/schemas/create-issue.schema";
 import { updateIssueSchema } from "@/features/issue/schemas/update-issue.schema";
@@ -58,15 +59,15 @@ export function EditIssueForm({
       assigneeId: assigneeId || null,
     });
     if (!parsed.success) {
-      setError(parsed.error.issues[0]?.message ?? "ข้อมูลไม่ถูกต้อง");
+      setError(parsed.error.issues[0]?.message ?? "Invalid input");
       return;
     }
 
     try {
       await updateIssue.mutateAsync(parsed.data);
-      toast.success("บันทึก Issue แล้ว");
+      toast.success("Issue saved");
     } catch (err) {
-      const message = err instanceof ApiError ? err.message : "บันทึกไม่สำเร็จ";
+      const message = err instanceof ApiError ? err.message : "Failed to save";
       setError(message);
       toast.error(message);
     }
@@ -76,7 +77,7 @@ export function EditIssueForm({
     <form onSubmit={handleSubmit} className="flex flex-col gap-4">
       <div className="flex flex-col gap-1.5">
         <label htmlFor="edit-issue-title" className="text-foreground text-sm font-medium">
-          ชื่อ Issue
+          Issue Title
         </label>
         <Input
           id="edit-issue-title"
@@ -90,7 +91,7 @@ export function EditIssueForm({
           htmlFor="edit-issue-description"
           className="text-foreground text-sm font-medium"
         >
-          คำอธิบาย
+          Description
         </label>
         <Textarea
           id="edit-issue-description"
@@ -116,7 +117,7 @@ export function EditIssueForm({
           >
             {ISSUE_PRIORITIES.map((p) => (
               <option key={p} value={p}>
-                {p}
+                {ISSUE_PRIORITY_LABEL[p]}
               </option>
             ))}
           </select>
@@ -135,7 +136,7 @@ export function EditIssueForm({
             disabled={members.isLoading}
             className="border-input dark:bg-input/30 focus-visible:border-ring focus-visible:ring-ring/50 h-8 rounded-lg border bg-transparent px-2.5 text-sm outline-none focus-visible:ring-[3px]"
           >
-            <option value="">ไม่มอบหมาย</option>
+            <option value="">Unassigned</option>
             {members.data?.map((member) => (
               <option key={member.user.id} value={member.user.id}>
                 {member.user.name ?? member.user.email}
@@ -146,7 +147,7 @@ export function EditIssueForm({
       </div>
       {error && <p className="text-destructive text-sm">{error}</p>}
       <Button type="submit" disabled={updateIssue.isPending} className="self-start">
-        {updateIssue.isPending ? "กำลังบันทึก..." : "บันทึก"}
+        {updateIssue.isPending ? "Saving..." : "Save"}
       </Button>
     </form>
   );

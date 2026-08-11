@@ -1,5 +1,5 @@
 import { Badge } from "@/components/ui/badge";
-import { ISSUE_STATUS_COLOR } from "@/constants/issue";
+import { ISSUE_STATUS_COLOR, ISSUE_STATUS_LABEL } from "@/constants/issue";
 import { IssueCard } from "@/features/issue/components/issue-card";
 import type { IssueResponse } from "@/features/issue/hooks/use-issues";
 import type { WorkspaceMemberResponse } from "@/features/workspace/hooks/use-workspace-members";
@@ -26,7 +26,7 @@ export function KanbanColumn({ status, issues, slug, assigneeById }: KanbanColum
           aria-hidden="true"
         />
         <h3 className="text-foreground text-xs font-semibold tracking-wide uppercase">
-          {status}
+          {ISSUE_STATUS_LABEL[status]}
         </h3>
         <Badge variant="secondary" className="ml-auto">
           {issues.length}
@@ -36,7 +36,7 @@ export function KanbanColumn({ status, issues, slug, assigneeById }: KanbanColum
       <div className="flex flex-col gap-2">
         {issues.length === 0 ? (
           <div className="border-border/60 text-muted-foreground rounded-lg border border-dashed px-3 py-6 text-center text-xs">
-            ไม่มี issue
+            No issues
           </div>
         ) : (
           issues.map((issue) => (

@@ -44,11 +44,15 @@ export function WorkspaceKpiCards({
 
   return (
     <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
-      <StatCard label="โปรเจกต์ทั้งหมด" value={projectCount} icon={FolderKanban} />
-      <StatCard label="Issue ทั้งหมด" value={overview.data?.total ?? 0} icon={ListTodo} />
-      <StatCard label="สมาชิก Workspace" value={members.data?.length ?? 0} icon={Users} />
+      <StatCard label="Total Projects" value={projectCount} icon={FolderKanban} />
+      <StatCard label="Total Issues" value={overview.data?.total ?? 0} icon={ListTodo} />
       <StatCard
-        label="Issue ที่เสร็จแล้ว"
+        label="Workspace Members"
+        value={members.data?.length ?? 0}
+        icon={Users}
+      />
+      <StatCard
+        label="Completed Issues"
         value={overview.data?.byStatus.DONE ?? 0}
         icon={CheckCircle2}
       />

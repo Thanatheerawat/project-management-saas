@@ -27,17 +27,17 @@ export function AddMemberForm({ workspaceId }: { workspaceId: string }) {
 
     const parsed = addWorkspaceMemberSchema.safeParse({ email, role });
     if (!parsed.success) {
-      setError(parsed.error.issues[0]?.message ?? "ข้อมูลไม่ถูกต้อง");
+      setError(parsed.error.issues[0]?.message ?? "Invalid input");
       return;
     }
 
     try {
       await addMember.mutateAsync(parsed.data);
-      toast.success("เพิ่มสมาชิกแล้ว");
+      toast.success("Member added");
       setEmail("");
       setRole("MEMBER");
     } catch (err) {
-      const message = err instanceof ApiError ? err.message : "เพิ่มสมาชิกไม่สำเร็จ";
+      const message = err instanceof ApiError ? err.message : "Failed to add member";
       setError(message);
       toast.error(message);
     }
@@ -50,7 +50,7 @@ export function AddMemberForm({ workspaceId }: { workspaceId: string }) {
     >
       <div className="flex flex-1 flex-col gap-1.5">
         <label htmlFor="member-email" className="text-foreground text-sm font-medium">
-          อีเมลสมาชิก
+          Member Email
         </label>
         <Input
           id="member-email"
@@ -81,7 +81,7 @@ export function AddMemberForm({ workspaceId }: { workspaceId: string }) {
         </select>
       </div>
       <Button type="submit" disabled={addMember.isPending}>
-        {addMember.isPending ? "กำลังเพิ่ม..." : "เพิ่มสมาชิก"}
+        {addMember.isPending ? "Adding..." : "Add Member"}
       </Button>
       {error && <p className="text-destructive text-sm sm:basis-full">{error}</p>}
     </form>

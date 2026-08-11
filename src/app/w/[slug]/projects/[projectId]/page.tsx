@@ -5,6 +5,7 @@ import { notFound } from "next/navigation";
 import { Breadcrumb } from "@/components/layout/breadcrumb";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { PROJECT_STATUS_LABEL } from "@/constants/project";
 import { ProjectAnalyticsSummary } from "@/features/analytics/components/project-analytics-summary";
 import { CreateIssueDialog } from "@/features/issue/components/create-issue-dialog";
 import { KanbanBoard } from "@/features/issue/components/kanban-board";
@@ -14,7 +15,7 @@ import { hasWorkspaceRole } from "@/lib/auth/workspace-rbac";
 import { userRepository } from "@/repositories/auth/user.repository";
 import { projectRepository } from "@/repositories/workspace/project.repository";
 
-export const metadata: Metadata = { title: "รายละเอียดโปรเจกต์ — Orbit" };
+export const metadata: Metadata = { title: "Project Details — Orbit" };
 
 export default async function ProjectDetailPage({
   params,
@@ -46,7 +47,7 @@ export default async function ProjectDetailPage({
       <Breadcrumb
         items={[
           { label: workspace.name, href: `/w/${slug}` },
-          { label: "โปรเจกต์", href: `/w/${slug}/projects` },
+          { label: "Projects", href: `/w/${slug}/projects` },
           { label: project.name },
         ]}
       />
@@ -64,30 +65,30 @@ export default async function ProjectDetailPage({
         </div>
         {canEdit && (
           <Button asChild variant="outline" size="sm">
-            <Link href={`/w/${slug}/projects/${project.id}/edit`}>แก้ไข</Link>
+            <Link href={`/w/${slug}/projects/${project.id}/edit`}>Edit</Link>
           </Button>
         )}
       </div>
 
       <div className="flex flex-col gap-3">
         <div className="flex items-center gap-2">
-          <span className="text-muted-foreground text-sm">สถานะ</span>
-          <Badge variant="outline">{project.status}</Badge>
+          <span className="text-muted-foreground text-sm">Status</span>
+          <Badge variant="outline">{PROJECT_STATUS_LABEL[project.status]}</Badge>
         </div>
         <div className="flex flex-col gap-1.5">
-          <span className="text-muted-foreground text-sm">เจ้าของโปรเจกต์</span>
+          <span className="text-muted-foreground text-sm">Project Owner</span>
           <p className="text-foreground text-sm">{owner?.name ?? owner?.email ?? "—"}</p>
         </div>
         <div className="flex flex-col gap-1.5">
-          <span className="text-muted-foreground text-sm">สร้างเมื่อ</span>
+          <span className="text-muted-foreground text-sm">Created</span>
           <p className="text-foreground text-sm">
-            {new Date(project.createdAt).toLocaleDateString("th-TH")}
+            {new Date(project.createdAt).toLocaleDateString("en-US")}
           </p>
         </div>
       </div>
 
       <div className="flex flex-col gap-3">
-        <h2 className="text-foreground text-sm font-semibold">ภาพรวม</h2>
+        <h2 className="text-foreground text-sm font-semibold">Overview</h2>
         <ProjectAnalyticsSummary projectId={project.id} />
       </div>
 

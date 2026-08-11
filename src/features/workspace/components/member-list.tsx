@@ -47,8 +47,8 @@ export function MemberList({ workspaceId, currentUserId, canManage }: MemberList
     return (
       <EmptyState
         icon={Users}
-        title="ไม่พบสมาชิก"
-        description="สมาชิกใน Workspace นี้จะแสดงที่นี่"
+        title="No members found"
+        description="Members in this workspace will appear here"
         className="border-border rounded-xl border border-dashed"
       />
     );
@@ -99,9 +99,9 @@ function MemberRow({
         memberId: member.id,
         data: { role: role as (typeof ASSIGNABLE_WORKSPACE_ROLES)[number] },
       });
-      toast.success("เปลี่ยน Role แล้ว");
+      toast.success("Role updated");
     } catch (err) {
-      const message = err instanceof ApiError ? err.message : "เปลี่ยน Role ไม่สำเร็จ";
+      const message = err instanceof ApiError ? err.message : "Failed to update role";
       setError(message);
       toast.error(message);
     }
@@ -112,9 +112,9 @@ function MemberRow({
     try {
       await removeMember.mutateAsync(member.id);
       setConfirmOpen(false);
-      toast.success(isSelf ? "ออกจาก Workspace แล้ว" : "ลบสมาชิกแล้ว");
+      toast.success(isSelf ? "Left workspace" : "Member removed");
     } catch (err) {
-      const message = err instanceof ApiError ? err.message : "ลบสมาชิกไม่สำเร็จ";
+      const message = err instanceof ApiError ? err.message : "Failed to remove member";
       setError(message);
       toast.error(message);
       setConfirmOpen(false);
@@ -126,14 +126,14 @@ function MemberRow({
       <div className="flex flex-col gap-0.5">
         <p className="text-foreground text-sm font-medium">
           {member.user.name ?? member.user.email}
-          {isSelf && <span className="text-muted-foreground"> (คุณ)</span>}
+          {isSelf && <span className="text-muted-foreground"> (you)</span>}
         </p>
         <p className="text-muted-foreground text-xs">{member.user.email}</p>
       </div>
       <div className="flex items-center gap-2">
         {canChangeRole ? (
           <select
-            aria-label={`เปลี่ยน role ของ ${member.user.name ?? member.user.email}`}
+            aria-label={`Change role for ${member.user.name ?? member.user.email}`}
             value={member.role}
             onChange={(e) => handleRoleChange(e.target.value)}
             disabled={updateRole.isPending}
@@ -157,27 +157,29 @@ function MemberRow({
               size="sm"
               onClick={() => setConfirmOpen(true)}
             >
-              {isSelf ? "ออกจาก Workspace" : "ลบ"}
+              {isSelf ? "Leave Workspace" : "Remove"}
             </Button>
             <DialogContent>
               <DialogHeader>
-                <DialogTitle>{isSelf ? "ออกจาก Workspace?" : "ลบสมาชิกนี้?"}</DialogTitle>
+                <DialogTitle>
+                  {isSelf ? "Leave workspace?" : "Remove this member?"}
+                </DialogTitle>
                 <DialogDescription>
                   {isSelf
-                    ? "คุณจะไม่สามารถเข้าถึง Workspace นี้ได้อีกจนกว่าจะถูกเชิญกลับเข้ามาใหม่"
-                    : `${member.user.name ?? member.user.email} จะถูกลบออกจาก Workspace นี้ทันที`}
+                    ? "You won't be able to access this workspace again until you're invited back."
+                    : `${member.user.name ?? member.user.email} will be removed from this workspace immediately.`}
                 </DialogDescription>
               </DialogHeader>
               <DialogFooter>
                 <Button variant="outline" onClick={() => setConfirmOpen(false)}>
-                  ยกเลิก
+                  Cancel
                 </Button>
                 <Button
                   variant="destructive"
                   onClick={handleRemove}
                   disabled={removeMember.isPending}
                 >
-                  {removeMember.isPending ? "กำลังลบ..." : "ยืนยัน"}
+                  {removeMember.isPending ? "Removing..." : "Confirm"}
                 </Button>
               </DialogFooter>
             </DialogContent>

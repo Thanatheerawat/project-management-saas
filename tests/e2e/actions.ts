@@ -8,10 +8,10 @@ export async function registerViaUi(
   opts: { name: string; email: string; password: string },
 ): Promise<void> {
   await page.goto("/register");
-  await page.getByLabel("ชื่อ").fill(opts.name);
-  await page.getByLabel("อีเมล").fill(opts.email);
-  await page.getByLabel("รหัสผ่าน").fill(opts.password);
-  await page.getByRole("button", { name: "สร้างบัญชี" }).click();
+  await page.getByLabel("Name").fill(opts.name);
+  await page.getByLabel("Email").fill(opts.email);
+  await page.getByLabel("Password").fill(opts.password);
+  await page.getByRole("button", { name: "Create Account" }).click();
   await page.waitForURL(/\/verify-email\?/);
 }
 
@@ -20,9 +20,9 @@ export async function loginViaUi(
   opts: { email: string; password: string },
 ): Promise<void> {
   await page.goto("/login");
-  await page.getByLabel("อีเมล").fill(opts.email);
-  await page.getByLabel("รหัสผ่าน").fill(opts.password);
-  await page.getByRole("button", { name: "เข้าสู่ระบบ" }).click();
+  await page.getByLabel("Email").fill(opts.email);
+  await page.getByLabel("Password").fill(opts.password);
+  await page.getByRole("button", { name: "Sign in" }).click();
   // "/workspaces" (0 memberships) or straight through to "/w/<slug>" (the
   // server-side auto-redirect when the user has exactly one membership) —
   // both are valid post-login landing spots depending on which fixture
@@ -31,6 +31,6 @@ export async function loginViaUi(
 }
 
 export async function logoutViaUi(page: Page): Promise<void> {
-  await page.getByRole("button", { name: "ออกจากระบบ" }).click();
+  await page.getByRole("button", { name: "Sign out" }).click();
   await page.waitForURL("/");
 }

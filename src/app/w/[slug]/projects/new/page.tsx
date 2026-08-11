@@ -6,7 +6,7 @@ import { auth } from "@/lib/auth/auth";
 import { resolveWorkspaceForRequest } from "@/lib/auth/workspace-membership";
 import { hasWorkspaceRole } from "@/lib/auth/workspace-rbac";
 
-export const metadata: Metadata = { title: "สร้างโปรเจกต์ — Orbit" };
+export const metadata: Metadata = { title: "Create Project — Orbit" };
 
 // Server-side enforcement lives in POST .../projects (requires ADMIN+,
 // Decision Point 2 in the approved proposal) — this page-level check keeps
@@ -28,10 +28,10 @@ export default async function NewProjectPage({
     return (
       <div className="flex max-w-lg flex-col gap-6">
         <h1 className="text-foreground text-2xl font-bold tracking-tight">
-          สร้างโปรเจกต์
+          Create Project
         </h1>
         <p className="text-muted-foreground text-sm">
-          เฉพาะ Owner หรือ Admin เท่านั้นที่สร้างโปรเจกต์ได้
+          Only the Owner or Admin can create a project
         </p>
       </div>
     );
@@ -40,7 +40,7 @@ export default async function NewProjectPage({
   return (
     <div className="flex max-w-lg flex-col gap-6">
       <h1 className="text-foreground text-2xl font-bold tracking-tight">
-        สร้างโปรเจกต์ใหม่
+        Create New Project
       </h1>
       <CreateProjectForm workspaceId={workspace.id} slug={slug} />
     </div>

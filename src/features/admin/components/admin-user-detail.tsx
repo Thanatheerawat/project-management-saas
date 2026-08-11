@@ -48,7 +48,7 @@ export function AdminUserDetail({
   }
 
   if (isError || !data) {
-    return <p className="text-destructive text-sm">โหลดข้อมูลผู้ใช้ไม่สำเร็จ</p>;
+    return <p className="text-destructive text-sm">Failed to load user</p>;
   }
 
   // Rebound as its own const so the narrowed (non-undefined) type survives
@@ -61,9 +61,9 @@ export function AdminUserDetail({
     setError(null);
     try {
       await updateUser.mutateAsync({ role: role as PlatformRole });
-      toast.success("เปลี่ยน Role แล้ว");
+      toast.success("Role updated");
     } catch (err) {
-      const message = err instanceof ApiError ? err.message : "เปลี่ยน Role ไม่สำเร็จ";
+      const message = err instanceof ApiError ? err.message : "Failed to update role";
       setError(message);
       toast.error(message);
     }
@@ -74,9 +74,9 @@ export function AdminUserDetail({
     try {
       const wasActive = user.isActive;
       await updateUser.mutateAsync({ isActive: !wasActive });
-      toast.success(wasActive ? "ปิดใช้งานบัญชีแล้ว" : "เปิดใช้งานบัญชีแล้ว");
+      toast.success(wasActive ? "Account deactivated" : "Account activated");
     } catch (err) {
-      const message = err instanceof ApiError ? err.message : "เปลี่ยนสถานะไม่สำเร็จ";
+      const message = err instanceof ApiError ? err.message : "Failed to update status";
       setError(message);
       toast.error(message);
     }
@@ -87,20 +87,20 @@ export function AdminUserDetail({
       <div className="flex flex-col gap-1">
         <h1 className="text-foreground text-2xl font-bold tracking-tight">
           {data.name ?? data.email}
-          {isSelf && <span className="text-muted-foreground"> (คุณ)</span>}
+          {isSelf && <span className="text-muted-foreground"> (you)</span>}
         </h1>
         <p className="text-muted-foreground text-sm">{data.email}</p>
       </div>
 
       <Card>
         <CardHeader>
-          <CardTitle>สิทธิ์การใช้งาน</CardTitle>
+          <CardTitle>Permissions</CardTitle>
         </CardHeader>
         <CardContent className="flex flex-col gap-4">
           <div className="flex flex-col gap-1.5">
             <span className="text-muted-foreground text-xs">Platform Role</span>
             <select
-              aria-label="เปลี่ยน Platform Role"
+              aria-label="Change platform role"
               value={data.role}
               onChange={(e) => handleRoleChange(e.target.value)}
               disabled={!isSuperAdmin || updateUser.isPending}
@@ -114,13 +114,13 @@ export function AdminUserDetail({
             </select>
             {!isSuperAdmin && (
               <span className="text-muted-foreground text-xs">
-                เฉพาะ SUPER_ADMIN เท่านั้นที่เปลี่ยน Role ได้
+                Only a SUPER_ADMIN can change roles
               </span>
             )}
           </div>
 
           <div className="flex flex-col gap-1.5">
-            <span className="text-muted-foreground text-xs">สถานะบัญชี</span>
+            <span className="text-muted-foreground text-xs">Account Status</span>
             <div className="flex items-center gap-2">
               <Badge variant={data.isActive ? "outline" : "destructive"}>
                 {data.isActive ? "Active" : "Inactive"}
@@ -132,12 +132,12 @@ export function AdminUserDetail({
                 onClick={handleToggleActive}
                 disabled={isSelf || updateUser.isPending}
               >
-                {data.isActive ? "ปิดใช้งาน" : "เปิดใช้งาน"}
+                {data.isActive ? "Deactivate" : "Activate"}
               </Button>
             </div>
             {isSelf && (
               <span className="text-muted-foreground text-xs">
-                ไม่สามารถเปลี่ยนสถานะบัญชีของตัวเองได้
+                You can&apos;t change your own account status
               </span>
             )}
           </div>
@@ -148,11 +148,11 @@ export function AdminUserDetail({
 
       <Card>
         <CardHeader>
-          <CardTitle>Workspace ที่เป็นสมาชิก ({data.workspaces.length})</CardTitle>
+          <CardTitle>Member Workspaces ({data.workspaces.length})</CardTitle>
         </CardHeader>
         <CardContent>
           {data.workspaces.length === 0 ? (
-            <EmptyState icon={Users} title="ไม่ได้เป็นสมาชิก Workspace ใดเลย" />
+            <EmptyState icon={Users} title="Not a member of any workspace" />
           ) : (
             <div className="flex flex-col gap-2">
               {data.workspaces.map((workspace) => (

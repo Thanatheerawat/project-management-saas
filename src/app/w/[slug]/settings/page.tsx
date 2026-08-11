@@ -6,7 +6,7 @@ import { auth } from "@/lib/auth/auth";
 import { resolveWorkspaceForRequest } from "@/lib/auth/workspace-membership";
 import { hasWorkspaceRole } from "@/lib/auth/workspace-rbac";
 
-export const metadata: Metadata = { title: "ตั้งค่า Workspace — Orbit" };
+export const metadata: Metadata = { title: "Workspace Settings — Orbit" };
 
 // Server-side enforcement already lives in PATCH /api/workspaces/[id]
 // (requires ADMIN+) — this page-level check is purely UX: a plain Member
@@ -30,7 +30,7 @@ export default async function WorkspaceSettingsPage({
   return (
     <div className="flex max-w-lg flex-col gap-6">
       <h1 className="text-foreground text-2xl font-bold tracking-tight">
-        ตั้งค่า Workspace
+        Workspace Settings
       </h1>
 
       {canEdit ? (
@@ -43,10 +43,10 @@ export default async function WorkspaceSettingsPage({
       ) : (
         <div className="flex flex-col gap-3">
           <p className="text-muted-foreground text-sm">
-            เฉพาะ Owner หรือ Admin เท่านั้นที่แก้ไขการตั้งค่า Workspace ได้
+            Only the Owner or Admin can edit workspace settings
           </p>
           <div className="flex flex-col gap-1.5">
-            <span className="text-muted-foreground text-sm">ชื่อ Workspace</span>
+            <span className="text-muted-foreground text-sm">Workspace Name</span>
             <p className="text-foreground text-sm">{workspace.name}</p>
           </div>
           <div className="flex flex-col gap-1.5">
@@ -55,7 +55,7 @@ export default async function WorkspaceSettingsPage({
           </div>
           {workspace.description && (
             <div className="flex flex-col gap-1.5">
-              <span className="text-muted-foreground text-sm">คำอธิบาย</span>
+              <span className="text-muted-foreground text-sm">Description</span>
               <p className="text-foreground text-sm">{workspace.description}</p>
             </div>
           )}

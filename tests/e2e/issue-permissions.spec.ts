@@ -70,13 +70,13 @@ test.describe
     });
 
     await ownerPage.goto("/workspaces/new");
-    await ownerPage.getByLabel("ชื่อ Workspace").fill(workspaceName);
-    await ownerPage.getByRole("button", { name: "สร้าง Workspace" }).click();
+    await ownerPage.getByLabel("Workspace Name").fill(workspaceName);
+    await ownerPage.getByRole("button", { name: "Create Workspace" }).click();
     await expect(ownerPage).toHaveURL(new RegExp(`/w/${workspaceName}$`));
 
     await ownerPage.goto(`/w/${workspaceName}/projects/new`);
-    await ownerPage.getByLabel("ชื่อโปรเจกต์").fill(projectName);
-    await ownerPage.getByRole("button", { name: "สร้างโปรเจกต์" }).click();
+    await ownerPage.getByLabel("Project Name").fill(projectName);
+    await ownerPage.getByRole("button", { name: "Create Project" }).click();
     // A generic `[^/]+$` also matches the literal "new" segment of the
     // pre-submit URL — see issue-flow.spec.ts's setup test for the full
     // explanation of the race this avoids.
@@ -85,23 +85,23 @@ test.describe
     );
     await expect(ownerPage.getByRole("heading", { name: projectName })).toBeVisible();
 
-    await ownerPage.getByRole("button", { name: "Issue ใหม่" }).click();
-    await ownerPage.getByLabel("ชื่อ Issue").fill(issueTitle);
-    await ownerPage.getByRole("button", { name: "สร้าง Issue" }).click();
+    await ownerPage.getByRole("button", { name: "New Issue" }).click();
+    await ownerPage.getByLabel("Issue Title").fill(issueTitle);
+    await ownerPage.getByRole("button", { name: "Create Issue" }).click();
     await ownerPage.getByRole("link", { name: new RegExp(issueTitle) }).click();
     await expect(ownerPage.getByRole("heading", { name: issueTitle })).toBeVisible();
     issueUrl = ownerPage.url();
 
     await outsiderPage.goto("/workspaces/new");
-    await outsiderPage.getByLabel("ชื่อ Workspace").fill(outsiderWorkspaceName);
-    await outsiderPage.getByRole("button", { name: "สร้าง Workspace" }).click();
+    await outsiderPage.getByLabel("Workspace Name").fill(outsiderWorkspaceName);
+    await outsiderPage.getByRole("button", { name: "Create Workspace" }).click();
     await expect(outsiderPage).toHaveURL(new RegExp(`/w/${outsiderWorkspaceName}$`));
   });
 
   test("the owner invites the member by email", async () => {
     await ownerPage.goto(`/w/${workspaceName}/members`);
-    await ownerPage.getByLabel("อีเมลสมาชิก").fill(memberEmail);
-    await ownerPage.getByRole("button", { name: "เพิ่มสมาชิก" }).click();
+    await ownerPage.getByLabel("Member Email").fill(memberEmail);
+    await ownerPage.getByRole("button", { name: "Add Member" }).click();
 
     await expect(ownerPage.getByText("Issue Perm Member")).toBeVisible();
   });
@@ -110,8 +110,8 @@ test.describe
     await memberPage.goto(issueUrl);
     await expect(memberPage.getByRole("heading", { name: issueTitle })).toBeVisible();
 
-    await memberPage.getByLabel("ชื่อ Issue").fill(editedByMemberTitle);
-    await memberPage.getByRole("button", { name: "บันทึก" }).click();
+    await memberPage.getByLabel("Issue Title").fill(editedByMemberTitle);
+    await memberPage.getByRole("button", { name: "Save" }).click();
 
     await expect(
       memberPage.getByRole("heading", { name: editedByMemberTitle }),
@@ -120,13 +120,13 @@ test.describe
 
   test("the owner creates a workspace label from the issue detail page (ADMIN+ only, Decision Point F)", async () => {
     await ownerPage.goto(issueUrl);
-    await ownerPage.getByLabel("ชื่อ Label ใหม่").fill(labelName);
-    await ownerPage.getByLabel("สี (hex)").fill("#B2551E");
-    await ownerPage.getByRole("button", { name: "สร้าง" }).click();
+    await ownerPage.getByLabel("New Label Name").fill(labelName);
+    await ownerPage.getByLabel("Color (hex)").fill("#B2551E");
+    await ownerPage.getByRole("button", { name: "Create" }).click();
 
     await expect(
       ownerPage
-        .getByLabel("เลือก Label ที่จะแนบ")
+        .getByLabel("Select label to attach")
         .getByRole("option", { name: labelName }),
     ).toHaveCount(1);
   });
@@ -134,19 +134,19 @@ test.describe
   test("the member does not see the create-label form, but can attach the existing label (Decision Point F: attach is MEMBER+)", async () => {
     await memberPage.reload();
 
-    await expect(memberPage.getByLabel("ชื่อ Label ใหม่")).toHaveCount(0);
+    await expect(memberPage.getByLabel("New Label Name")).toHaveCount(0);
 
     await memberPage
-      .getByLabel("เลือก Label ที่จะแนบ")
+      .getByLabel("Select label to attach")
       .selectOption({ label: labelName });
-    await memberPage.getByRole("button", { name: "แนบ" }).click();
+    await memberPage.getByRole("button", { name: "Attach" }).click();
     await expect(memberPage.getByText(labelName)).toBeVisible();
   });
 
   test("the owner posts a comment", async () => {
     await ownerPage.goto(issueUrl);
-    await ownerPage.getByLabel("เพิ่มความคิดเห็น").fill(ownerCommentBody);
-    await ownerPage.getByRole("button", { name: "แสดงความคิดเห็น" }).click();
+    await ownerPage.getByLabel("Add a comment").fill(ownerCommentBody);
+    await ownerPage.getByRole("button", { name: "Post Comment" }).click();
 
     await expect(ownerPage.getByText(ownerCommentBody)).toBeVisible();
   });
@@ -156,37 +156,37 @@ test.describe
 
     await expect(memberPage.getByText(ownerCommentBody)).toBeVisible();
     await expect(
-      memberPage.getByRole("button", { name: "แก้ไข", exact: true }),
+      memberPage.getByRole("button", { name: "Edit", exact: true }),
     ).toHaveCount(0);
-    await expect(memberPage.getByRole("button", { name: "ลบ", exact: true })).toHaveCount(
-      0,
-    );
+    await expect(
+      memberPage.getByRole("button", { name: "Delete", exact: true }),
+    ).toHaveCount(0);
   });
 
   test("the member can post their own comment and then edit/delete it (author has full control over their own comment)", async () => {
-    await memberPage.getByLabel("เพิ่มความคิดเห็น").fill(memberCommentBody);
-    await memberPage.getByRole("button", { name: "แสดงความคิดเห็น" }).click();
+    await memberPage.getByLabel("Add a comment").fill(memberCommentBody);
+    await memberPage.getByRole("button", { name: "Post Comment" }).click();
     await expect(memberPage.getByText(memberCommentBody)).toBeVisible();
 
     await expect(
-      memberPage.getByRole("button", { name: "แก้ไข", exact: true }),
+      memberPage.getByRole("button", { name: "Edit", exact: true }),
     ).toBeVisible();
     await expect(
-      memberPage.getByRole("button", { name: "ลบ", exact: true }),
+      memberPage.getByRole("button", { name: "Delete", exact: true }),
     ).toBeVisible();
   });
 
   test("the owner (ADMIN+) can moderate-delete the member's comment", async () => {
     await ownerPage.reload();
 
-    // Two "ลบ" buttons now exist (owner's own comment + the member's) —
+    // Two "Delete" buttons now exist (owner's own comment + the member's) —
     // scope to the row containing the member's comment text so this
     // targets the right one regardless of DOM order.
     const memberCommentRow = ownerPage
       .locator("div", { hasText: memberCommentBody })
       .last();
-    await memberCommentRow.getByRole("button", { name: "ลบ", exact: true }).click();
-    await ownerPage.getByRole("button", { name: "ยืนยัน" }).click();
+    await memberCommentRow.getByRole("button", { name: "Delete", exact: true }).click();
+    await ownerPage.getByRole("button", { name: "Confirm" }).click();
 
     await expect(ownerPage.getByText(memberCommentBody)).toHaveCount(0);
   });
@@ -203,7 +203,7 @@ test.describe
     await outsiderPage.goto(issueUrl);
 
     await expect(
-      outsiderPage.getByRole("heading", { name: "ไม่พบหน้านี้" }),
+      outsiderPage.getByRole("heading", { name: "Page Not Found" }),
     ).toBeVisible();
   });
 });

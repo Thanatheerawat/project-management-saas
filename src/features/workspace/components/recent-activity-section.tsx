@@ -12,8 +12,8 @@ export function RecentActivitySection() {
   return (
     <EmptyState
       icon={Activity}
-      title="ยังไม่มีกิจกรรมล่าสุด"
-      description="กิจกรรมของทีมใน Workspace นี้จะแสดงที่นี่เมื่อพร้อมใช้งาน"
+      title="No recent activity yet"
+      description="Team activity in this workspace will appear here once available"
       className="border-border rounded-xl border border-dashed"
     />
   );

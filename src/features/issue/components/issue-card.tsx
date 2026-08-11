@@ -4,7 +4,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
-import { ISSUE_PRIORITY_COLOR } from "@/constants/issue";
+import { ISSUE_PRIORITY_COLOR, ISSUE_PRIORITY_LABEL } from "@/constants/issue";
 import type { IssueResponse } from "@/features/issue/hooks/use-issues";
 import type { WorkspaceMemberResponse } from "@/features/workspace/hooks/use-workspace-members";
 import { getInitials } from "@/lib/utils";
@@ -52,7 +52,7 @@ export function IssueCard({
                     borderColor: ISSUE_PRIORITY_COLOR[issue.priority],
                   }}
                 >
-                  {issue.priority}
+                  {ISSUE_PRIORITY_LABEL[issue.priority]}
                 </Badge>
               )}
             </div>
@@ -85,7 +85,7 @@ export function IssueCard({
           {assignee ? (
             <>
               <span className="sr-only">
-                มอบหมายให้ {assignee.name ?? assignee.email}
+                Assigned to {assignee.name ?? assignee.email}
               </span>
               <Tooltip>
                 <TooltipTrigger asChild>
@@ -100,7 +100,7 @@ export function IssueCard({
               </Tooltip>
             </>
           ) : (
-            <span className="text-muted-foreground text-xs">ไม่มอบหมาย</span>
+            <span className="text-muted-foreground text-xs">Unassigned</span>
           )}
         </CardContent>
       </Card>

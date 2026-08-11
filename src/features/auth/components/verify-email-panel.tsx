@@ -20,12 +20,12 @@ export function VerifyEmailPanel() {
   if (verifyEmail.isSuccess) {
     return (
       <div className="flex flex-col gap-4">
-        <p className="text-foreground text-sm">ยืนยันอีเมลสำเร็จแล้ว</p>
+        <p className="text-foreground text-sm">Email verified successfully</p>
         {/* "/workspaces", not "/profile" — same reasoning as login-form.tsx:
             it already resolves 0/1/many memberships into the actual app
             instead of stranding a brand-new user on a settings page. */}
         <Button asChild>
-          <Link href="/workspaces">ไปที่ Workspace</Link>
+          <Link href="/workspaces">Go to Workspace</Link>
         </Button>
       </div>
     );
@@ -34,27 +34,28 @@ export function VerifyEmailPanel() {
   return (
     <div className="flex flex-col gap-4">
       <p className="bg-muted text-foreground border-border rounded-md border px-3 py-2 text-xs font-medium">
-        MOCK — ยังไม่มีระบบส่งอีเมลจริง ลิงก์นี้จำลองอีเมลที่ควรได้รับ
+        MOCK — there&apos;s no real email delivery yet; this link simulates the email
+        you&apos;d receive.
       </p>
       <p className="text-muted-foreground text-sm">
-        กดยืนยันเพื่อจำลองการคลิกลิงก์ยืนยันจากอีเมล ({email})
+        Click confirm to simulate clicking the verification link from the email ({email})
       </p>
       {verifyEmail.isError && (
-        <p className="text-destructive text-sm">ลิงก์นี้ใช้ไม่ได้หรือหมดอายุแล้ว</p>
+        <p className="text-destructive text-sm">This link is invalid or has expired</p>
       )}
       <Button
         onClick={() =>
           verifyEmail.mutate(
             { email, token },
             {
-              onSuccess: () => toast.success("ยืนยันอีเมลแล้ว"),
-              onError: () => toast.error("ยืนยันอีเมลไม่สำเร็จ"),
+              onSuccess: () => toast.success("Email verified"),
+              onError: () => toast.error("Failed to verify email"),
             },
           )
         }
         disabled={!email || !token || verifyEmail.isPending}
       >
-        {verifyEmail.isPending ? "กำลังยืนยัน..." : "ยืนยันอีเมล"}
+        {verifyEmail.isPending ? "Verifying..." : "Verify Email"}
       </Button>
     </div>
   );

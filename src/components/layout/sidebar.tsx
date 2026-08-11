@@ -34,7 +34,7 @@ function SidebarNavLinks({
   onNavigate?: () => void;
 }) {
   return (
-    <nav className="flex flex-1 flex-col gap-1 p-2">
+    <nav className="flex flex-1 flex-col gap-1 overflow-y-auto p-2">
       {items.map(({ label, href, icon: Icon }) => {
         const active = href === activeHref;
         return (
@@ -82,7 +82,7 @@ export function Sidebar({ items, activeHref }: SidebarProps) {
             variant="ghost"
             size="icon-sm"
             onClick={toggle}
-            aria-label={collapsed ? "ขยาย sidebar" : "ย่อ sidebar"}
+            aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
           >
             {collapsed ? (
               <ChevronsRight className="size-4" />
@@ -96,7 +96,7 @@ export function Sidebar({ items, activeHref }: SidebarProps) {
       <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
         <SheetContent side="left" className="w-64 max-w-[80vw] md:hidden">
           <SheetHeader>
-            <SheetTitle>เมนูนำทาง</SheetTitle>
+            <SheetTitle>Navigation Menu</SheetTitle>
           </SheetHeader>
           <SidebarNavLinks
             items={items}
@@ -124,7 +124,7 @@ export function SidebarMobileTrigger() {
       size="icon-sm"
       className="md:hidden"
       onClick={() => setMobileOpen(true)}
-      aria-label="เปิดเมนูนำทาง"
+      aria-label="Open navigation menu"
     >
       <Menu className="size-4" />
     </Button>

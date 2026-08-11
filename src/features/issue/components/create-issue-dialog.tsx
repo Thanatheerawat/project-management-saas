@@ -13,6 +13,7 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { ISSUE_PRIORITY_LABEL } from "@/constants/issue";
 import { useCreateIssue } from "@/features/issue/hooks/use-create-issue";
 import {
   createIssueSchema,
@@ -60,17 +61,17 @@ export function CreateIssueDialog({
       assigneeId: assigneeId || undefined,
     });
     if (!parsed.success) {
-      setError(parsed.error.issues[0]?.message ?? "ข้อมูลไม่ถูกต้อง");
+      setError(parsed.error.issues[0]?.message ?? "Invalid input");
       return;
     }
 
     try {
       await createIssue.mutateAsync(parsed.data);
-      toast.success("สร้าง Issue แล้ว");
+      toast.success("Issue created");
       reset();
       setOpen(false);
     } catch (err) {
-      const message = err instanceof ApiError ? err.message : "สร้าง Issue ไม่สำเร็จ";
+      const message = err instanceof ApiError ? err.message : "Failed to create issue";
       setError(message);
       toast.error(message);
     }
@@ -85,16 +86,16 @@ export function CreateIssueDialog({
       }}
     >
       <Button type="button" size="sm" onClick={() => setOpen(true)}>
-        Issue ใหม่
+        New Issue
       </Button>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle>สร้าง Issue ใหม่</DialogTitle>
+          <DialogTitle>Create New Issue</DialogTitle>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="flex flex-col gap-4">
           <div className="flex flex-col gap-1.5">
             <label htmlFor="issue-title" className="text-foreground text-sm font-medium">
-              ชื่อ Issue
+              Issue Title
             </label>
             <Input
               id="issue-title"
@@ -109,7 +110,7 @@ export function CreateIssueDialog({
               htmlFor="issue-description"
               className="text-foreground text-sm font-medium"
             >
-              คำอธิบาย (ถ้ามี)
+              Description (optional)
             </label>
             <Textarea
               id="issue-description"
@@ -135,7 +136,7 @@ export function CreateIssueDialog({
               >
                 {ISSUE_PRIORITIES.map((p) => (
                   <option key={p} value={p}>
-                    {p}
+                    {ISSUE_PRIORITY_LABEL[p]}
                   </option>
                 ))}
               </select>
@@ -154,7 +155,7 @@ export function CreateIssueDialog({
                 disabled={members.isLoading}
                 className="border-input dark:bg-input/30 focus-visible:border-ring focus-visible:ring-ring/50 h-8 rounded-lg border bg-transparent px-2.5 text-sm outline-none focus-visible:ring-[3px]"
               >
-                <option value="">ไม่มอบหมาย</option>
+                <option value="">Unassigned</option>
                 {members.data?.map((member) => (
                   <option key={member.user.id} value={member.user.id}>
                     {member.user.name ?? member.user.email}
@@ -166,7 +167,7 @@ export function CreateIssueDialog({
           {error && <p className="text-destructive text-sm">{error}</p>}
           <DialogFooter>
             <Button type="submit" disabled={createIssue.isPending}>
-              {createIssue.isPending ? "กำลังสร้าง..." : "สร้าง Issue"}
+              {createIssue.isPending ? "Creating..." : "Create Issue"}
             </Button>
           </DialogFooter>
         </form>

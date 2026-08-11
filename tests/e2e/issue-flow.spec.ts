@@ -43,13 +43,13 @@ test.describe
     await registerViaUi(page, { name: "Issue Flow User", email, password });
 
     await page.goto("/workspaces/new");
-    await page.getByLabel("ชื่อ Workspace").fill(workspaceName);
-    await page.getByRole("button", { name: "สร้าง Workspace" }).click();
+    await page.getByLabel("Workspace Name").fill(workspaceName);
+    await page.getByRole("button", { name: "Create Workspace" }).click();
     await expect(page).toHaveURL(new RegExp(`/w/${workspaceName}$`));
 
     await page.goto(`/w/${workspaceName}/projects/new`);
-    await page.getByLabel("ชื่อโปรเจกต์").fill(projectName);
-    await page.getByRole("button", { name: "สร้างโปรเจกต์" }).click();
+    await page.getByLabel("Project Name").fill(projectName);
+    await page.getByRole("button", { name: "Create Project" }).click();
     // A generic `[^/]+$` also matches the literal "new" segment of the
     // pre-submit URL, so the assertion could pass before the client-side
     // redirect actually fires and projectUrl would capture the wrong page
@@ -62,14 +62,14 @@ test.describe
   });
 
   test("the project detail page shows an empty Kanban board before any issue exists", async () => {
-    await expect(page.getByText("ยังไม่มี issue")).toBeVisible();
+    await expect(page.getByText("No issues yet")).toBeVisible();
   });
 
   test("creating an issue via the dialog shows it on the Kanban board", async () => {
-    await page.getByRole("button", { name: "Issue ใหม่" }).click();
-    await page.getByLabel("ชื่อ Issue").fill(issueTitle);
+    await page.getByRole("button", { name: "New Issue" }).click();
+    await page.getByLabel("Issue Title").fill(issueTitle);
     await page.getByLabel("Priority").selectOption("HIGH");
-    await page.getByRole("button", { name: "สร้าง Issue" }).click();
+    await page.getByRole("button", { name: "Create Issue" }).click();
 
     await expect(page.getByRole("link", { name: new RegExp(issueTitle) })).toBeVisible();
   });
@@ -81,11 +81,11 @@ test.describe
   });
 
   test("changing the status via the instant-apply select persists after reload", async () => {
-    await page.getByLabel("สถานะ Issue").selectOption("IN_PROGRESS");
-    await expect(page.getByLabel("สถานะ Issue")).toHaveValue("IN_PROGRESS");
+    await page.getByLabel("Issue Status").selectOption("IN_PROGRESS");
+    await expect(page.getByLabel("Issue Status")).toHaveValue("IN_PROGRESS");
 
     await page.reload();
-    await expect(page.getByLabel("สถานะ Issue")).toHaveValue("IN_PROGRESS");
+    await expect(page.getByLabel("Issue Status")).toHaveValue("IN_PROGRESS");
   });
 
   test("the issue is still visible on the Kanban board after navigating back", async () => {
@@ -94,65 +94,65 @@ test.describe
 
     await page.getByRole("link", { name: new RegExp(issueTitle) }).click();
     await expect(page.getByRole("heading", { name: issueTitle })).toBeVisible();
-    await expect(page.getByLabel("สถานะ Issue")).toHaveValue("IN_PROGRESS");
+    await expect(page.getByLabel("Issue Status")).toHaveValue("IN_PROGRESS");
   });
 
   test("editing title and priority via the edit form saves", async () => {
-    await page.getByLabel("ชื่อ Issue").fill(editedIssueTitle);
+    await page.getByLabel("Issue Title").fill(editedIssueTitle);
     await page.getByLabel("Priority").selectOption("URGENT");
-    await page.getByRole("button", { name: "บันทึก" }).click();
+    await page.getByRole("button", { name: "Save" }).click();
 
     await expect(page.getByRole("heading", { name: editedIssueTitle })).toBeVisible();
-    await expect(page.getByText("บันทึก Issue แล้ว")).toBeVisible();
+    await expect(page.getByText("Issue saved")).toBeVisible();
   });
 
   test("creating a new label from the issue detail page adds it to the attach dropdown", async () => {
-    await page.getByLabel("ชื่อ Label ใหม่").fill(labelName);
-    await page.getByLabel("สี (hex)").fill("#2C7FA6");
-    await page.getByRole("button", { name: "สร้าง" }).click();
+    await page.getByLabel("New Label Name").fill(labelName);
+    await page.getByLabel("Color (hex)").fill("#2C7FA6");
+    await page.getByRole("button", { name: "Create" }).click();
 
     await expect(
-      page.getByLabel("เลือก Label ที่จะแนบ").getByRole("option", { name: labelName }),
+      page.getByLabel("Select label to attach").getByRole("option", { name: labelName }),
     ).toHaveCount(1);
   });
 
   test("attaching the label shows it as a badge on the issue", async () => {
-    await page.getByLabel("เลือก Label ที่จะแนบ").selectOption({ label: labelName });
-    await page.getByRole("button", { name: "แนบ" }).click();
+    await page.getByLabel("Select label to attach").selectOption({ label: labelName });
+    await page.getByRole("button", { name: "Attach" }).click();
 
     await expect(page.getByText(labelName)).toBeVisible();
   });
 
   test("detaching the label removes the badge", async () => {
-    await page.getByRole("button", { name: `ลบ Label ${labelName}` }).click();
+    await page.getByRole("button", { name: `Delete label ${labelName}` }).click();
 
-    await expect(page.getByText("ยังไม่มี Label")).toBeVisible();
+    await expect(page.getByText("No labels yet")).toBeVisible();
   });
 
   test("posting a comment shows it in the list", async () => {
-    await page.getByLabel("เพิ่มความคิดเห็น").fill(commentBody);
-    await page.getByRole("button", { name: "แสดงความคิดเห็น" }).click();
+    await page.getByLabel("Add a comment").fill(commentBody);
+    await page.getByRole("button", { name: "Post Comment" }).click();
 
     await expect(page.getByText(commentBody)).toBeVisible();
   });
 
   test("editing the comment persists the new text", async () => {
-    await page.getByRole("button", { name: "แก้ไข", exact: true }).click();
-    await page.getByLabel("แก้ไขความคิดเห็น").fill(editedCommentBody);
-    // .last(): the comment row's own "บันทึก" button, distinct from the
+    await page.getByRole("button", { name: "Edit", exact: true }).click();
+    await page.getByLabel("Edit comment").fill(editedCommentBody);
+    // .last(): the comment row's own "Save" button, distinct from the
     // Edit Issue form's identically-labeled submit button earlier on the
     // same page — the comment section always renders after the edit form
     // (see issue-detail-panel.tsx), so it's reliably the later match.
-    await page.getByRole("button", { name: "บันทึก", exact: true }).last().click();
+    await page.getByRole("button", { name: "Save", exact: true }).last().click();
 
     await expect(page.getByText(editedCommentBody)).toBeVisible();
   });
 
   test("deleting the comment via the confirm dialog removes it", async () => {
-    await page.getByRole("button", { name: "ลบ", exact: true }).click();
-    await page.getByRole("button", { name: "ยืนยัน" }).click();
+    await page.getByRole("button", { name: "Delete", exact: true }).click();
+    await page.getByRole("button", { name: "Confirm" }).click();
 
-    await expect(page.getByText("ยังไม่มีความคิดเห็น")).toBeVisible();
+    await expect(page.getByText("No comments yet")).toBeVisible();
   });
 
   // No Delete Issue UI exists (out of scope since Increment 6 — see the
@@ -169,12 +169,12 @@ test.describe
     expect(response.ok()).toBe(true);
 
     await page.reload();
-    await expect(page.getByRole("heading", { name: "ไม่พบหน้านี้" })).toBeVisible();
+    await expect(page.getByRole("heading", { name: "Page Not Found" })).toBeVisible();
 
     await page.goto(projectUrl);
     await expect(
       page.getByRole("link", { name: new RegExp(editedIssueTitle) }),
     ).toHaveCount(0);
-    await expect(page.getByText("ยังไม่มี issue")).toBeVisible();
+    await expect(page.getByText("No issues yet")).toBeVisible();
   });
 });

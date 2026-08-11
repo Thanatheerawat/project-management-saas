@@ -2,6 +2,7 @@ import Link from "next/link";
 
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import { PROJECT_STATUS_LABEL } from "@/constants/project";
 import type { Project } from "@/generated/prisma/client";
 
 // Issue count is deliberately not shown here — Increment 3 only surfaces
@@ -48,14 +49,14 @@ export function RecentProjectCard({
               )}
             </div>
             <Badge variant="outline" className="shrink-0">
-              {project.status}
+              {PROJECT_STATUS_LABEL[project.status]}
             </Badge>
           </div>
         </CardHeader>
         <CardContent>
           <p className="text-muted-foreground text-xs">
-            อัปเดตล่าสุด{" "}
-            {new Date(project.updatedAt).toLocaleDateString("th-TH", {
+            Updated{" "}
+            {new Date(project.updatedAt).toLocaleDateString("en-US", {
               day: "numeric",
               month: "short",
               year: "numeric",

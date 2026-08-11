@@ -49,11 +49,11 @@ export function AdminUserList() {
           type="email"
           value={emailInput}
           onChange={(e) => setEmailInput(e.target.value)}
-          placeholder="ค้นหาด้วยอีเมล..."
-          aria-label="ค้นหาผู้ใช้ด้วยอีเมล"
+          placeholder="Search by email..."
+          aria-label="Search users by email"
         />
         <Button type="submit" variant="outline">
-          ค้นหา
+          Search
         </Button>
       </form>
 
@@ -65,22 +65,22 @@ export function AdminUserList() {
           <Skeleton className="h-12 w-full" />
         </div>
       ) : isError || !data ? (
-        <p className="text-destructive text-sm">โหลดรายชื่อผู้ใช้ไม่สำเร็จ</p>
+        <p className="text-destructive text-sm">Failed to load users</p>
       ) : data.items.length === 0 ? (
         <EmptyState
           icon={Users}
-          title="ไม่พบผู้ใช้"
-          description="ลองค้นหาด้วยอีเมลอื่น"
+          title="No users found"
+          description="Try searching a different email"
           className="border-border rounded-xl border border-dashed"
         />
       ) : (
         <div className="flex flex-col gap-3">
           <div className="border-border overflow-hidden rounded-xl border">
-            <Table aria-label="รายชื่อผู้ใช้ทั้งหมด">
+            <Table aria-label="All users">
               <TableHeader>
                 <TableRow>
-                  <TableHead>ผู้ใช้</TableHead>
-                  <TableHead>สถานะ</TableHead>
+                  <TableHead>User</TableHead>
+                  <TableHead>Status</TableHead>
                   <TableHead>Role</TableHead>
                   <TableHead className="text-right">Workspace</TableHead>
                 </TableRow>

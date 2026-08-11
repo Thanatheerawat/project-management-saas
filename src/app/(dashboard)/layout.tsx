@@ -36,12 +36,12 @@ export default async function DashboardLayout({
         actions={
           <>
             {isAdmin && (
-              <Button variant="ghost" size="sm" asChild>
+              <Button variant="ghost" size="sm" asChild className="hidden md:inline-flex">
                 <Link href="/admin">Admin</Link>
               </Button>
             )}
             <ThemeToggle />
-            <UserMenu />
+            <UserMenu isAdmin={isAdmin} />
           </>
         }
       />

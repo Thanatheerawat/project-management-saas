@@ -26,7 +26,7 @@ export function RegisterForm() {
 
     const parsed = registerSchema.safeParse({ name, email, password });
     if (!parsed.success) {
-      setError(parsed.error.issues[0]?.message ?? "ข้อมูลไม่ถูกต้อง");
+      setError(parsed.error.issues[0]?.message ?? "Invalid input");
       return;
     }
 
@@ -40,11 +40,11 @@ export function RegisterForm() {
         password: parsed.data.password,
         redirect: false,
       });
-      toast.success("สมัครสมาชิกสำเร็จ");
+      toast.success("Account created successfully");
       router.push(result.mockVerifyUrl);
       router.refresh();
     } catch (err) {
-      const message = err instanceof ApiError ? err.message : "สมัครสมาชิกไม่สำเร็จ";
+      const message = err instanceof ApiError ? err.message : "Failed to create account";
       setError(message);
       toast.error(message);
     }
@@ -54,7 +54,7 @@ export function RegisterForm() {
     <form onSubmit={handleSubmit} className="flex flex-col gap-4">
       <div className="flex flex-col gap-1.5">
         <label htmlFor="name" className="text-foreground text-sm font-medium">
-          ชื่อ
+          Name
         </label>
         <Input
           id="name"
@@ -65,7 +65,7 @@ export function RegisterForm() {
       </div>
       <div className="flex flex-col gap-1.5">
         <label htmlFor="email" className="text-foreground text-sm font-medium">
-          อีเมล
+          Email
         </label>
         <Input
           id="email"
@@ -78,7 +78,7 @@ export function RegisterForm() {
       </div>
       <div className="flex flex-col gap-1.5">
         <label htmlFor="password" className="text-foreground text-sm font-medium">
-          รหัสผ่าน
+          Password
         </label>
         <Input
           id="password"
@@ -91,11 +91,11 @@ export function RegisterForm() {
       </div>
       {error && <p className="text-destructive text-sm">{error}</p>}
       <Button type="submit" disabled={register.isPending}>
-        {register.isPending ? "กำลังสร้างบัญชี..." : "สร้างบัญชี"}
+        {register.isPending ? "Creating account..." : "Create Account"}
       </Button>
       <p className="text-center text-sm">
         <Link href="/login" className="text-muted-foreground hover:text-foreground">
-          มีบัญชีอยู่แล้ว? เข้าสู่ระบบ
+          Already have an account? Sign in
         </Link>
       </p>
     </form>

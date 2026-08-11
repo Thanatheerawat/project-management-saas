@@ -38,12 +38,12 @@ export function AdminAuditLogList() {
   return (
     <div className="flex flex-col gap-4">
       <select
-        aria-label="กรองตาม Action"
+        aria-label="Filter by action"
         value={action ?? ""}
         onChange={(e) => handleActionChange(e.target.value)}
         className="border-input dark:bg-input/30 focus-visible:border-ring focus-visible:ring-ring/50 h-8 w-fit rounded-lg border bg-transparent px-2.5 text-sm outline-none focus-visible:ring-[3px]"
       >
-        <option value="">ทุก Action</option>
+        <option value="">All actions</option>
         {AUDIT_ACTIONS.map((a) => (
           <option key={a} value={a}>
             {a}
@@ -58,23 +58,23 @@ export function AdminAuditLogList() {
           <Skeleton className="h-10 w-full" />
         </div>
       ) : isError || !data ? (
-        <p className="text-destructive text-sm">โหลด Audit Log ไม่สำเร็จ</p>
+        <p className="text-destructive text-sm">Failed to load audit log</p>
       ) : data.items.length === 0 ? (
         <EmptyState
           icon={ScrollText}
-          title="ไม่พบ Audit Log"
-          description="ลองเปลี่ยนตัวกรอง Action"
+          title="No audit log entries found"
+          description="Try changing the action filter"
           className="border-border rounded-xl border border-dashed"
         />
       ) : (
         <div className="flex flex-col gap-3">
           <div className="border-border overflow-hidden rounded-xl border">
-            <Table aria-label="Audit Log ทั้งหมด">
+            <Table aria-label="All audit log entries">
               <TableHeader>
                 <TableRow>
                   <TableHead>Action</TableHead>
-                  <TableHead>ผู้ใช้</TableHead>
-                  <TableHead className="text-right">เวลา</TableHead>
+                  <TableHead>User</TableHead>
+                  <TableHead className="text-right">Time</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -84,10 +84,10 @@ export function AdminAuditLogList() {
                       <Badge variant="outline">{entry.action}</Badge>
                     </TableCell>
                     <TableCell className="text-foreground text-sm">
-                      {entry.user?.name ?? entry.user?.email ?? "ไม่ทราบผู้ใช้"}
+                      {entry.user?.name ?? entry.user?.email ?? "Unknown user"}
                     </TableCell>
                     <TableCell className="text-muted-foreground text-right text-xs">
-                      {new Date(entry.createdAt).toLocaleString("th-TH")}
+                      {new Date(entry.createdAt).toLocaleString("en-US")}
                     </TableCell>
                   </TableRow>
                 ))}

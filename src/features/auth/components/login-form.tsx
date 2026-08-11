@@ -24,13 +24,13 @@ export function LoginForm() {
 
     const parsed = loginSchema.safeParse({ email, password });
     if (!parsed.success) {
-      setError(parsed.error.issues[0]?.message ?? "ข้อมูลไม่ถูกต้อง");
+      setError(parsed.error.issues[0]?.message ?? "Invalid input");
       return;
     }
 
     try {
       await login.mutateAsync(parsed.data);
-      toast.success("เข้าสู่ระบบสำเร็จ");
+      toast.success("Signed in successfully");
       // "/workspaces" (not "/profile") — it already resolves 0/1/many
       // memberships correctly (see workspaces/page.tsx), so a plain login
       // lands the user in the actual app instead of a dead-end settings
@@ -41,7 +41,7 @@ export function LoginForm() {
     } catch {
       // Same message regardless of whether the email exists or the
       // password was wrong — see docs/security.md (A04).
-      const message = "อีเมลหรือรหัสผ่านไม่ถูกต้อง";
+      const message = "Invalid email or password";
       setError(message);
       toast.error(message);
     }
@@ -51,7 +51,7 @@ export function LoginForm() {
     <form onSubmit={handleSubmit} className="flex flex-col gap-4">
       <div className="flex flex-col gap-1.5">
         <label htmlFor="email" className="text-foreground text-sm font-medium">
-          อีเมล
+          Email
         </label>
         <Input
           id="email"
@@ -64,7 +64,7 @@ export function LoginForm() {
       </div>
       <div className="flex flex-col gap-1.5">
         <label htmlFor="password" className="text-foreground text-sm font-medium">
-          รหัสผ่าน
+          Password
         </label>
         <Input
           id="password"
@@ -77,17 +77,17 @@ export function LoginForm() {
       </div>
       {error && <p className="text-destructive text-sm">{error}</p>}
       <Button type="submit" disabled={login.isPending}>
-        {login.isPending ? "กำลังเข้าสู่ระบบ..." : "เข้าสู่ระบบ"}
+        {login.isPending ? "Signing in..." : "Sign in"}
       </Button>
       <div className="flex justify-between text-sm">
         <Link
           href="/forgot-password"
           className="text-muted-foreground hover:text-foreground"
         >
-          ลืมรหัสผ่าน?
+          Forgot password?
         </Link>
         <Link href="/register" className="text-muted-foreground hover:text-foreground">
-          สร้างบัญชีใหม่
+          Create an account
         </Link>
       </div>
     </form>

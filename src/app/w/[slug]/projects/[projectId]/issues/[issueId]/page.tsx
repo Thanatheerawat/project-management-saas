@@ -9,7 +9,7 @@ import { hasWorkspaceRole } from "@/lib/auth/workspace-rbac";
 import { issueRepository } from "@/repositories/issue/issue.repository";
 import { projectRepository } from "@/repositories/workspace/project.repository";
 
-export const metadata: Metadata = { title: "รายละเอียด Issue — Orbit" };
+export const metadata: Metadata = { title: "Issue Details — Orbit" };
 
 export default async function IssueDetailPage({
   params,
@@ -43,7 +43,7 @@ export default async function IssueDetailPage({
       <Breadcrumb
         items={[
           { label: workspace.name, href: `/w/${slug}` },
-          { label: "โปรเจกต์", href: `/w/${slug}/projects` },
+          { label: "Projects", href: `/w/${slug}/projects` },
           { label: project.name, href: `/w/${slug}/projects/${project.id}` },
           { label: "Issue" },
         ]}

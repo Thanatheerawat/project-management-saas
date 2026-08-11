@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { toast } from "sonner";
 
-import { ISSUE_STATUS_COLOR } from "@/constants/issue";
+import { ISSUE_STATUS_COLOR, ISSUE_STATUS_LABEL } from "@/constants/issue";
 import { useUpdateIssue } from "@/features/issue/hooks/use-update-issue";
 import { ISSUE_STATUSES } from "@/features/issue/schemas/update-issue.schema";
 import type { IssueStatus } from "@/generated/prisma/client";
@@ -30,9 +30,9 @@ export function IssueStatusSelect({
     setError(null);
     try {
       await updateIssue.mutateAsync({ status });
-      toast.success(`เปลี่ยนสถานะเป็น ${status} แล้ว`);
+      toast.success(`Status changed to ${ISSUE_STATUS_LABEL[status]}`);
     } catch (err) {
-      const message = err instanceof ApiError ? err.message : "เปลี่ยนสถานะไม่สำเร็จ";
+      const message = err instanceof ApiError ? err.message : "Failed to update status";
       setError(message);
       toast.error(message);
     }
@@ -46,7 +46,7 @@ export function IssueStatusSelect({
           style={{ backgroundColor: ISSUE_STATUS_COLOR[currentStatus] }}
         />
         <select
-          aria-label="สถานะ Issue"
+          aria-label="Issue Status"
           value={currentStatus}
           onChange={(e) => handleChange(e.target.value as IssueStatus)}
           disabled={updateIssue.isPending}
@@ -54,7 +54,7 @@ export function IssueStatusSelect({
         >
           {ISSUE_STATUSES.map((status) => (
             <option key={status} value={status}>
-              {status}
+              {ISSUE_STATUS_LABEL[status]}
             </option>
           ))}
         </select>

@@ -13,7 +13,7 @@ import { auth } from "@/lib/auth/auth";
 import { resolveWorkspaceForRequest } from "@/lib/auth/workspace-membership";
 import { projectRepository } from "@/repositories/workspace/project.repository";
 
-export const metadata: Metadata = { title: "แดชบอร์ด — Orbit" };
+export const metadata: Metadata = { title: "Dashboard — Orbit" };
 
 // "Shell" deliberately: shows workspace info and a read-only project
 // preview via the already-approved GET .../projects endpoint's underlying
@@ -48,15 +48,15 @@ export default async function WorkspaceDashboardPage({
       <WorkspaceKpiCards workspaceId={workspace.id} projectCount={projects.length} />
 
       <div className="flex flex-col gap-3">
-        <h2 className="text-foreground text-sm font-semibold">โปรเจกต์ล่าสุด</h2>
+        <h2 className="text-foreground text-sm font-semibold">Recent Projects</h2>
         {projects.length === 0 ? (
           <EmptyState
             icon={FolderKanban}
-            title="ยังไม่มีโปรเจกต์"
-            description="โปรเจกต์ใน Workspace นี้จะแสดงที่นี่"
+            title="No projects yet"
+            description="Projects in this workspace will appear here"
             action={
               <Button size="sm" asChild>
-                <Link href={`/w/${slug}/projects/new`}>สร้างโปรเจกต์แรก</Link>
+                <Link href={`/w/${slug}/projects/new`}>Create your first project</Link>
               </Button>
             }
             className="border-border rounded-xl border border-dashed"
@@ -75,12 +75,12 @@ export default async function WorkspaceDashboardPage({
       </div>
 
       <div className="flex flex-col gap-3">
-        <h2 className="text-foreground text-sm font-semibold">กิจกรรมล่าสุด</h2>
+        <h2 className="text-foreground text-sm font-semibold">Recent Activity</h2>
         <RecentActivitySection />
       </div>
 
       <div className="flex flex-col gap-3">
-        <h2 className="text-foreground text-sm font-semibold">ภาพรวม</h2>
+        <h2 className="text-foreground text-sm font-semibold">Overview</h2>
         <WorkspaceAnalyticsSection workspaceId={workspace.id} />
       </div>
     </div>

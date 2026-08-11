@@ -10,7 +10,7 @@ test.describe("Auth redirects", () => {
     await page.goto("/profile");
 
     await expect(page).toHaveURL(/\/login\?callbackUrl=%2Fprofile/);
-    await expect(page.getByRole("heading", { name: "เข้าสู่ระบบ" })).toBeVisible();
+    await expect(page.getByRole("heading", { name: "Sign In" })).toBeVisible();
   });
 
   test("an authenticated user visiting /login is redirected straight to /workspaces", async ({

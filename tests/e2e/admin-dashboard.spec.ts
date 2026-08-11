@@ -86,8 +86,8 @@ test.describe.serial("Admin dashboard", () => {
     await loginViaUi(adminPage, { email: adminEmail, password });
 
     await superAdminPage.goto("/workspaces/new");
-    await superAdminPage.getByLabel("ชื่อ Workspace").fill(workspaceName);
-    await superAdminPage.getByRole("button", { name: "สร้าง Workspace" }).click();
+    await superAdminPage.getByLabel("Workspace Name").fill(workspaceName);
+    await superAdminPage.getByRole("button", { name: "Create Workspace" }).click();
     await expect(superAdminPage).toHaveURL(new RegExp(`/w/${workspaceName}$`));
   });
 
@@ -99,14 +99,14 @@ test.describe.serial("Admin dashboard", () => {
     await superAdminPage.getByRole("link", { name: "Admin", exact: true }).click();
     await expect(superAdminPage).toHaveURL(/\/admin$/);
     await expect(
-      superAdminPage.getByRole("heading", { name: "ภาพรวมระบบ" }),
+      superAdminPage.getByRole("heading", { name: "System Overview" }),
     ).toBeVisible();
-    await expect(superAdminPage.getByText("ผู้ใช้ทั้งหมด")).toBeVisible();
-    await expect(superAdminPage.getByText("Workspace ทั้งหมด")).toBeVisible();
+    await expect(superAdminPage.getByText("Total Users")).toBeVisible();
+    await expect(superAdminPage.getByText("Total Workspaces")).toBeVisible();
     // CardTitle renders a styled <div>, not a semantic heading element —
     // getByText, not getByRole("heading"), matches components/ui/card.tsx.
-    await expect(superAdminPage.getByText("สถานะ Issue")).toBeVisible();
-    await expect(superAdminPage.getByText("ระดับความสำคัญ")).toBeVisible();
+    await expect(superAdminPage.getByText("Issue Status")).toBeVisible();
+    await expect(superAdminPage.getByText("Priority")).toBeVisible();
   });
 
   test("SUPER_ADMIN: workspaces list shows the workspace just created", async () => {
@@ -120,7 +120,7 @@ test.describe.serial("Admin dashboard", () => {
   test("SUPER_ADMIN: users list finds the target user by email search", async () => {
     await superAdminPage.goto("/admin/users");
     await expect(
-      superAdminPage.getByRole("heading", { name: "ผู้ใช้ทั้งหมด" }),
+      superAdminPage.getByRole("heading", { name: "All Users" }),
     ).toBeVisible();
     // .first(): under the full suite's ~12-worker parallel load this
     // input has intermittently resolved as 2 identical elements (a
@@ -128,8 +128,8 @@ test.describe.serial("Admin dashboard", () => {
     // settled — never reproduces in isolation, and both matches are
     // byte-identical, so acting on the first is safe regardless of the
     // underlying cause.
-    await superAdminPage.getByLabel("ค้นหาผู้ใช้ด้วยอีเมล").first().fill(targetEmail);
-    await superAdminPage.getByRole("button", { name: "ค้นหา" }).click();
+    await superAdminPage.getByLabel("Search users by email").first().fill(targetEmail);
+    await superAdminPage.getByRole("button", { name: "Search" }).click();
     await expect(superAdminPage.getByText(targetEmail)).toBeVisible();
   });
 
@@ -145,16 +145,16 @@ test.describe.serial("Admin dashboard", () => {
   test("SUPER_ADMIN: deactivates the target user from the detail page", async () => {
     await superAdminPage.goto("/admin/users");
     await expect(
-      superAdminPage.getByRole("heading", { name: "ผู้ใช้ทั้งหมด" }),
+      superAdminPage.getByRole("heading", { name: "All Users" }),
     ).toBeVisible();
-    await superAdminPage.getByLabel("ค้นหาผู้ใช้ด้วยอีเมล").first().fill(targetEmail);
-    await superAdminPage.getByRole("button", { name: "ค้นหา" }).click();
+    await superAdminPage.getByLabel("Search users by email").first().fill(targetEmail);
+    await superAdminPage.getByRole("button", { name: "Search" }).click();
     await superAdminPage.getByRole("link", { name: new RegExp(targetEmail) }).click();
 
     await expect(
       superAdminPage.getByRole("heading", { name: "E2E Deactivation Target" }),
     ).toBeVisible();
-    await superAdminPage.getByRole("button", { name: "ปิดใช้งาน" }).click();
+    await superAdminPage.getByRole("button", { name: "Deactivate" }).click();
     await expect(superAdminPage.getByText("Inactive")).toBeVisible();
   });
 
@@ -169,31 +169,33 @@ test.describe.serial("Admin dashboard", () => {
     await logoutViaUi(targetPage);
 
     await targetPage.goto("/login");
-    await targetPage.getByLabel("อีเมล").fill(targetEmail);
-    await targetPage.getByLabel("รหัสผ่าน").fill(password);
-    await targetPage.getByRole("button", { name: "เข้าสู่ระบบ" }).click();
+    await targetPage.getByLabel("Email").fill(targetEmail);
+    await targetPage.getByLabel("Password").fill(password);
+    await targetPage.getByRole("button", { name: "Sign in" }).click();
 
     // Scoped to the form, not just getByText: the same message also
     // appears in a toast (both are the app's established error-feedback
     // convention — see login-form.tsx), so an unscoped getByText resolves
     // to two elements.
     await expect(
-      targetPage.locator("form").getByText("อีเมลหรือรหัสผ่านไม่ถูกต้อง"),
+      targetPage.locator("form").getByText("Invalid email or password"),
     ).toBeVisible();
     await expect(targetPage).toHaveURL(/\/login$/);
   });
 
   test("ADMIN: has read access to every admin page", async () => {
     await adminPage.goto("/admin");
-    await expect(adminPage.getByRole("heading", { name: "ภาพรวมระบบ" })).toBeVisible();
+    await expect(
+      adminPage.getByRole("heading", { name: "System Overview" }),
+    ).toBeVisible();
 
     await adminPage.goto("/admin/workspaces");
     await expect(
-      adminPage.getByRole("heading", { name: "Workspace ทั้งหมด" }),
+      adminPage.getByRole("heading", { name: "All Workspaces" }),
     ).toBeVisible();
 
     await adminPage.goto("/admin/users");
-    await expect(adminPage.getByRole("heading", { name: "ผู้ใช้ทั้งหมด" })).toBeVisible();
+    await expect(adminPage.getByRole("heading", { name: "All Users" })).toBeVisible();
 
     await adminPage.goto("/admin/audit-log");
     await expect(adminPage.getByRole("heading", { name: "Audit Log" })).toBeVisible();
@@ -201,12 +203,12 @@ test.describe.serial("Admin dashboard", () => {
 
   test("ADMIN: role-change is denied — disabled in the UI and rejected by the API", async () => {
     await adminPage.goto("/admin/users");
-    await expect(adminPage.getByRole("heading", { name: "ผู้ใช้ทั้งหมด" })).toBeVisible();
-    await adminPage.getByLabel("ค้นหาผู้ใช้ด้วยอีเมล").first().fill(plainUserEmail);
-    await adminPage.getByRole("button", { name: "ค้นหา" }).click();
+    await expect(adminPage.getByRole("heading", { name: "All Users" })).toBeVisible();
+    await adminPage.getByLabel("Search users by email").first().fill(plainUserEmail);
+    await adminPage.getByRole("button", { name: "Search" }).click();
     await adminPage.getByRole("link", { name: new RegExp(plainUserEmail) }).click();
 
-    await expect(adminPage.getByLabel("เปลี่ยน Platform Role")).toBeDisabled();
+    await expect(adminPage.getByLabel("Change platform role")).toBeDisabled();
 
     const targetUserId = adminPage.url().split("/").pop();
     const response = await adminPage.request.patch(`/api/admin/users/${targetUserId}`, {

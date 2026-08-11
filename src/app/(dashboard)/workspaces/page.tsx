@@ -5,7 +5,7 @@ import { WorkspacePicker } from "@/features/workspace/components/workspace-picke
 import { auth } from "@/lib/auth/auth";
 import { workspaceMemberRepository } from "@/repositories/workspace/workspace-member.repository";
 
-export const metadata: Metadata = { title: "เลือก Workspace — Orbit" };
+export const metadata: Metadata = { title: "Select Workspace — Orbit" };
 
 // Workspace Resolution step of the approved User Flow: 0 workspaces →
 // picker renders its own empty state; exactly 1 → skip the picker
@@ -24,7 +24,7 @@ export default async function WorkspacesPage() {
   return (
     <div className="flex flex-col gap-6">
       <h1 className="text-foreground text-2xl font-bold tracking-tight">
-        Workspace ของคุณ
+        Your Workspaces
       </h1>
       <WorkspacePicker />
     </div>

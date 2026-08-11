@@ -26,17 +26,18 @@ export function CreateWorkspaceForm() {
       description: description || undefined,
     });
     if (!parsed.success) {
-      setError(parsed.error.issues[0]?.message ?? "ข้อมูลไม่ถูกต้อง");
+      setError(parsed.error.issues[0]?.message ?? "Invalid input");
       return;
     }
 
     try {
       const workspace = await createWorkspace.mutateAsync(parsed.data);
-      toast.success("สร้าง Workspace แล้ว");
+      toast.success("Workspace created");
       router.push(`/w/${workspace.slug}`);
       router.refresh();
     } catch (err) {
-      const message = err instanceof ApiError ? err.message : "สร้าง Workspace ไม่สำเร็จ";
+      const message =
+        err instanceof ApiError ? err.message : "Failed to create workspace";
       setError(message);
       toast.error(message);
     }
@@ -46,7 +47,7 @@ export function CreateWorkspaceForm() {
     <form onSubmit={handleSubmit} className="flex flex-col gap-4">
       <div className="flex flex-col gap-1.5">
         <label htmlFor="name" className="text-foreground text-sm font-medium">
-          ชื่อ Workspace
+          Workspace Name
         </label>
         <Input
           id="name"
@@ -57,7 +58,7 @@ export function CreateWorkspaceForm() {
       </div>
       <div className="flex flex-col gap-1.5">
         <label htmlFor="description" className="text-foreground text-sm font-medium">
-          คำอธิบาย (ถ้ามี)
+          Description (optional)
         </label>
         <Input
           id="description"
@@ -67,7 +68,7 @@ export function CreateWorkspaceForm() {
       </div>
       {error && <p className="text-destructive text-sm">{error}</p>}
       <Button type="submit" disabled={createWorkspace.isPending} className="self-start">
-        {createWorkspace.isPending ? "กำลังสร้าง..." : "สร้าง Workspace"}
+        {createWorkspace.isPending ? "Creating..." : "Create Workspace"}
       </Button>
     </form>
   );

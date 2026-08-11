@@ -37,7 +37,7 @@ export function AdminOverviewSection() {
   }
 
   if (overview.isError || !overview.data) {
-    return <p className="text-destructive text-sm">โหลดข้อมูลภาพรวมไม่สำเร็จ</p>;
+    return <p className="text-destructive text-sm">Failed to load overview</p>;
   }
 
   const { userCount, workspaceCount, projectCount, issueOverview } = overview.data;
@@ -45,16 +45,16 @@ export function AdminOverviewSection() {
   return (
     <div className="flex flex-col gap-4">
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
-        <StatCard label="ผู้ใช้ทั้งหมด" value={userCount} icon={Users} />
-        <StatCard label="Workspace ทั้งหมด" value={workspaceCount} icon={Building2} />
-        <StatCard label="โปรเจกต์ทั้งหมด" value={projectCount} icon={FolderKanban} />
+        <StatCard label="Total Users" value={userCount} icon={Users} />
+        <StatCard label="Total Workspaces" value={workspaceCount} icon={Building2} />
+        <StatCard label="Total Projects" value={projectCount} icon={FolderKanban} />
         <HealthStatCard health={health} />
       </div>
 
       <div className="grid gap-4 sm:grid-cols-2">
         <Card size="sm">
           <CardHeader>
-            <CardTitle>สถานะ Issue</CardTitle>
+            <CardTitle>Issue Status</CardTitle>
           </CardHeader>
           <CardContent>
             <StatusBreakdownChart data={issueOverview.byStatus} />
@@ -63,7 +63,7 @@ export function AdminOverviewSection() {
 
         <Card size="sm">
           <CardHeader>
-            <CardTitle>ระดับความสำคัญ</CardTitle>
+            <CardTitle>Priority</CardTitle>
           </CardHeader>
           <CardContent>
             <PriorityBreakdownChart data={issueOverview.byPriority} />
@@ -89,9 +89,9 @@ function HealthStatCard({ health }: { health: ReturnType<typeof useAdminHealth> 
         <CardContent className="flex items-center gap-3">
           <Database className="text-destructive size-5 shrink-0" strokeWidth={1.5} />
           <div className="flex flex-col">
-            <span className="text-muted-foreground text-xs">ฐานข้อมูล</span>
+            <span className="text-muted-foreground text-xs">Database</span>
             <span className="text-destructive text-sm font-semibold">
-              เรียก API ไม่สำเร็จ
+              API call failed
             </span>
           </div>
         </CardContent>
@@ -113,7 +113,7 @@ function HealthStatCard({ health }: { health: ReturnType<typeof useAdminHealth> 
           strokeWidth={1.5}
         />
         <div className="flex flex-col">
-          <span className="text-muted-foreground text-xs">ฐานข้อมูล</span>
+          <span className="text-muted-foreground text-xs">Database</span>
           <span
             className={
               reachable
@@ -121,7 +121,7 @@ function HealthStatCard({ health }: { health: ReturnType<typeof useAdminHealth> 
                 : "text-destructive text-sm font-semibold"
             }
           >
-            {reachable ? `ออนไลน์ (${latencyMs}ms)` : "ไม่ตอบสนอง"}
+            {reachable ? `Online (${latencyMs}ms)` : "Unresponsive"}
           </span>
         </div>
       </CardContent>

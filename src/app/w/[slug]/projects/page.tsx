@@ -7,12 +7,13 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader } from "@/components/ui/card";
 import { EmptyState } from "@/components/ui/empty-state";
+import { PROJECT_STATUS_LABEL } from "@/constants/project";
 import { auth } from "@/lib/auth/auth";
 import { resolveWorkspaceForRequest } from "@/lib/auth/workspace-membership";
 import { hasWorkspaceRole } from "@/lib/auth/workspace-rbac";
 import { projectRepository } from "@/repositories/workspace/project.repository";
 
-export const metadata: Metadata = { title: "โปรเจกต์ — Orbit" };
+export const metadata: Metadata = { title: "Projects — Orbit" };
 
 // Read-only list via the repository directly (same SSR pattern as the
 // dashboard shell) — every workspace Member can see every project
@@ -37,10 +38,10 @@ export default async function ProjectsPage({
   return (
     <div className="flex flex-col gap-6">
       <div className="flex items-center justify-between gap-2">
-        <h1 className="text-foreground text-2xl font-bold tracking-tight">โปรเจกต์</h1>
+        <h1 className="text-foreground text-2xl font-bold tracking-tight">Projects</h1>
         {canCreate && (
           <Button asChild size="sm">
-            <Link href={`/w/${slug}/projects/new`}>สร้างโปรเจกต์</Link>
+            <Link href={`/w/${slug}/projects/new`}>Create Project</Link>
           </Button>
         )}
       </div>
@@ -48,12 +49,12 @@ export default async function ProjectsPage({
       {projects.length === 0 ? (
         <EmptyState
           icon={FolderKanban}
-          title="ยังไม่มีโปรเจกต์"
-          description="โปรเจกต์ใน Workspace นี้จะแสดงที่นี่"
+          title="No projects yet"
+          description="Projects in this workspace will appear here"
           action={
             canCreate ? (
               <Button asChild size="sm">
-                <Link href={`/w/${slug}/projects/new`}>สร้างโปรเจกต์แรก</Link>
+                <Link href={`/w/${slug}/projects/new`}>Create your first project</Link>
               </Button>
             ) : undefined
           }
@@ -78,7 +79,7 @@ export default async function ProjectsPage({
                       {project.name}
                     </p>
                     <Badge variant="outline" className="shrink-0">
-                      {project.status}
+                      {PROJECT_STATUS_LABEL[project.status]}
                     </Badge>
                   </div>
                 </CardHeader>

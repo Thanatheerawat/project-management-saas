@@ -44,15 +44,17 @@ export function KanbanBoard({
   }
 
   if (issues.isError || !issues.data) {
-    return <p className="text-destructive text-sm">โหลดข้อมูล issue ไม่สำเร็จ</p>;
+    return <p className="text-destructive text-sm">Failed to load issues</p>;
   }
 
   if (issues.data.length === 0) {
     return (
       <EmptyState
         icon={FolderKanban}
-        title="ยังไม่มี issue"
-        description="Issue ในโปรเจกต์นี้จะแสดงที่นี่ — เริ่มสร้าง issue แรกได้จากปุ่ม “Issue ใหม่” ด้านบน"
+        title="No issues yet"
+        description={
+          'Issues in this project will appear here — create your first one using the "New Issue" button above.'
+        }
         className="border-border rounded-xl border border-dashed"
       />
     );

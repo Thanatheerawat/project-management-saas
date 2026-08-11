@@ -35,15 +35,15 @@ export default function GlobalError({
       <body className="bg-background text-foreground flex min-h-screen flex-col items-center justify-center gap-2 px-6 text-center">
         <AlertTriangle className="text-faint mb-1 size-8" strokeWidth={1.5} />
         <h1 className="text-foreground text-2xl font-bold tracking-tight">
-          แอปพลิเคชันขัดข้อง
+          Application Error
         </h1>
         <p className="text-muted-foreground max-w-sm text-sm">
-          เกิดข้อผิดพลาดร้ายแรง โปรดลองโหลดหน้าใหม่อีกครั้ง
+          A critical error occurred. Please reload the page.
         </p>
         <div className="mt-2 flex gap-2">
-          <Button onClick={reset}>โหลดใหม่</Button>
+          <Button onClick={reset}>Reload</Button>
           <Button variant="outline" asChild>
-            <Link href="/">กลับหน้าหลัก</Link>
+            <Link href="/">Back to Home</Link>
           </Button>
         </div>
       </body>

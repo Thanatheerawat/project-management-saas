@@ -24,31 +24,31 @@ export function ResetPasswordForm() {
 
     const parsed = resetPasswordSchema.safeParse({ token, newPassword });
     if (!parsed.success) {
-      setError(parsed.error.issues[0]?.message ?? "ข้อมูลไม่ถูกต้อง");
+      setError(parsed.error.issues[0]?.message ?? "Invalid input");
       return;
     }
 
     try {
       await resetPassword.mutateAsync(parsed.data);
-      toast.success("ตั้งรหัสผ่านใหม่แล้ว");
+      toast.success("Password reset successfully");
       router.push("/login");
     } catch (err) {
       const message =
-        err instanceof ApiError ? err.message : "ลิงก์นี้ใช้ไม่ได้หรือหมดอายุแล้ว";
+        err instanceof ApiError ? err.message : "This link is invalid or has expired";
       setError(message);
       toast.error(message);
     }
   }
 
   if (!token) {
-    return <p className="text-destructive text-sm">ลิงก์นี้ไม่ถูกต้อง</p>;
+    return <p className="text-destructive text-sm">This link is invalid</p>;
   }
 
   return (
     <form onSubmit={handleSubmit} className="flex flex-col gap-4">
       <div className="flex flex-col gap-1.5">
         <label htmlFor="newPassword" className="text-foreground text-sm font-medium">
-          รหัสผ่านใหม่
+          New Password
         </label>
         <Input
           id="newPassword"
@@ -61,7 +61,7 @@ export function ResetPasswordForm() {
       </div>
       {error && <p className="text-destructive text-sm">{error}</p>}
       <Button type="submit" disabled={resetPassword.isPending}>
-        {resetPassword.isPending ? "กำลังบันทึก..." : "ตั้งรหัสผ่านใหม่"}
+        {resetPassword.isPending ? "Saving..." : "Reset Password"}
       </Button>
     </form>
   );

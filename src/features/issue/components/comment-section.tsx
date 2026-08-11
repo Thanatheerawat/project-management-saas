@@ -45,16 +45,16 @@ export function CommentSection({
 
     const parsed = createCommentSchema.safeParse({ body });
     if (!parsed.success) {
-      setError(parsed.error.issues[0]?.message ?? "ข้อความไม่ถูกต้อง");
+      setError(parsed.error.issues[0]?.message ?? "Invalid message");
       return;
     }
 
     try {
       await createComment.mutateAsync(parsed.data);
       setBody("");
-      toast.success("แสดงความคิดเห็นแล้ว");
+      toast.success("Comment posted");
     } catch (err) {
-      const message = err instanceof ApiError ? err.message : "แสดงความคิดเห็นไม่สำเร็จ";
+      const message = err instanceof ApiError ? err.message : "Failed to post comment";
       setError(message);
       toast.error(message);
     }
@@ -70,11 +70,11 @@ export function CommentSection({
       )}
 
       {comments.isError && (
-        <p className="text-destructive text-sm">โหลดความคิดเห็นไม่สำเร็จ</p>
+        <p className="text-destructive text-sm">Failed to load comments</p>
       )}
 
       {comments.data?.length === 0 && (
-        <p className="text-muted-foreground text-sm">ยังไม่มีความคิดเห็น</p>
+        <p className="text-muted-foreground text-sm">No comments yet</p>
       )}
 
       <div className="flex flex-col gap-3">
@@ -91,10 +91,10 @@ export function CommentSection({
 
       <form onSubmit={handleSubmit} className="flex flex-col gap-2">
         <Textarea
-          aria-label="เพิ่มความคิดเห็น"
+          aria-label="Add a comment"
           value={body}
           onChange={(e) => setBody(e.target.value)}
-          placeholder="แสดงความคิดเห็น..."
+          placeholder="Write a comment..."
         />
         {error && <p className="text-destructive text-sm">{error}</p>}
         <Button
@@ -103,7 +103,7 @@ export function CommentSection({
           disabled={createComment.isPending}
           className="self-start"
         >
-          {createComment.isPending ? "กำลังส่ง..." : "แสดงความคิดเห็น"}
+          {createComment.isPending ? "Posting..." : "Post Comment"}
         </Button>
       </form>
     </div>
@@ -134,15 +134,15 @@ function CommentRow({
     setError(null);
     const parsed = createCommentSchema.safeParse({ body: draft });
     if (!parsed.success) {
-      setError(parsed.error.issues[0]?.message ?? "ข้อความไม่ถูกต้อง");
+      setError(parsed.error.issues[0]?.message ?? "Invalid message");
       return;
     }
     try {
       await updateComment.mutateAsync({ commentId: comment.id, data: parsed.data });
       setIsEditing(false);
-      toast.success("บันทึกความคิดเห็นแล้ว");
+      toast.success("Comment saved");
     } catch (err) {
-      const message = err instanceof ApiError ? err.message : "บันทึกไม่สำเร็จ";
+      const message = err instanceof ApiError ? err.message : "Failed to save";
       setError(message);
       toast.error(message);
     }
@@ -153,9 +153,9 @@ function CommentRow({
     try {
       await deleteComment.mutateAsync(comment.id);
       setConfirmOpen(false);
-      toast.success("ลบความคิดเห็นแล้ว");
+      toast.success("Comment deleted");
     } catch (err) {
-      const message = err instanceof ApiError ? err.message : "ลบไม่สำเร็จ";
+      const message = err instanceof ApiError ? err.message : "Failed to delete";
       setError(message);
       toast.error(message);
       setConfirmOpen(false);
@@ -170,7 +170,7 @@ function CommentRow({
             {comment.author.name ?? comment.author.email}
           </span>
           <span className="text-muted-foreground text-xs">
-            {new Date(comment.createdAt).toLocaleString("th-TH")}
+            {new Date(comment.createdAt).toLocaleString("en-US")}
           </span>
         </div>
         {!isEditing && (isAuthor || canDelete) && (
@@ -185,7 +185,7 @@ function CommentRow({
                   setIsEditing(true);
                 }}
               >
-                แก้ไข
+                Edit
               </Button>
             )}
             {canDelete && (
@@ -196,23 +196,23 @@ function CommentRow({
                   size="xs"
                   onClick={() => setConfirmOpen(true)}
                 >
-                  ลบ
+                  Delete
                 </Button>
                 <DialogContent>
                   <DialogHeader>
-                    <DialogTitle>ลบความคิดเห็นนี้?</DialogTitle>
-                    <DialogDescription>การลบนี้ไม่สามารถย้อนกลับได้</DialogDescription>
+                    <DialogTitle>Delete this comment?</DialogTitle>
+                    <DialogDescription>This action cannot be undone</DialogDescription>
                   </DialogHeader>
                   <DialogFooter>
                     <Button variant="outline" onClick={() => setConfirmOpen(false)}>
-                      ยกเลิก
+                      Cancel
                     </Button>
                     <Button
                       variant="destructive"
                       onClick={handleDelete}
                       disabled={deleteComment.isPending}
                     >
-                      {deleteComment.isPending ? "กำลังลบ..." : "ยืนยัน"}
+                      {deleteComment.isPending ? "Deleting..." : "Confirm"}
                     </Button>
                   </DialogFooter>
                 </DialogContent>
@@ -225,7 +225,7 @@ function CommentRow({
       {isEditing ? (
         <div className="flex flex-col gap-2">
           <Textarea
-            aria-label="แก้ไขความคิดเห็น"
+            aria-label="Edit comment"
             value={draft}
             onChange={(e) => setDraft(e.target.value)}
           />
@@ -236,7 +236,7 @@ function CommentRow({
               onClick={handleSave}
               disabled={updateComment.isPending}
             >
-              บันทึก
+              Save
             </Button>
             <Button
               type="button"
@@ -247,7 +247,7 @@ function CommentRow({
                 setError(null);
               }}
             >
-              ยกเลิก
+              Cancel
             </Button>
           </div>
         </div>

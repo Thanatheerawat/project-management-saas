@@ -53,9 +53,9 @@ export function IssueLabelSection({
     try {
       await attachLabel.mutateAsync({ labelId: selectedLabelId });
       setSelectedLabelId("");
-      toast.success("แนบ Label แล้ว");
+      toast.success("Label attached");
     } catch (err) {
-      const message = err instanceof ApiError ? err.message : "แนบ Label ไม่สำเร็จ";
+      const message = err instanceof ApiError ? err.message : "Failed to attach label";
       setError(message);
       toast.error(message);
     }
@@ -65,9 +65,9 @@ export function IssueLabelSection({
     setError(null);
     try {
       await detachLabel.mutateAsync(labelId);
-      toast.success("ลบ Label แล้ว");
+      toast.success("Label removed");
     } catch (err) {
-      const message = err instanceof ApiError ? err.message : "ลบ Label ไม่สำเร็จ";
+      const message = err instanceof ApiError ? err.message : "Failed to remove label";
       setError(message);
       toast.error(message);
     }
@@ -82,7 +82,7 @@ export function IssueLabelSection({
       color: newLabelColor,
     });
     if (!parsed.success) {
-      setError(parsed.error.issues[0]?.message ?? "ข้อมูลไม่ถูกต้อง");
+      setError(parsed.error.issues[0]?.message ?? "Invalid input");
       return;
     }
 
@@ -90,9 +90,9 @@ export function IssueLabelSection({
       await createLabel.mutateAsync(parsed.data);
       setNewLabelName("");
       setNewLabelColor("#6B7280");
-      toast.success("สร้าง Label แล้ว");
+      toast.success("Label created");
     } catch (err) {
-      const message = err instanceof ApiError ? err.message : "สร้าง Label ไม่สำเร็จ";
+      const message = err instanceof ApiError ? err.message : "Failed to create label";
       setError(message);
       toast.error(message);
     }
@@ -114,7 +114,7 @@ export function IssueLabelSection({
             {label.name}
             <button
               type="button"
-              aria-label={`ลบ Label ${label.name}`}
+              aria-label={`Delete label ${label.name}`}
               onClick={() => handleDetach(label.id)}
               disabled={detachLabel.isPending}
               className="ml-0.5 cursor-pointer"
@@ -124,20 +124,20 @@ export function IssueLabelSection({
           </Badge>
         ))}
         {issueLabels.data?.length === 0 && (
-          <span className="text-muted-foreground text-xs">ยังไม่มี Label</span>
+          <span className="text-muted-foreground text-xs">No labels yet</span>
         )}
       </div>
 
       <div className="flex items-center gap-2">
         <select
-          aria-label="เลือก Label ที่จะแนบ"
+          aria-label="Select label to attach"
           value={selectedLabelId}
           onChange={(e) => setSelectedLabelId(e.target.value)}
           disabled={workspaceLabels.isLoading || availableToAttach.length === 0}
           className="border-input dark:bg-input/30 focus-visible:border-ring focus-visible:ring-ring/50 h-7 rounded-lg border bg-transparent px-2 text-xs outline-none focus-visible:ring-[3px]"
         >
           <option value="">
-            {availableToAttach.length === 0 ? "ไม่มี Label ให้แนบ" : "เลือก Label"}
+            {availableToAttach.length === 0 ? "No labels to attach" : "Select label"}
           </option>
           {availableToAttach.map((label) => (
             <option key={label.id} value={label.id}>
@@ -152,7 +152,7 @@ export function IssueLabelSection({
           onClick={handleAttach}
           disabled={!selectedLabelId || attachLabel.isPending}
         >
-          แนบ
+          Attach
         </Button>
       </div>
 
@@ -166,7 +166,7 @@ export function IssueLabelSection({
               htmlFor="new-label-name"
               className="text-foreground text-sm font-medium"
             >
-              ชื่อ Label ใหม่
+              New Label Name
             </label>
             <Input
               id="new-label-name"
@@ -180,7 +180,7 @@ export function IssueLabelSection({
               htmlFor="new-label-color"
               className="text-foreground text-sm font-medium"
             >
-              สี (hex)
+              Color (hex)
             </label>
             <Input
               id="new-label-color"
@@ -195,7 +195,7 @@ export function IssueLabelSection({
             size="sm"
             disabled={createLabel.isPending}
           >
-            สร้าง
+            Create
           </Button>
         </form>
       )}
