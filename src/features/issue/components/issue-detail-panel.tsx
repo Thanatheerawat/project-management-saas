@@ -83,7 +83,9 @@ export function IssueDetailPanel({
     <div className="flex flex-col gap-4">
       <div className="flex flex-col gap-1">
         <span className="text-muted-foreground font-mono text-sm">{data.key}</span>
-        <h1 className="text-foreground text-xl font-bold">{data.title}</h1>
+        <h1 className="text-foreground text-2xl font-bold tracking-tight">
+          {data.title}
+        </h1>
       </div>
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">

@@ -29,7 +29,9 @@ export default async function WorkspaceSettingsPage({
 
   return (
     <div className="flex max-w-lg flex-col gap-6">
-      <h1 className="text-foreground text-xl font-bold">ตั้งค่า Workspace</h1>
+      <h1 className="text-foreground text-2xl font-bold tracking-tight">
+        ตั้งค่า Workspace
+      </h1>
 
       {canEdit ? (
         <WorkspaceSettingsForm

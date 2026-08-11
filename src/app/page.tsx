@@ -91,13 +91,14 @@ export default function Home() {
 
       <main className="flex-1">
         {/* Hero */}
-        <section className="border-border bg-dot-grid bg-hero-glow relative border-b bg-repeat">
-          <PageContainer className="flex flex-col items-center gap-5 py-20 text-center sm:py-28">
+        <section className="bg-dot-grid bg-hero-glow relative bg-repeat">
+          <PageContainer className="flex flex-col items-center gap-5 py-24 text-center sm:py-32">
             <span className="text-accent bg-accent/10 rounded-full px-3 py-1 text-xs font-semibold tracking-wide uppercase">
               Project Management for Software Teams
             </span>
-            <h1 className="text-foreground max-w-2xl text-4xl font-bold text-balance sm:text-5xl">
-              Plan, track, and ship better — together.
+            <h1 className="text-foreground max-w-2xl text-4xl font-bold tracking-tight text-balance sm:text-6xl">
+              Plan, track, and ship <span className="text-accent">better</span> —
+              together.
             </h1>
             <p className="text-muted-foreground max-w-xl text-base text-balance sm:text-lg">
               Orbit brings workspaces, projects, and issues into one focused workspace
@@ -118,10 +119,10 @@ export default function Home() {
         </section>
 
         {/* Product capabilities */}
-        <section className="border-border border-b">
+        <section>
           <PageContainer className="flex flex-col gap-8 py-16 sm:py-20">
             <div className="flex flex-col gap-2 text-center">
-              <h2 className="text-foreground text-2xl font-bold">
+              <h2 className="text-foreground text-2xl font-bold tracking-tight">
                 Everything your team needs to ship
               </h2>
               <p className="text-muted-foreground text-sm sm:text-base">
@@ -130,9 +131,14 @@ export default function Home() {
             </div>
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
               {CAPABILITIES.map(({ icon: Icon, title, description }) => (
-                <Card key={title} className="hover:border-accent/40 transition-colors">
+                <Card
+                  key={title}
+                  className="hover:border-accent/40 hover:shadow-accent/5 transition-all hover:shadow-lg"
+                >
                   <CardHeader>
-                    <Icon className="text-accent size-6" aria-hidden="true" />
+                    <div className="bg-accent/10 flex size-10 items-center justify-center rounded-lg">
+                      <Icon className="text-accent size-5" aria-hidden="true" />
+                    </div>
                     <CardTitle className="mt-2">{title}</CardTitle>
                     <CardDescription>{description}</CardDescription>
                   </CardHeader>
@@ -143,10 +149,10 @@ export default function Home() {
         </section>
 
         {/* Workflow */}
-        <section className="border-border bg-surface border-b">
+        <section className="bg-surface">
           <PageContainer className="flex flex-col gap-10 py-16 sm:py-20">
             <div className="flex flex-col gap-2 text-center">
-              <h2 className="text-foreground text-2xl font-bold">
+              <h2 className="text-foreground text-2xl font-bold tracking-tight">
                 A clear path from idea to done
               </h2>
               <p className="text-muted-foreground text-sm sm:text-base">
@@ -175,10 +181,10 @@ export default function Home() {
         {/* Product preview — an abstract representation of the real Kanban
             board, built from the same UI primitives and status vocabulary
             the app actually uses. Not a screenshot, not fabricated data. */}
-        <section className="border-border border-b">
+        <section>
           <PageContainer className="flex flex-col gap-8 py-16 sm:py-20">
             <div className="flex flex-col gap-2 text-center">
-              <h2 className="text-foreground text-2xl font-bold">
+              <h2 className="text-foreground text-2xl font-bold tracking-tight">
                 See your work, board by board
               </h2>
               <p className="text-muted-foreground text-sm sm:text-base">
@@ -214,10 +220,11 @@ export default function Home() {
           </PageContainer>
         </section>
 
-        {/* Final CTA */}
-        <section className="bg-dot-grid bg-repeat">
+        {/* Final CTA — bookends the hero with the same dot-grid + glow
+            texture, so the page opens and closes on the same visual note. */}
+        <section className="bg-dot-grid bg-hero-glow border-border border-t bg-repeat">
           <PageContainer className="flex flex-col items-center gap-5 py-16 text-center sm:py-20">
-            <h2 className="text-foreground max-w-lg text-2xl font-bold text-balance sm:text-3xl">
+            <h2 className="text-foreground max-w-lg text-2xl font-bold tracking-tight text-balance sm:text-3xl">
               Ready to bring your projects into focus?
             </h2>
             <p className="text-muted-foreground max-w-md text-sm sm:text-base">

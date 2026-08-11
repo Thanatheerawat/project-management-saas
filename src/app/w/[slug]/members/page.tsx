@@ -26,7 +26,7 @@ export default async function WorkspaceMembersPage({
 
   return (
     <div className="flex flex-col gap-6">
-      <h1 className="text-foreground text-xl font-bold">สมาชิก</h1>
+      <h1 className="text-foreground text-2xl font-bold tracking-tight">สมาชิก</h1>
 
       {canManage && <AddMemberForm workspaceId={workspace.id} />}
 

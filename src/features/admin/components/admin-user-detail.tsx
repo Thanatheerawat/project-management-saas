@@ -85,7 +85,7 @@ export function AdminUserDetail({
   return (
     <div className="flex flex-col gap-6">
       <div className="flex flex-col gap-1">
-        <h1 className="text-foreground text-xl font-bold">
+        <h1 className="text-foreground text-2xl font-bold tracking-tight">
           {data.name ?? data.email}
           {isSelf && <span className="text-muted-foreground"> (คุณ)</span>}
         </h1>

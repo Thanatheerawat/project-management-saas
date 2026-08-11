@@ -7,7 +7,7 @@ export const metadata: Metadata = { title: "ลืมรหัสผ่าน �
 export default function ForgotPasswordPage() {
   return (
     <div className="flex flex-col gap-6">
-      <h1 className="text-foreground text-xl font-bold">ลืมรหัสผ่าน</h1>
+      <h1 className="text-foreground text-2xl font-bold tracking-tight">ลืมรหัสผ่าน</h1>
       <ForgotPasswordForm />
     </div>
   );

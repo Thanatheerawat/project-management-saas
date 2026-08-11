@@ -7,7 +7,9 @@ export const metadata: Metadata = { title: "Workspace — Orbit Admin" };
 export default function AdminWorkspacesPage() {
   return (
     <div className="flex flex-col gap-6">
-      <h1 className="text-foreground text-xl font-bold">Workspace ทั้งหมด</h1>
+      <h1 className="text-foreground text-2xl font-bold tracking-tight">
+        Workspace ทั้งหมด
+      </h1>
       <AdminWorkspaceList />
     </div>
   );

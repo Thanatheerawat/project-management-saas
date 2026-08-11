@@ -43,9 +43,9 @@ function SidebarNavLinks({
             href={href}
             onClick={onNavigate}
             className={cn(
-              "flex items-center gap-2 rounded-md px-2 py-1.5 text-sm",
+              "flex items-center gap-2 rounded-md px-2 py-1.5 text-sm transition-colors",
               active
-                ? "bg-muted text-foreground"
+                ? "bg-accent/10 text-accent font-medium"
                 : "text-muted-foreground hover:bg-muted hover:text-foreground",
             )}
           >

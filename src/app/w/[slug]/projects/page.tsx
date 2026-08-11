@@ -37,7 +37,7 @@ export default async function ProjectsPage({
   return (
     <div className="flex flex-col gap-6">
       <div className="flex items-center justify-between gap-2">
-        <h1 className="text-foreground text-xl font-bold">โปรเจกต์</h1>
+        <h1 className="text-foreground text-2xl font-bold tracking-tight">โปรเจกต์</h1>
         {canCreate && (
           <Button asChild size="sm">
             <Link href={`/w/${slug}/projects/new`}>สร้างโปรเจกต์</Link>

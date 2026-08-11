@@ -8,7 +8,7 @@ export const metadata: Metadata = { title: "เข้าสู่ระบบ �
 export default function LoginPage() {
   return (
     <div className="flex flex-col gap-6">
-      <h1 className="text-foreground text-xl font-bold">เข้าสู่ระบบ</h1>
+      <h1 className="text-foreground text-2xl font-bold tracking-tight">เข้าสู่ระบบ</h1>
       <Suspense>
         <LoginForm />
       </Suspense>

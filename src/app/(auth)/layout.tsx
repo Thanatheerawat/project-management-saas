@@ -1,5 +1,6 @@
 import Link from "next/link";
 
+import { Footer } from "@/components/layout/footer";
 import { PageContainer } from "@/components/layout/page-container";
 
 // Created now (not in Foundation) specifically because real pages exist
@@ -10,23 +11,33 @@ import { PageContainer } from "@/components/layout/page-container";
 // to "/" from /login or /register was the browser back button — no link
 // existed anywhere on these pages (a real navigation gap, not a style
 // preference).
+//
+// M6.5 finalization: added the same Footer the landing page uses (brand +
+// tagline + copyright, no new links) so the auth pages read as the same
+// product as "/" instead of a bare, disconnected form — and switched the
+// card's flat shadow-sm for a faint accent-tinted ring, matching the
+// portfolio-inspired "restrained glow" direction already used on
+// .bg-hero-glow.
 export default function AuthLayout({ children }: { children: React.ReactNode }) {
   return (
-    <div className="bg-background bg-dot-grid bg-hero-glow flex min-h-screen flex-col items-center justify-center bg-repeat px-4 py-10">
-      <PageContainer className="flex w-full max-w-sm flex-col items-center gap-6">
-        <Link href="/" className="text-foreground text-lg font-bold">
-          Orbit
-        </Link>
-        <div className="border-border bg-surface w-full rounded-xl border p-6 shadow-sm">
-          {children}
-        </div>
-        <Link
-          href="/"
-          className="text-muted-foreground hover:text-foreground text-sm transition-colors"
-        >
-          ← Back to Orbit
-        </Link>
-      </PageContainer>
+    <div className="bg-background bg-dot-grid bg-hero-glow flex min-h-screen flex-col bg-repeat">
+      <div className="flex flex-1 flex-col items-center justify-center px-4 py-10">
+        <PageContainer className="flex w-full max-w-sm flex-col items-center gap-6">
+          <Link href="/" className="text-foreground text-lg font-bold">
+            Orbit
+          </Link>
+          <div className="border-border bg-surface ring-accent/5 w-full rounded-xl border p-6 shadow-lg ring-1">
+            {children}
+          </div>
+          <Link
+            href="/"
+            className="text-muted-foreground hover:text-foreground text-sm transition-colors"
+          >
+            ← Back to Orbit
+          </Link>
+        </PageContainer>
+      </div>
+      <Footer />
     </div>
   );
 }

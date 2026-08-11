@@ -37,7 +37,9 @@ export default async function WorkspaceDashboardPage({
   return (
     <div className="flex flex-col gap-6">
       <div className="flex flex-col gap-1">
-        <h1 className="text-foreground text-xl font-bold">{workspace.name}</h1>
+        <h1 className="text-foreground text-2xl font-bold tracking-tight">
+          {workspace.name}
+        </h1>
         {workspace.description && (
           <p className="text-muted-foreground text-sm">{workspace.description}</p>
         )}

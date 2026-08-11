@@ -23,7 +23,9 @@ export default async function WorkspacesPage() {
 
   return (
     <div className="flex flex-col gap-6">
-      <h1 className="text-foreground text-xl font-bold">Workspace ของคุณ</h1>
+      <h1 className="text-foreground text-2xl font-bold tracking-tight">
+        Workspace ของคุณ
+      </h1>
       <WorkspacePicker />
     </div>
   );

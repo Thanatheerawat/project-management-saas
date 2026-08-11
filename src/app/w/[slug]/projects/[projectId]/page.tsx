@@ -53,7 +53,9 @@ export default async function ProjectDetailPage({
 
       <div className="flex items-center justify-between gap-2">
         <div className="flex min-w-0 flex-col gap-1">
-          <h1 className="text-foreground truncate text-xl font-bold">{project.name}</h1>
+          <h1 className="text-foreground truncate text-2xl font-bold tracking-tight">
+            {project.name}
+          </h1>
           {project.description && (
             <p className="text-muted-foreground truncate text-sm">
               {project.description}

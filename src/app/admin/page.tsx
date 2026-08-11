@@ -10,7 +10,7 @@ export const metadata: Metadata = { title: "ภาพรวมระบบ — O
 export default function AdminOverviewPage() {
   return (
     <div className="flex flex-col gap-6">
-      <h1 className="text-foreground text-xl font-bold">ภาพรวมระบบ</h1>
+      <h1 className="text-foreground text-2xl font-bold tracking-tight">ภาพรวมระบบ</h1>
       <AdminOverviewSection />
     </div>
   );

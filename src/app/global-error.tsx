@@ -34,7 +34,9 @@ export default function GlobalError({
     <html lang="en" className={`${inter.variable} antialiased`}>
       <body className="bg-background text-foreground flex min-h-screen flex-col items-center justify-center gap-2 px-6 text-center">
         <AlertTriangle className="text-faint mb-1 size-8" strokeWidth={1.5} />
-        <h1 className="text-foreground text-xl font-bold">แอปพลิเคชันขัดข้อง</h1>
+        <h1 className="text-foreground text-2xl font-bold tracking-tight">
+          แอปพลิเคชันขัดข้อง
+        </h1>
         <p className="text-muted-foreground max-w-sm text-sm">
           เกิดข้อผิดพลาดร้ายแรง โปรดลองโหลดหน้าใหม่อีกครั้ง
         </p>

@@ -55,7 +55,11 @@
 
   --radius-sm: 4px;
   --radius-md: 8px;
-  --radius-lg: 10px;
+  /* Bumped from 10px: matches Card/Dialog's fixed rounded-xl (12px,
+     Tailwind's un-overridden default) so buttons/inputs read as the same
+     "roundedness family" as cards instead of visibly tighter — a small,
+     token-only nudge toward the more rounded, premium-SaaS feel. */
+  --radius-lg: 12px;
 }
 
 .dark {
