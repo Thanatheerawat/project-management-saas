@@ -73,5 +73,55 @@
   "footer": {
     "tagline": "Project management for software teams.",
     "copyright": "© {year} Orbit"
+  },
+  "auth": {
+    "email": "Email",
+    "password": "Password",
+    "name": "Name",
+    "newPassword": "New Password",
+    "backToOrbit": "← Back to Orbit",
+    "signInHeading": "Sign In",
+    "signIn": "Sign in",
+    "signingIn": "Signing in...",
+    "forgotPasswordLink": "Forgot password?",
+    "createAccountLink": "Create an account",
+    "invalidCredentials": "Invalid email or password",
+    "signedInSuccessfully": "Signed in successfully",
+    "createAccount": "Create Account",
+    "creatingAccount": "Creating account...",
+    "alreadyHaveAccount": "Already have an account? Sign in",
+    "accountCreated": "Account created successfully",
+    "forgotPasswordHeading": "Forgot Password",
+    "sendResetLink": "Send Reset Link",
+    "sending": "Sending...",
+    "backToSignIn": "Back to sign in",
+    "forgotPasswordSentToast": "If an account exists, a link has been sent",
+    "forgotPasswordSuccessMessage": "If an account exists for this email, we've sent a password reset link.",
+    "forgotPasswordRequestFailed": "Request failed, please try again",
+    "resetPassword": "Reset Password",
+    "saving": "Saving...",
+    "resetPasswordSuccessToast": "Password reset successfully",
+    "resetPasswordLinkInvalid": "This link is invalid",
+    "verifyEmail": "Verify Email",
+    "verifying": "Verifying...",
+    "verifyEmailMockBanner": "MOCK — there's no real email delivery yet; this link simulates the email you'd receive.",
+    "verifyEmailInstructions": "Click confirm to simulate clicking the verification link from the email ({email})",
+    "verifyEmailSuccessMessage": "Email verified successfully",
+    "verifyEmailToastSuccess": "Email verified",
+    "verifyEmailToastError": "Failed to verify email",
+    "goToWorkspace": "Go to Workspace",
+    "validation": {
+      "passwordRequired": "Password is required",
+      "nameRequired": "Name is required",
+      "passwordMin8": "Password must be at least 8 characters",
+      "tokenRequired": "Token is required",
+      "invalidInput": "Invalid input"
+    },
+    "errors": {
+      "emailTaken": "An account with this email already exists",
+      "registerFailed": "Failed to create account",
+      "invalidResetToken": "This reset link is invalid or has expired",
+      "linkInvalidOrExpired": "This link is invalid or has expired"
+    }
   }
 }

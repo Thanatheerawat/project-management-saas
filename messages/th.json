@@ -73,5 +73,55 @@
   "footer": {
     "tagline": "การจัดการโปรเจกต์สำหรับทีมพัฒนาซอฟต์แวร์",
     "copyright": "© {year} Orbit"
+  },
+  "auth": {
+    "email": "อีเมล",
+    "password": "รหัสผ่าน",
+    "name": "ชื่อ",
+    "newPassword": "รหัสผ่านใหม่",
+    "backToOrbit": "← กลับไปที่ Orbit",
+    "signInHeading": "เข้าสู่ระบบ",
+    "signIn": "เข้าสู่ระบบ",
+    "signingIn": "กำลังเข้าสู่ระบบ...",
+    "forgotPasswordLink": "ลืมรหัสผ่าน?",
+    "createAccountLink": "สร้างบัญชี",
+    "invalidCredentials": "อีเมลหรือรหัสผ่านไม่ถูกต้อง",
+    "signedInSuccessfully": "เข้าสู่ระบบสำเร็จ",
+    "createAccount": "สร้างบัญชี",
+    "creatingAccount": "กำลังสร้างบัญชี...",
+    "alreadyHaveAccount": "มีบัญชีอยู่แล้ว? เข้าสู่ระบบ",
+    "accountCreated": "สร้างบัญชีสำเร็จ",
+    "forgotPasswordHeading": "ลืมรหัสผ่าน",
+    "sendResetLink": "ส่งลิงก์รีเซ็ตรหัสผ่าน",
+    "sending": "กำลังส่ง...",
+    "backToSignIn": "กลับไปเข้าสู่ระบบ",
+    "forgotPasswordSentToast": "หากมีบัญชีนี้อยู่ ระบบได้ส่งลิงก์ให้แล้ว",
+    "forgotPasswordSuccessMessage": "หากมีบัญชีสำหรับอีเมลนี้ เราได้ส่งลิงก์รีเซ็ตรหัสผ่านให้แล้ว",
+    "forgotPasswordRequestFailed": "คำขอล้มเหลว กรุณาลองใหม่อีกครั้ง",
+    "resetPassword": "รีเซ็ตรหัสผ่าน",
+    "saving": "กำลังบันทึก...",
+    "resetPasswordSuccessToast": "รีเซ็ตรหัสผ่านสำเร็จ",
+    "resetPasswordLinkInvalid": "ลิงก์นี้ไม่ถูกต้อง",
+    "verifyEmail": "ยืนยันอีเมล",
+    "verifying": "กำลังยืนยัน...",
+    "verifyEmailMockBanner": "จำลอง — ยังไม่มีการส่งอีเมลจริง ลิงก์นี้จำลองอีเมลที่คุณจะได้รับ",
+    "verifyEmailInstructions": "คลิกยืนยันเพื่อจำลองการคลิกลิงก์ยืนยันจากอีเมล ({email})",
+    "verifyEmailSuccessMessage": "ยืนยันอีเมลสำเร็จ",
+    "verifyEmailToastSuccess": "ยืนยันอีเมลแล้ว",
+    "verifyEmailToastError": "ยืนยันอีเมลไม่สำเร็จ",
+    "goToWorkspace": "ไปที่เวิร์กสเปซ",
+    "validation": {
+      "passwordRequired": "กรุณากรอกรหัสผ่าน",
+      "nameRequired": "กรุณากรอกชื่อ",
+      "passwordMin8": "รหัสผ่านต้องมีอย่างน้อย 8 ตัวอักษร",
+      "tokenRequired": "ต้องระบุโทเคน",
+      "invalidInput": "ข้อมูลไม่ถูกต้อง"
+    },
+    "errors": {
+      "emailTaken": "มีบัญชีที่ใช้อีเมลนี้อยู่แล้ว",
+      "registerFailed": "สร้างบัญชีไม่สำเร็จ",
+      "invalidResetToken": "ลิงก์รีเซ็ตนี้ไม่ถูกต้องหรือหมดอายุแล้ว",
+      "linkInvalidOrExpired": "ลิงก์นี้ไม่ถูกต้องหรือหมดอายุแล้ว"
+    }
   }
 }

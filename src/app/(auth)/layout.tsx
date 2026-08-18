@@ -1,6 +1,8 @@
 import Link from "next/link";
+import { getTranslations } from "next-intl/server";
 
 import { Footer } from "@/components/layout/footer";
+import { LanguageSwitcher } from "@/components/layout/language-switcher";
 import { PageContainer } from "@/components/layout/page-container";
 
 // Created now (not in Foundation) specifically because real pages exist
@@ -18,11 +20,23 @@ import { PageContainer } from "@/components/layout/page-container";
 // card's flat shadow-sm for a faint accent-tinted ring, matching the
 // portfolio-inspired "restrained glow" direction already used on
 // .bg-hero-glow.
-export default function AuthLayout({ children }: { children: React.ReactNode }) {
+export default async function AuthLayout({ children }: { children: React.ReactNode }) {
+  const t = await getTranslations("auth");
+
   return (
     <div className="bg-background bg-dot-grid bg-hero-glow flex min-h-screen flex-col bg-repeat">
       <div className="flex flex-1 flex-col items-center justify-center px-4 py-10">
         <PageContainer className="flex w-full max-w-sm flex-col items-center gap-6">
+          {/* M6.6 Increment 3B: this layout has no Navbar/actions-slot the
+              way every other layout does, so the switcher gets its own
+              row instead — alwaysVisible for the same reason the public
+              Navbar needs it (no mobile drawer/menu to fall back into
+              below `md`). Right-aligned above the brand link rather than
+              centered with it, matching the top-right placement the
+              switcher already has everywhere else in the app. */}
+          <div className="flex w-full justify-end">
+            <LanguageSwitcher alwaysVisible />
+          </div>
           <Link href="/" className="text-foreground text-lg font-bold">
             Orbit
           </Link>
@@ -33,7 +47,7 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
             href="/"
             className="text-muted-foreground hover:text-foreground text-sm transition-colors"
           >
-            ← Back to Orbit
+            {t("backToOrbit")}
           </Link>
         </PageContainer>
       </div>

@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { signIn } from "next-auth/react";
+import { useTranslations } from "next-intl";
 import { useState } from "react";
 import { toast } from "sonner";
 
@@ -10,10 +11,12 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useRegister } from "@/features/auth/hooks/use-register";
 import { registerSchema } from "@/features/auth/schemas/register.schema";
+import { translateValidationMessage } from "@/features/auth/schemas/validation-messages";
 import { ApiError } from "@/lib/api-client";
 
 export function RegisterForm() {
   const router = useRouter();
+  const t = useTranslations("auth");
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -26,7 +29,7 @@ export function RegisterForm() {
 
     const parsed = registerSchema.safeParse({ name, email, password });
     if (!parsed.success) {
-      setError(parsed.error.issues[0]?.message ?? "Invalid input");
+      setError(translateValidationMessage(t, parsed.error.issues[0]?.message));
       return;
     }
 
@@ -40,11 +43,18 @@ export function RegisterForm() {
         password: parsed.data.password,
         redirect: false,
       });
-      toast.success("Account created successfully");
+      toast.success(t("accountCreated"));
       router.push(result.mockVerifyUrl);
       router.refresh();
     } catch (err) {
-      const message = err instanceof ApiError ? err.message : "Failed to create account";
+      // Known stable code -> its own translated message; anything else
+      // (an ApiError with an unrecognized code, or no ApiError at all —
+      // e.g. a network failure) falls back to the same generic message,
+      // never the server's raw English `err.message`.
+      const message =
+        err instanceof ApiError && err.code === "email_taken"
+          ? t("errors.emailTaken")
+          : t("errors.registerFailed");
       setError(message);
       toast.error(message);
     }
@@ -54,7 +64,7 @@ export function RegisterForm() {
     <form onSubmit={handleSubmit} className="flex flex-col gap-4">
       <div className="flex flex-col gap-1.5">
         <label htmlFor="name" className="text-foreground text-sm font-medium">
-          Name
+          {t("name")}
         </label>
         <Input
           id="name"
@@ -65,7 +75,7 @@ export function RegisterForm() {
       </div>
       <div className="flex flex-col gap-1.5">
         <label htmlFor="email" className="text-foreground text-sm font-medium">
-          Email
+          {t("email")}
         </label>
         <Input
           id="email"
@@ -78,7 +88,7 @@ export function RegisterForm() {
       </div>
       <div className="flex flex-col gap-1.5">
         <label htmlFor="password" className="text-foreground text-sm font-medium">
-          Password
+          {t("password")}
         </label>
         <Input
           id="password"
@@ -91,11 +101,11 @@ export function RegisterForm() {
       </div>
       {error && <p className="text-destructive text-sm">{error}</p>}
       <Button type="submit" disabled={register.isPending}>
-        {register.isPending ? "Creating account..." : "Create Account"}
+        {register.isPending ? t("creatingAccount") : t("createAccount")}
       </Button>
       <p className="text-center text-sm">
         <Link href="/login" className="text-muted-foreground hover:text-foreground">
-          Already have an account? Sign in
+          {t("alreadyHaveAccount")}
         </Link>
       </p>
     </form>
