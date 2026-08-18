@@ -1,10 +1,14 @@
-export default function Loading() {
+import { getTranslations } from "next-intl/server";
+
+export default async function Loading() {
+  const t = await getTranslations("system");
+
   return (
     <div className="flex flex-1 items-center justify-center">
       <div
         className="border-border border-t-accent h-6 w-6 animate-spin rounded-full border-2"
         role="status"
-        aria-label="Loading"
+        aria-label={t("loading")}
       />
     </div>
   );

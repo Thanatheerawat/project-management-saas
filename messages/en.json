@@ -123,5 +123,18 @@
       "invalidResetToken": "This reset link is invalid or has expired",
       "linkInvalidOrExpired": "This link is invalid or has expired"
     }
+  },
+  "system": {
+    "loading": "Loading",
+    "error": {
+      "heading": "Something went wrong",
+      "description": "An error occurred while loading this page. Please try again.",
+      "tryAgain": "Try again"
+    },
+    "notFound": {
+      "heading": "Page Not Found",
+      "description": "This link may have moved or doesn't exist. Try going back to the homepage.",
+      "backToHome": "Back to Home"
+    }
   }
 }
