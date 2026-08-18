@@ -2,6 +2,7 @@
 
 import { FolderKanban, LayoutDashboard, Settings, Users } from "lucide-react";
 import { usePathname } from "next/navigation";
+import { useTranslations } from "next-intl";
 
 import { Sidebar } from "@/components/layout/sidebar";
 
@@ -13,14 +14,15 @@ import { Sidebar } from "@/components/layout/sidebar";
 // UI logic duplicating what the page already does correctly.
 export function WorkspaceSidebar({ slug }: { slug: string }) {
   const pathname = usePathname();
+  const t = useTranslations("navigation");
 
   return (
     <Sidebar
       items={[
-        { label: "Dashboard", href: `/w/${slug}`, icon: LayoutDashboard },
-        { label: "Projects", href: `/w/${slug}/projects`, icon: FolderKanban },
-        { label: "Members", href: `/w/${slug}/members`, icon: Users },
-        { label: "Settings", href: `/w/${slug}/settings`, icon: Settings },
+        { label: t("dashboard"), href: `/w/${slug}`, icon: LayoutDashboard },
+        { label: t("projects"), href: `/w/${slug}/projects`, icon: FolderKanban },
+        { label: t("members"), href: `/w/${slug}/members`, icon: Users },
+        { label: t("settings"), href: `/w/${slug}/settings`, icon: Settings },
       ]}
       activeHref={pathname}
     />

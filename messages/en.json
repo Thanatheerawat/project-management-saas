@@ -1,0 +1,21 @@
+{
+  "common": {
+    "toggleTheme": "Toggle theme"
+  },
+  "navigation": {
+    "dashboard": "Dashboard",
+    "projects": "Projects",
+    "members": "Members",
+    "settings": "Settings",
+    "profile": "Profile",
+    "workspace": "Workspace",
+    "admin": "Admin",
+    "signOut": "Sign out",
+    "signedOut": "Signed out",
+    "accountMenu": "Account menu",
+    "openMenu": "Open navigation menu",
+    "menuTitle": "Navigation Menu",
+    "expandSidebar": "Expand sidebar",
+    "collapseSidebar": "Collapse sidebar"
+  }
+}

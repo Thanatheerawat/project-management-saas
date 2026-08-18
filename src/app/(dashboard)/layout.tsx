@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { getTranslations } from "next-intl/server";
 
 import { Navbar } from "@/components/layout/navbar";
 import { PageContainer } from "@/components/layout/page-container";
@@ -24,6 +25,7 @@ export default async function DashboardLayout({
 }) {
   const session = await auth();
   const isAdmin = !!session?.user && hasRole(session.user.role, "ADMIN");
+  const t = await getTranslations("navigation");
 
   return (
     <div className="flex min-h-screen flex-col">
@@ -37,7 +39,7 @@ export default async function DashboardLayout({
           <>
             {isAdmin && (
               <Button variant="ghost" size="sm" asChild className="hidden md:inline-flex">
-                <Link href="/admin">Admin</Link>
+                <Link href="/admin">{t("admin")}</Link>
               </Button>
             )}
             <ThemeToggle />

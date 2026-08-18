@@ -1,5 +1,14 @@
 allowBuilds:
+  # Both arrived as transitive deps of next-intl (M6.6). Neither needs its
+  # postinstall build step: each ships prebuilt platform binaries as
+  # optional deps (@swc/core-win32-x64-msvc locally, the linux-x64 build on
+  # Vercel/CI), and they are only used by next-intl's build-time message
+  # extraction and its dev-mode message-file watcher — nothing at runtime.
+  # Declared explicitly rather than left as pnpm's placeholder because
+  # pnpm 11 fails `pnpm install` outright while any entry is undecided.
+  '@parcel/watcher': false
   '@prisma/engines': true
+  '@swc/core': false
   esbuild: true
   prisma: true
   sharp: true

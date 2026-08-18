@@ -4,6 +4,7 @@ import { CircleUserRound } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { signOut } from "next-auth/react";
+import { useTranslations } from "next-intl";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
@@ -26,6 +27,7 @@ import {
 // there's no layout-shift flash on resize.
 export function UserMenu({ isAdmin = false }: { isAdmin?: boolean }) {
   const router = useRouter();
+  const t = useTranslations("navigation");
 
   // `redirect: false` + a manual router.push (instead of signOut's default
   // hard browser redirect) so the sign-out toast — rendered by the global
@@ -33,7 +35,7 @@ export function UserMenu({ isAdmin = false }: { isAdmin?: boolean }) {
   // document reload straight to "/".
   async function handleSignOut() {
     await signOut({ redirect: false });
-    toast.success("Signed out");
+    toast.success(t("signedOut"));
     router.push("/");
   }
 
@@ -45,13 +47,13 @@ export function UserMenu({ isAdmin = false }: { isAdmin?: boolean }) {
           workspace the user is in. */}
       <div className="hidden items-center gap-2 md:flex">
         <Button variant="ghost" size="sm" asChild>
-          <Link href="/workspaces">Workspace</Link>
+          <Link href="/workspaces">{t("workspace")}</Link>
         </Button>
         <Button variant="ghost" size="sm" asChild>
-          <Link href="/profile">Profile</Link>
+          <Link href="/profile">{t("profile")}</Link>
         </Button>
         <Button variant="ghost" size="sm" onClick={handleSignOut}>
-          Sign out
+          {t("signOut")}
         </Button>
       </div>
 
@@ -62,26 +64,26 @@ export function UserMenu({ isAdmin = false }: { isAdmin?: boolean }) {
             variant="ghost"
             size="icon-sm"
             className="md:hidden"
-            aria-label="Account menu"
+            aria-label={t("accountMenu")}
           >
             <CircleUserRound className="size-4" />
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end" className="md:hidden">
           <DropdownMenuItem asChild>
-            <Link href="/workspaces">Workspace</Link>
+            <Link href="/workspaces">{t("workspace")}</Link>
           </DropdownMenuItem>
           <DropdownMenuItem asChild>
-            <Link href="/profile">Profile</Link>
+            <Link href="/profile">{t("profile")}</Link>
           </DropdownMenuItem>
           {isAdmin && (
             <DropdownMenuItem asChild>
-              <Link href="/admin">Admin</Link>
+              <Link href="/admin">{t("admin")}</Link>
             </DropdownMenuItem>
           )}
           <DropdownMenuSeparator />
           <DropdownMenuItem onClick={handleSignOut} variant="destructive">
-            Sign out
+            {t("signOut")}
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>

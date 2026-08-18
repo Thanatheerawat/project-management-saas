@@ -1,0 +1,21 @@
+{
+  "common": {
+    "toggleTheme": "สลับธีม"
+  },
+  "navigation": {
+    "dashboard": "แดชบอร์ด",
+    "projects": "โปรเจกต์",
+    "members": "สมาชิก",
+    "settings": "การตั้งค่า",
+    "profile": "โปรไฟล์",
+    "workspace": "เวิร์กสเปซ",
+    "admin": "ผู้ดูแลระบบ",
+    "signOut": "ออกจากระบบ",
+    "signedOut": "ออกจากระบบแล้ว",
+    "accountMenu": "เมนูบัญชี",
+    "openMenu": "เปิดเมนูนำทาง",
+    "menuTitle": "เมนูนำทาง",
+    "expandSidebar": "ขยายแถบด้านข้าง",
+    "collapseSidebar": "ย่อแถบด้านข้าง"
+  }
+}

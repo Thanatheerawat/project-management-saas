@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
+import { getTranslations } from "next-intl/server";
 
 import { Navbar } from "@/components/layout/navbar";
 import { PageContainer } from "@/components/layout/page-container";
@@ -41,6 +42,7 @@ export default async function WorkspaceLayout({
   // ADMIN/SUPER_ADMIN. Real authorization still lives in
   // `app/admin/layout.tsx` and every `/api/admin/*` route.
   const isAdmin = hasRole(session.user.role, "ADMIN");
+  const t = await getTranslations("navigation");
 
   // M6.5 responsive pass: `h-dvh` (fixed, not `min-h-screen`'s min-height)
   // + `overflow-hidden` on the shell, then `overflow-y-auto` on `main`
@@ -63,7 +65,7 @@ export default async function WorkspaceLayout({
           <>
             {isAdmin && (
               <Button variant="ghost" size="sm" asChild className="hidden md:inline-flex">
-                <Link href="/admin">Admin</Link>
+                <Link href="/admin">{t("admin")}</Link>
               </Button>
             )}
             <ThemeToggle />

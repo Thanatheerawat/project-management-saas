@@ -153,7 +153,12 @@
   --radius-md: var(--radius-md);
   --radius-lg: var(--radius-lg);
 
-  --font-sans: var(--font-inter);
+  /* Inter stays first so every Latin glyph resolves to it exactly as it
+     did in M6.5 — Noto Sans Thai is only ever reached for codepoints
+     Inter has no glyph for, i.e. Thai. This is plain CSS font fallback,
+     not a locale switch: a Thai page with an English project name in it
+     still renders that name in Inter, within the same line. */
+  --font-sans: var(--font-inter), var(--font-noto-sans-thai);
   --font-mono: var(--font-jetbrains-mono);
 }
 

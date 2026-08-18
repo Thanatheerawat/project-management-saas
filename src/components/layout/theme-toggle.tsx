@@ -1,6 +1,7 @@
 "use client";
 
 import { Moon, Sun } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { useTheme } from "next-themes";
 
 import { Button } from "@/components/ui/button";
@@ -11,12 +12,13 @@ import { Button } from "@/components/ui/button";
 // just renders Moon until the theme resolves, then re-renders normally.
 export function ThemeToggle() {
   const { resolvedTheme, setTheme } = useTheme();
+  const t = useTranslations("common");
 
   return (
     <Button
       variant="ghost"
       size="icon-sm"
-      aria-label="Toggle theme"
+      aria-label={t("toggleTheme")}
       onClick={() => setTheme(resolvedTheme === "dark" ? "light" : "dark")}
     >
       {resolvedTheme === "dark" ? (

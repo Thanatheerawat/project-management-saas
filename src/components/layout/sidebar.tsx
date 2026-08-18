@@ -2,6 +2,7 @@
 
 import { ChevronsLeft, ChevronsRight, type LucideIcon, Menu } from "lucide-react";
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 
 import { useSidebarStore } from "@/components/layout/sidebar-store";
 import { Button } from "@/components/ui/button";
@@ -67,6 +68,9 @@ function SidebarNavLinks({
 // stacking both behaviors.
 export function Sidebar({ items, activeHref }: SidebarProps) {
   const { collapsed, toggle, mobileOpen, setMobileOpen } = useSidebarStore();
+  // `items[].label` is already translated by the caller
+  // (WorkspaceSidebar) — this component only owns its own chrome.
+  const t = useTranslations("navigation");
 
   return (
     <>
@@ -82,7 +86,7 @@ export function Sidebar({ items, activeHref }: SidebarProps) {
             variant="ghost"
             size="icon-sm"
             onClick={toggle}
-            aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
+            aria-label={collapsed ? t("expandSidebar") : t("collapseSidebar")}
           >
             {collapsed ? (
               <ChevronsRight className="size-4" />
@@ -96,7 +100,7 @@ export function Sidebar({ items, activeHref }: SidebarProps) {
       <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
         <SheetContent side="left" className="w-64 max-w-[80vw] md:hidden">
           <SheetHeader>
-            <SheetTitle>Navigation Menu</SheetTitle>
+            <SheetTitle>{t("menuTitle")}</SheetTitle>
           </SheetHeader>
           <SidebarNavLinks
             items={items}
@@ -117,6 +121,7 @@ export function Sidebar({ items, activeHref }: SidebarProps) {
 // than prop-drilling across that layout boundary.
 export function SidebarMobileTrigger() {
   const { setMobileOpen } = useSidebarStore();
+  const t = useTranslations("navigation");
 
   return (
     <Button
@@ -124,7 +129,7 @@ export function SidebarMobileTrigger() {
       size="icon-sm"
       className="md:hidden"
       onClick={() => setMobileOpen(true)}
-      aria-label="Open navigation menu"
+      aria-label={t("openMenu")}
     >
       <Menu className="size-4" />
     </Button>
