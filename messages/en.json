@@ -1,4 +1,9 @@
 {
+  "metadata": {
+    "root": {
+      "description": "Project & issue tracker for software teams."
+    }
+  },
   "common": {
     "toggleTheme": "Toggle theme",
     "close": "Close"

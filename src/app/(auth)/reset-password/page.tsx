@@ -4,8 +4,12 @@ import { Suspense } from "react";
 
 import { ResetPasswordForm } from "@/features/auth/components/reset-password-form";
 
-// Increment 3D translates this — metadata is out of scope for 3B.
-export const metadata: Metadata = { title: "Reset Password — Orbit" };
+// Reuses `auth.resetPassword` (the page's own visible h1) plus the same
+// literal " — Orbit" brand suffix every page in this group uses.
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations("auth");
+  return { title: `${t("resetPassword")} — Orbit` };
+}
 
 export default async function ResetPasswordPage() {
   const t = await getTranslations("auth");

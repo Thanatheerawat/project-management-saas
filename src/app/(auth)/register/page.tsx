@@ -3,8 +3,12 @@ import { getTranslations } from "next-intl/server";
 
 import { RegisterForm } from "@/features/auth/components/register-form";
 
-// Increment 3D translates this — metadata is out of scope for 3B.
-export const metadata: Metadata = { title: "Create Account — Orbit" };
+// Reuses `auth.createAccount` (the page's own visible h1) plus the same
+// literal " — Orbit" brand suffix every page in this group uses.
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations("auth");
+  return { title: `${t("createAccount")} — Orbit` };
+}
 
 export default async function RegisterPage() {
   const t = await getTranslations("auth");

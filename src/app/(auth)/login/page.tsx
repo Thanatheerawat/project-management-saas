@@ -4,8 +4,12 @@ import { Suspense } from "react";
 
 import { LoginForm } from "@/features/auth/components/login-form";
 
-// Increment 3D translates this — metadata is out of scope for 3B.
-export const metadata: Metadata = { title: "Sign In — Orbit" };
+// Reuses `auth.signInHeading` (the page's own visible h1) plus the same
+// literal " — Orbit" brand suffix every page in this group uses.
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations("auth");
+  return { title: `${t("signInHeading")} — Orbit` };
+}
 
 export default async function LoginPage() {
   const t = await getTranslations("auth");

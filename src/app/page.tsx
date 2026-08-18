@@ -19,14 +19,18 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 
-// Increment 3D translates this — out of scope for 3A per the approved
-// metadata-scope decision (only the 7 surfaces whose bodies this
-// increment touches, and even those are deferred to their own step).
-export const metadata: Metadata = {
-  title: "Orbit — Project Management for Software Teams",
-  description:
-    "Orbit brings workspaces, projects, and issues into one focused workspace built for modern software teams.",
-};
+// Reuses `landing.eyebrow`/`landing.heroDescription` rather than adding
+// new metadata-only keys — both are already the exact visible copy this
+// page's own hero renders, so a separate key would just be a second
+// string to keep in sync (Increment 3D scope decision).
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations("landing");
+
+  return {
+    title: `Orbit — ${t("eyebrow")}`,
+    description: t("heroDescription"),
+  };
+}
 
 export default async function Home() {
   // No namespace argument: this page needs both `landing.*` (its own

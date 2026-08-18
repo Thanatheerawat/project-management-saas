@@ -3,8 +3,12 @@ import { getTranslations } from "next-intl/server";
 
 import { ForgotPasswordForm } from "@/features/auth/components/forgot-password-form";
 
-// Increment 3D translates this — metadata is out of scope for 3B.
-export const metadata: Metadata = { title: "Forgot Password — Orbit" };
+// Reuses `auth.forgotPasswordHeading` (the page's own visible h1) plus
+// the same literal " — Orbit" brand suffix every page in this group uses.
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations("auth");
+  return { title: `${t("forgotPasswordHeading")} — Orbit` };
+}
 
 export default async function ForgotPasswordPage() {
   const t = await getTranslations("auth");

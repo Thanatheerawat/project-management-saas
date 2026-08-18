@@ -4,8 +4,12 @@ import { Suspense } from "react";
 
 import { VerifyEmailPanel } from "@/features/auth/components/verify-email-panel";
 
-// Increment 3D translates this — metadata is out of scope for 3B.
-export const metadata: Metadata = { title: "Verify Email — Orbit" };
+// Reuses `auth.verifyEmail` (the page's own visible h1) plus the same
+// literal " — Orbit" brand suffix every page in this group uses.
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations("auth");
+  return { title: `${t("verifyEmail")} — Orbit` };
+}
 
 export default async function VerifyEmailPage() {
   const t = await getTranslations("auth");

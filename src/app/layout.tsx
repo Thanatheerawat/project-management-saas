@@ -2,7 +2,7 @@ import "./globals.css";
 
 import type { Metadata } from "next";
 import { Inter, JetBrains_Mono, Noto_Sans_Thai } from "next/font/google";
-import { getLocale } from "next-intl/server";
+import { getLocale, getTranslations } from "next-intl/server";
 
 import { AppProviders } from "@/providers";
 
@@ -29,10 +29,18 @@ const notoSansThai = Noto_Sans_Thai({
   subsets: ["thai"],
 });
 
-export const metadata: Metadata = {
-  title: "Orbit",
-  description: "Project & issue tracker for software teams.",
-};
+// "Orbit" itself stays a literal, untranslated brand name (same choice
+// the navbar/footer already make) — only the description varies by
+// locale, which is why this is generateMetadata() rather than a static
+// object.
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations("metadata");
+
+  return {
+    title: "Orbit",
+    description: t("root.description"),
+  };
+}
 
 export default async function RootLayout({
   children,
