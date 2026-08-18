@@ -1,8 +1,10 @@
 {
   "common": {
-    "toggleTheme": "Toggle theme"
+    "toggleTheme": "Toggle theme",
+    "close": "Close"
   },
   "navigation": {
+    "language": "Language",
     "dashboard": "Dashboard",
     "projects": "Projects",
     "members": "Members",

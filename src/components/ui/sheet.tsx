@@ -1,6 +1,7 @@
 "use client";
 
 import { XIcon } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { Dialog as SheetPrimitive } from "radix-ui";
 import * as React from "react";
 
@@ -62,6 +63,12 @@ function SheetContent({
   side?: keyof typeof SHEET_SIDE_CLASSES;
   showCloseButton?: boolean;
 }) {
+  // M6.6: the only user-visible string this primitive owns. Read from the
+  // catalogue rather than taken as a prop so no caller has to remember to
+  // pass it — the provider is mounted at the root layout, above every
+  // possible consumer. Nothing about the markup or styling changes.
+  const t = useTranslations("common");
+
   return (
     <SheetPortal>
       <SheetOverlay />
@@ -79,7 +86,7 @@ function SheetContent({
           <SheetPrimitive.Close asChild>
             <Button variant="ghost" className="absolute top-2 right-2" size="icon-sm">
               <XIcon />
-              <span className="sr-only">Close</span>
+              <span className="sr-only">{t("close")}</span>
             </Button>
           </SheetPrimitive.Close>
         )}

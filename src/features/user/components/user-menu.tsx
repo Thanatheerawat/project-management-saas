@@ -7,6 +7,7 @@ import { signOut } from "next-auth/react";
 import { useTranslations } from "next-intl";
 import { toast } from "sonner";
 
+import { LanguageMenuItems } from "@/components/layout/language-switcher";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -81,6 +82,13 @@ export function UserMenu({ isAdmin = false }: { isAdmin?: boolean }) {
               <Link href="/admin">{t("admin")}</Link>
             </DropdownMenuItem>
           )}
+          {/* M6.6 Increment 2: below `md` there is no room in the top bar
+              for a separate language control, so the choices live here —
+              the same place the other collapsed actions already moved to
+              in M6.5, rather than a second mobile-only trigger competing
+              for the same row. */}
+          <DropdownMenuSeparator />
+          <LanguageMenuItems />
           <DropdownMenuSeparator />
           <DropdownMenuItem onClick={handleSignOut} variant="destructive">
             {t("signOut")}

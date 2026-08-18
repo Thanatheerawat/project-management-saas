@@ -1,8 +1,10 @@
 {
   "common": {
-    "toggleTheme": "สลับธีม"
+    "toggleTheme": "สลับธีม",
+    "close": "ปิด"
   },
   "navigation": {
+    "language": "ภาษา",
     "dashboard": "แดชบอร์ด",
     "projects": "โปรเจกต์",
     "members": "สมาชิก",

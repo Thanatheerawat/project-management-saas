@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { getTranslations } from "next-intl/server";
 
+import { LanguageSwitcher } from "@/components/layout/language-switcher";
 import { Navbar } from "@/components/layout/navbar";
 import { PageContainer } from "@/components/layout/page-container";
 import { SidebarMobileTrigger } from "@/components/layout/sidebar";
@@ -68,6 +69,7 @@ export default async function WorkspaceLayout({
                 <Link href="/admin">{t("admin")}</Link>
               </Button>
             )}
+            <LanguageSwitcher />
             <ThemeToggle />
             <UserMenu isAdmin={isAdmin} />
           </>

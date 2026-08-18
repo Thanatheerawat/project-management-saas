@@ -28,3 +28,14 @@ export const LOCALE_COOKIE_MAX_AGE = 60 * 60 * 24 * 365;
 export function isLocale(value: unknown): value is Locale {
   return typeof value === "string" && LOCALES.includes(value as Locale);
 }
+
+// Endonyms — each language named in itself, which is the standard for a
+// language picker: a Thai speaker looking for their language scans for
+// "ไทย", not for whatever the current UI locale calls Thai. Because they
+// are identical in every locale, they live here rather than in en.json /
+// th.json, where they would be duplicated strings that could silently
+// drift apart.
+export const LOCALE_LABEL: Record<Locale, string> = {
+  en: "English",
+  th: "ไทย",
+};

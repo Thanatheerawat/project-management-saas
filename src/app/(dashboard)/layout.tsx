@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { getTranslations } from "next-intl/server";
 
+import { LanguageSwitcher } from "@/components/layout/language-switcher";
 import { Navbar } from "@/components/layout/navbar";
 import { PageContainer } from "@/components/layout/page-container";
 import { ThemeToggle } from "@/components/layout/theme-toggle";
@@ -42,6 +43,7 @@ export default async function DashboardLayout({
                 <Link href="/admin">{t("admin")}</Link>
               </Button>
             )}
+            <LanguageSwitcher />
             <ThemeToggle />
             <UserMenu isAdmin={isAdmin} />
           </>
