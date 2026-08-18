@@ -19,5 +19,59 @@
     "menuTitle": "Navigation Menu",
     "expandSidebar": "Expand sidebar",
     "collapseSidebar": "Collapse sidebar"
+  },
+  "landing": {
+    "signIn": "Sign In",
+    "getStarted": "Get Started",
+    "eyebrow": "Project Management for Software Teams",
+    "heroHeading": "Plan, track, and ship <accent>better</accent> — together.",
+    "heroDescription": "Orbit brings workspaces, projects, and issues into one focused workspace built for modern software teams.",
+    "capabilitiesHeading": "Everything your team needs to ship",
+    "capabilitiesDescription": "A focused set of tools for planning and tracking software work.",
+    "capabilities": {
+      "workspaces": {
+        "title": "Workspaces",
+        "description": "Organize teams and work in dedicated workspaces, each with their own members and projects."
+      },
+      "projects": {
+        "title": "Projects",
+        "description": "Keep projects structured and easy to navigate, with clear status from active to completed."
+      },
+      "issueTracking": {
+        "title": "Issue Tracking",
+        "description": "Track issues on a Kanban board — status, priority, assignees, and labels in one place."
+      },
+      "roleBasedAccess": {
+        "title": "Role-based Access",
+        "description": "Control who can do what with workspace-level roles for owners, admins, and members."
+      }
+    },
+    "workflowHeading": "A clear path from idea to done",
+    "workflowDescription": "One consistent structure, from the first workspace to a shipped issue.",
+    "workflow": {
+      "issues": "Issues",
+      "progress": "Progress"
+    },
+    "previewHeading": "See your work, board by board",
+    "previewDescription": "Every issue moves through Backlog, In Progress, and Done — visible to the whole team.",
+    "previewColumns": {
+      "backlog": "Backlog",
+      "inProgress": "In Progress",
+      "done": "Done"
+    },
+    "previewItems": {
+      "authPolish": "Auth polish",
+      "onboardingCopy": "Onboarding copy",
+      "kanbanBoard": "Kanban board",
+      "workspaceRoles": "Workspace roles",
+      "projectSetup": "Project setup",
+      "issueTracking": "Issue tracking"
+    },
+    "finalCtaHeading": "Ready to bring your projects into focus?",
+    "finalCtaDescription": "Start organizing your work with Orbit."
+  },
+  "footer": {
+    "tagline": "Project management for software teams.",
+    "copyright": "© {year} Orbit"
   }
 }

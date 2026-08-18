@@ -15,6 +15,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { setLocale } from "@/i18n/actions";
 import { isLocale, LOCALE_LABEL, LOCALES } from "@/i18n/config";
+import { cn } from "@/lib/utils";
 
 /**
  * The locale choices themselves, as menu radio items.
@@ -71,8 +72,17 @@ export function LanguageMenuItems() {
  * icon, so the current language is readable at a glance without opening
  * the menu. The code is derived from the locale rather than translated —
  * "EN"/"TH" are the same in both languages.
+ *
+ * `alwaysVisible` (default false, unchanged behavior): the authenticated
+ * layouts hide this trigger below `md` because `UserMenu`'s mobile
+ * dropdown already embeds `LanguageMenuItems` as a fallback (Increment
+ * 2). The public Navbar has no such dropdown — no hamburger, no drawer —
+ * so an anonymous mobile visitor would otherwise have no way to switch
+ * language at all. Rather than a second switcher component, this one
+ * prop lets the public Navbar keep the same trigger visible at every
+ * width; every existing authenticated caller is untouched by omitting it.
  */
-export function LanguageSwitcher() {
+export function LanguageSwitcher({ alwaysVisible = false }: { alwaysVisible?: boolean }) {
   const locale = useLocale();
   const t = useTranslations("navigation");
 
@@ -82,7 +92,10 @@ export function LanguageSwitcher() {
         <Button
           variant="ghost"
           size="sm"
-          className="hidden gap-1.5 md:inline-flex"
+          className={cn(
+            "gap-1.5",
+            alwaysVisible ? "inline-flex" : "hidden md:inline-flex",
+          )}
           aria-label={`${t("language")}: ${LOCALE_LABEL[locale]}`}
         >
           <Languages className="size-4" strokeWidth={1.5} aria-hidden="true" />

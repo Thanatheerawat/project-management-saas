@@ -8,8 +8,10 @@ import {
 } from "lucide-react";
 import type { Metadata } from "next";
 import Link from "next/link";
+import { getTranslations } from "next-intl/server";
 
 import { Footer } from "@/components/layout/footer";
+import { LanguageSwitcher } from "@/components/layout/language-switcher";
 import { Navbar } from "@/components/layout/navbar";
 import { PageContainer } from "@/components/layout/page-container";
 import { ThemeToggle } from "@/components/layout/theme-toggle";
@@ -17,57 +19,85 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 
+// Increment 3D translates this — out of scope for 3A per the approved
+// metadata-scope decision (only the 7 surfaces whose bodies this
+// increment touches, and even those are deferred to their own step).
 export const metadata: Metadata = {
   title: "Orbit — Project Management for Software Teams",
   description:
     "Orbit brings workspaces, projects, and issues into one focused workspace built for modern software teams.",
 };
 
-const CAPABILITIES = [
-  {
-    icon: Building2,
-    title: "Workspaces",
-    description:
-      "Organize teams and work in dedicated workspaces, each with their own members and projects.",
-  },
-  {
-    icon: FolderKanban,
-    title: "Projects",
-    description:
-      "Keep projects structured and easy to navigate, with clear status from active to completed.",
-  },
-  {
-    icon: ListTodo,
-    title: "Issue Tracking",
-    description:
-      "Track issues on a Kanban board — status, priority, assignees, and labels in one place.",
-  },
-  {
-    icon: ShieldCheck,
-    title: "Role-based Access",
-    description:
-      "Control who can do what with workspace-level roles for owners, admins, and members.",
-  },
-] as const;
+export default async function Home() {
+  // No namespace argument: this page needs both `landing.*` (its own
+  // copy) and `navigation.workspace`/`navigation.projects` (reused for
+  // two of the four workflow labels, per the audit's dedupe finding), so
+  // a single translator scoped to the whole message tree is simpler than
+  // two separate `getTranslations()` calls.
+  const t = await getTranslations();
 
-const WORKFLOW_STEPS = [
-  { icon: Building2, label: "Workspace" },
-  { icon: FolderKanban, label: "Projects" },
-  { icon: ListTodo, label: "Issues" },
-  { icon: BarChart3, label: "Progress" },
-] as const;
+  const CAPABILITIES = [
+    {
+      icon: Building2,
+      title: t("landing.capabilities.workspaces.title"),
+      description: t("landing.capabilities.workspaces.description"),
+    },
+    {
+      icon: FolderKanban,
+      title: t("landing.capabilities.projects.title"),
+      description: t("landing.capabilities.projects.description"),
+    },
+    {
+      icon: ListTodo,
+      title: t("landing.capabilities.issueTracking.title"),
+      description: t("landing.capabilities.issueTracking.description"),
+    },
+    {
+      icon: ShieldCheck,
+      title: t("landing.capabilities.roleBasedAccess.title"),
+      description: t("landing.capabilities.roleBasedAccess.description"),
+    },
+  ] as const;
 
-// A truthful, abstract representation of the real Kanban board — not a
-// screenshot, not fabricated data. Same status vocabulary the app itself
-// uses (prisma/schema.prisma's IssueStatus), so it can't drift into a
-// claim the product doesn't back up.
-const PREVIEW_COLUMNS = [
-  { label: "Backlog", items: ["Auth polish", "Onboarding copy"] },
-  { label: "In Progress", items: ["Kanban board", "Workspace roles"] },
-  { label: "Done", items: ["Project setup", "Issue tracking"] },
-] as const;
+  const WORKFLOW_STEPS = [
+    { icon: Building2, label: t("navigation.workspace") },
+    { icon: FolderKanban, label: t("navigation.projects") },
+    { icon: ListTodo, label: t("landing.workflow.issues") },
+    { icon: BarChart3, label: t("landing.workflow.progress") },
+  ] as const;
 
-export default function Home() {
+  // A truthful, abstract representation of the real Kanban board — not a
+  // screenshot, not fabricated data. Same status vocabulary the app
+  // itself uses (prisma/schema.prisma's IssueStatus), so it can't drift
+  // into a claim the product doesn't back up. Column labels and item
+  // titles are all authored marketing/demo copy (no real user content),
+  // so — unlike the real IssueStatus enum values elsewhere in the app —
+  // they translate freely; there is no wire/DB value being displayed
+  // here for these particular strings to stay in sync with.
+  const PREVIEW_COLUMNS = [
+    {
+      label: t("landing.previewColumns.backlog"),
+      items: [
+        t("landing.previewItems.authPolish"),
+        t("landing.previewItems.onboardingCopy"),
+      ],
+    },
+    {
+      label: t("landing.previewColumns.inProgress"),
+      items: [
+        t("landing.previewItems.kanbanBoard"),
+        t("landing.previewItems.workspaceRoles"),
+      ],
+    },
+    {
+      label: t("landing.previewColumns.done"),
+      items: [
+        t("landing.previewItems.projectSetup"),
+        t("landing.previewItems.issueTracking"),
+      ],
+    },
+  ] as const;
+
   return (
     <div className="flex min-h-screen flex-col">
       <Navbar
@@ -78,12 +108,17 @@ export default function Home() {
         }
         actions={
           <>
+            {/* alwaysVisible: the public Navbar has no mobile drawer/menu
+                for the switcher to fall back into below `md` the way the
+                authenticated layouts' UserMenu does — see
+                language-switcher.tsx's own comment. */}
+            <LanguageSwitcher alwaysVisible />
             <ThemeToggle />
             <Button variant="ghost" size="sm" asChild>
-              <Link href="/login">Sign In</Link>
+              <Link href="/login">{t("landing.signIn")}</Link>
             </Button>
             <Button size="sm" asChild>
-              <Link href="/register">Get Started</Link>
+              <Link href="/register">{t("landing.getStarted")}</Link>
             </Button>
           </>
         }
@@ -94,25 +129,25 @@ export default function Home() {
         <section className="bg-dot-grid bg-hero-glow relative bg-repeat">
           <PageContainer className="flex flex-col items-center gap-5 py-24 text-center sm:py-32">
             <span className="text-accent bg-accent/10 rounded-full px-3 py-1 text-xs font-semibold tracking-wide uppercase">
-              Project Management for Software Teams
+              {t("landing.eyebrow")}
             </span>
             <h1 className="text-foreground max-w-2xl text-4xl font-bold tracking-tight text-balance sm:text-6xl">
-              Plan, track, and ship <span className="text-accent">better</span> —
-              together.
+              {t.rich("landing.heroHeading", {
+                accent: (chunks) => <span className="text-accent">{chunks}</span>,
+              })}
             </h1>
             <p className="text-muted-foreground max-w-xl text-base text-balance sm:text-lg">
-              Orbit brings workspaces, projects, and issues into one focused workspace
-              built for modern software teams.
+              {t("landing.heroDescription")}
             </p>
             <div className="mt-2 flex flex-col gap-3 sm:flex-row">
               <Button size="lg" asChild>
                 <Link href="/register" className="gap-2">
-                  Get Started
+                  {t("landing.getStarted")}
                   <ArrowRight className="size-4" />
                 </Link>
               </Button>
               <Button variant="outline" size="lg" asChild>
-                <Link href="/login">Sign In</Link>
+                <Link href="/login">{t("landing.signIn")}</Link>
               </Button>
             </div>
           </PageContainer>
@@ -123,10 +158,10 @@ export default function Home() {
           <PageContainer className="flex flex-col gap-8 py-16 sm:py-20">
             <div className="flex flex-col gap-2 text-center">
               <h2 className="text-foreground text-2xl font-bold tracking-tight">
-                Everything your team needs to ship
+                {t("landing.capabilitiesHeading")}
               </h2>
               <p className="text-muted-foreground text-sm sm:text-base">
-                A focused set of tools for planning and tracking software work.
+                {t("landing.capabilitiesDescription")}
               </p>
             </div>
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
@@ -153,10 +188,10 @@ export default function Home() {
           <PageContainer className="flex flex-col gap-10 py-16 sm:py-20">
             <div className="flex flex-col gap-2 text-center">
               <h2 className="text-foreground text-2xl font-bold tracking-tight">
-                A clear path from idea to done
+                {t("landing.workflowHeading")}
               </h2>
               <p className="text-muted-foreground text-sm sm:text-base">
-                One consistent structure, from the first workspace to a shipped issue.
+                {t("landing.workflowDescription")}
               </p>
             </div>
             <div className="flex flex-col items-center gap-4 sm:flex-row sm:justify-center sm:gap-2">
@@ -185,11 +220,10 @@ export default function Home() {
           <PageContainer className="flex flex-col gap-8 py-16 sm:py-20">
             <div className="flex flex-col gap-2 text-center">
               <h2 className="text-foreground text-2xl font-bold tracking-tight">
-                See your work, board by board
+                {t("landing.previewHeading")}
               </h2>
               <p className="text-muted-foreground text-sm sm:text-base">
-                Every issue moves through Backlog, In Progress, and Done — visible to the
-                whole team.
+                {t("landing.previewDescription")}
               </p>
             </div>
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
@@ -225,14 +259,14 @@ export default function Home() {
         <section className="bg-dot-grid bg-hero-glow border-border border-t bg-repeat">
           <PageContainer className="flex flex-col items-center gap-5 py-16 text-center sm:py-20">
             <h2 className="text-foreground max-w-lg text-2xl font-bold tracking-tight text-balance sm:text-3xl">
-              Ready to bring your projects into focus?
+              {t("landing.finalCtaHeading")}
             </h2>
             <p className="text-muted-foreground max-w-md text-sm sm:text-base">
-              Start organizing your work with Orbit.
+              {t("landing.finalCtaDescription")}
             </p>
             <Button size="lg" asChild>
               <Link href="/register" className="gap-2">
-                Get Started
+                {t("landing.getStarted")}
                 <ArrowRight className="size-4" />
               </Link>
             </Button>
