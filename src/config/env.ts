@@ -3,13 +3,7 @@ import { z } from "zod";
 /**
  * Validates env vars actually consumed by the code that exists so far.
  * AI/Storage vars are added in their own milestones — declaring them
- * earlier would validate nothing and just be dead code. AI_PROVIDER isn't
- * added here yet in M7 Increment 1: the provider factory takes an
- * explicit type parameter instead of reading env itself (see
- * ai-provider-factory.ts), specifically so importing it doesn't force
- * this whole schema (including DATABASE_URL/NEXTAUTH_SECRET) to validate
- * in plain unit tests. AI_PROVIDER will be added here once the M7
- * Increment 2 Route Handler is the one actually resolving it.
+ * earlier would validate nothing and just be dead code.
  */
 const envSchema = z.object({
   NODE_ENV: z.enum(["development", "test", "production"]).default("development"),
@@ -23,6 +17,13 @@ const envSchema = z.object({
       32,
       "NEXTAUTH_SECRET must be at least 32 characters — generate with `openssl rand -base64 32`",
     ),
+  // M7 Increment 2: the AI breakdown Route Handler is the one place that
+  // resolves this and passes it into createAIProvider() (the factory
+  // itself stays env-free, see ai-provider-factory.ts). Defaults to
+  // "mock", same reasoning as NODE_ENV's default, so nothing that already
+  // imports env.ts breaks by not setting it. GROQ_API_KEY isn't added
+  // here yet — only needed once GroqProvider exists (M7 Increment 3).
+  AI_PROVIDER: z.enum(["mock", "groq"]).default("mock"),
 });
 
 function loadEnv() {
