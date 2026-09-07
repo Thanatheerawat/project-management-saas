@@ -9,13 +9,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 A free-tier AI copilot that turns a plain-language prompt into a
 reviewable list of draft tasks, which the user can select and apply as
-real Issues — the first AI feature in the product, and the first code
-built on `feature/m7-ai-features` (branched off `v0.6.5`, not yet merged
-to `main`). Human-in-the-loop by design: nothing is created until the
-user explicitly selects drafts and clicks Apply. Built and approved
-strictly increment-by-increment (4 increments plus this closing
-increment), with a purely additive migration and no changes to any
-existing model. See `docs/session-log.md` for the full history.
+real Issues — the first AI feature in the product, built on
+`feature/m7-ai-features` (branched off `v0.6.5`). Human-in-the-loop by
+design: nothing is created until the user explicitly selects drafts and
+clicks Apply. Built and approved strictly increment-by-increment (4
+increments, a closing QA/documentation increment, and a merge
+reconciliation pass against the Thai→English i18n work that landed on
+`main` after this branch was created), with a purely additive migration
+and no changes to any existing model. Awaiting merge to `main`. See
+`docs/session-log.md` for the full history.
 
 ### Added
 
@@ -60,14 +62,19 @@ existing model. See `docs/session-log.md` for the full history.
   `test:integration`, `build`, and `test:e2e` (baseline unchanged at
   70/76 — see the M6.6 entry above for the pre-existing unrelated
   failure this refers to)
-- Not yet merged to `main` and not yet pushed to `origin` — this
-  milestone lives entirely on `feature/m7-ai-features` pending a future
-  merge/release checkpoint
+- Reconciled for merge: `AIBreakdownDialog`'s UI strings were translated
+  from Thai to English (its original language while this branch was
+  isolated from `main`'s i18n work), matching the plain hardcoded-English
+  convention `main` already uses for every other feature-area component
+  (`CreateIssueDialog`, `KanbanBoard`, admin/workspace/project forms) —
+  deliberately not wired into `next-intl`, which on `main` is scoped only
+  to chrome, the landing page, auth, and system-state pages
+- Still not yet merged to `main` and not yet pushed to `origin` — this
+  milestone lives entirely on `feature/m7-ai-features` pending an
+  explicit merge/release decision
 - Deferred, not forgotten: e2e coverage of the partial-failure retry
   path (already covered deterministically at the component level, see
-  `ai-breakdown-dialog.test.tsx`), and reconciling this branch's UI
-  strings with the Thai→English i18n translation that landed on `main`
-  after this branch was created
+  `ai-breakdown-dialog.test.tsx`)
 
 ## [0.6.0] - 2026-08-04 - Milestone 6: Admin Dashboard
 

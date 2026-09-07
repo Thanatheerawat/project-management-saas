@@ -76,7 +76,7 @@ export function AIBreakdownDialog(props: { projectId: string; workspaceId: strin
     // (1-2000 chars, trimmed) — no separate client-side limit invented.
     const parsed = aiBreakdownRequestSchema.safeParse({ prompt });
     if (!parsed.success) {
-      setError(parsed.error.issues[0]?.message ?? "ข้อมูลไม่ถูกต้อง");
+      setError(parsed.error.issues[0]?.message ?? "Invalid input");
       return;
     }
 
@@ -90,7 +90,8 @@ export function AIBreakdownDialog(props: { projectId: string; workspaceId: strin
       // The API already shapes every error response (401/404/400/429/502)
       // with a safe, direct-to-user message — no per-status-code branching
       // needed here, same as CreateIssueDialog's own error handling.
-      const message = err instanceof ApiError ? err.message : "สร้างงานด้วย AI ไม่สำเร็จ";
+      const message =
+        err instanceof ApiError ? err.message : "Failed to generate AI breakdown";
       setError(message);
       toast.error(message);
     }
@@ -145,12 +146,12 @@ export function AIBreakdownDialog(props: { projectId: string; workspaceId: strin
     setIsApplying(false);
 
     if (failedCount === 0) {
-      toast.success(`เพิ่ม ${succeededCount} Issue สำเร็จ`);
+      toast.success(`Added ${succeededCount} Issue${succeededCount === 1 ? "" : "s"}`);
       reset();
       setOpen(false);
     } else {
       toast.error(
-        `สร้างสำเร็จ ${succeededCount} รายการ ล้มเหลว ${failedCount} รายการ — กด "เพิ่มเป็น Issue" อีกครั้งเพื่อลองใหม่เฉพาะรายการที่ล้มเหลว`,
+        `${succeededCount} succeeded, ${failedCount} failed — click "Add as Issue" again to retry only the failed ones`,
       );
       // Dialog stays open (no reset/close) — failed drafts remain
       // checked and selectable for retry; succeeded ones are excluded
@@ -179,13 +180,13 @@ export function AIBreakdownDialog(props: { projectId: string; workspaceId: strin
           rest of the app's dialogs regardless of the underlying cause. */}
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle>สร้าง Issue ด้วย AI</DialogTitle>
+          <DialogTitle>Create Issue with AI</DialogTitle>
         </DialogHeader>
 
         <form onSubmit={handleGenerate} className="flex flex-col gap-4">
           <div className="flex flex-col gap-1.5">
             <label htmlFor="ai-prompt" className="text-foreground text-sm font-medium">
-              อธิบายงานที่ต้องการแบ่งเป็น Issue
+              Describe the work you want broken into Issues
             </label>
             <Textarea
               id="ai-prompt"
@@ -199,14 +200,14 @@ export function AIBreakdownDialog(props: { projectId: string; workspaceId: strin
           </div>
           {error && <p className="text-destructive text-sm">{error}</p>}
           <Button type="submit" disabled={breakdown.isPending} className="self-start">
-            {breakdown.isPending ? "กำลังสร้าง..." : "สร้างแผนงาน"}
+            {breakdown.isPending ? "Generating..." : "Generate Plan"}
           </Button>
         </form>
 
         {tasks && tasks.length > 0 && (
           <div className="flex flex-col gap-3 border-t pt-4">
             <p className="text-foreground text-sm font-semibold">
-              งานที่ AI สร้างให้ — เลือกรายการที่ต้องการเพิ่มเป็น Issue
+              AI-generated tasks — select which ones to add as Issues
             </p>
             <ul className="flex max-h-64 flex-col gap-2 overflow-y-auto">
               {tasks.map((task, index) => {
@@ -230,11 +231,11 @@ export function AIBreakdownDialog(props: { projectId: string; workspaceId: strin
                         </span>
                         {status === "succeeded" && (
                           <Badge variant="outline" className="text-xs">
-                            สร้างแล้ว
+                            Created
                           </Badge>
                         )}
                         {status === "failed" && (
-                          <span className="text-destructive text-xs">สร้างไม่สำเร็จ</span>
+                          <span className="text-destructive text-xs">Failed</span>
                         )}
                       </span>
                       {task.description && (
@@ -257,10 +258,10 @@ export function AIBreakdownDialog(props: { projectId: string; workspaceId: strin
             disabled={!tasks || pendingSelectedCount === 0 || isApplying}
           >
             {isApplying
-              ? "กำลังเพิ่ม Issue..."
+              ? "Adding Issues..."
               : pendingSelectedCount > 0
-                ? `เพิ่ม ${pendingSelectedCount} รายการเป็น Issue`
-                : "เพิ่มเป็น Issue"}
+                ? `Add ${pendingSelectedCount} as Issue${pendingSelectedCount === 1 ? "" : "s"}`
+                : "Add as Issue"}
           </Button>
         </DialogFooter>
       </DialogContent>

@@ -389,8 +389,15 @@ A free-tier AI copilot: the user describes a task in plain language, an
 `AIProvider` breaks it into a reviewable list of draft tasks, and the
 user selects which ones to create as real Issues. Human-in-the-loop by
 design — no Issue is ever created without an explicit Apply click.
-Built entirely on `feature/m7-ai-features` (branched off `v0.6.5`), not
-yet merged to `main`.
+Built on `feature/m7-ai-features` (branched off `v0.6.5`), reconciled
+against `main`'s subsequent Thai→English i18n work, and awaiting merge.
+`AIBreakdownDialog` deliberately does not use `next-intl` — its UI
+strings are plain hardcoded English, matching every other feature-area
+component on `main` (`CreateIssueDialog`, `KanbanBoard`, admin/workspace/
+project forms). `next-intl` on `main` is scoped only to chrome, the
+landing page, auth pages, and system-state pages — introducing it here
+would make this dialog _less_ consistent with its direct sibling
+`CreateIssueDialog`, not more.
 
 **One provider interface, two implementations, no route-level branching.**
 `AIProvider` (`src/services/ai/ai-provider.ts`) exposes a single
@@ -456,9 +463,10 @@ Milestone 2 (Identity & Access Management), Milestone 3 (Workspace &
 Project Management Core), Milestone 4 (Issue Tracking Core), Milestone 5
 (Dashboard & Analytics), and Milestone 6 (Admin Dashboard) are all
 implemented on `main` and covered by unit, integration, and e2e tests.
-Milestone 7 (AI Features, above) is implemented and covered by unit,
-integration, and e2e tests on `feature/m7-ai-features`, but that branch
-is **not yet merged to `main`** and not yet pushed to `origin`. See the
+Milestone 7 (AI Features, above) is implemented, covered by unit,
+integration, and e2e tests, and reconciled against `main`'s i18n work,
+all on `feature/m7-ai-features` — but that branch is **not yet merged to
+`main`** and not yet pushed to `origin`. See the
 root [README.md](../README.md) and [session-log.md](./session-log.md)
 for exact scope and what's still designed-but-not-built (GitHub
 integration, drag-and-drop, activity feed, trend/velocity charts, admin

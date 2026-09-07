@@ -43,7 +43,7 @@ async function renderGenerated(tasks = DRAFT_TASKS) {
   fireEvent.change(screen.getByRole("textbox"), {
     target: { value: "Build a login page" },
   });
-  fireEvent.click(screen.getByRole("button", { name: "สร้างแผนงาน" }));
+  fireEvent.click(screen.getByRole("button", { name: "Generate Plan" }));
 
   await waitFor(() => {
     expect(screen.getByText(tasks[0].title)).toBeInTheDocument();
@@ -51,7 +51,7 @@ async function renderGenerated(tasks = DRAFT_TASKS) {
 }
 
 function applyButton() {
-  return screen.getByRole("button", { name: /เพิ่ม.*Issue|กำลังเพิ่ม/ });
+  return screen.getByRole("button", { name: /Add.*Issue|Adding/ });
 }
 
 describe("AIBreakdownDialog — Apply (M7 Increment 4 Checkpoint B)", () => {
@@ -134,8 +134,8 @@ describe("AIBreakdownDialog — Apply (M7 Increment 4 Checkpoint B)", () => {
     // Task C both succeeded, Task B failed — two "created" badges, one
     // "failed" marker.
     expect(screen.getByText("Task A")).toBeInTheDocument();
-    expect(screen.getAllByText("สร้างแล้ว")).toHaveLength(2);
-    expect(screen.getByText("สร้างไม่สำเร็จ")).toBeInTheDocument();
+    expect(screen.getAllByText("Created")).toHaveLength(2);
+    expect(screen.getByText("Failed")).toBeInTheDocument();
   });
 
   it("on retry after a partial failure, does not recreate already-succeeded drafts", async () => {
