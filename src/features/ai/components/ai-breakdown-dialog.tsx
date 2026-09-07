@@ -1,5 +1,6 @@
 "use client";
 
+import { SparklesIcon } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 
@@ -169,6 +170,7 @@ export function AIBreakdownDialog(props: { projectId: string; workspaceId: strin
       }}
     >
       <Button type="button" size="sm" variant="outline" onClick={() => setOpen(true)}>
+        <SparklesIcon className="text-ai" aria-hidden="true" />
         AI Breakdown
       </Button>
       {/* max-w-md (not -lg): empirically verified in the browser at
@@ -180,7 +182,16 @@ export function AIBreakdownDialog(props: { projectId: string; workspaceId: strin
           rest of the app's dialogs regardless of the underlying cause. */}
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle>Create Issue with AI</DialogTitle>
+          {/* Phase 4: the one cyan touch in the dialog's chrome — an AI
+              marker on the title, not a filled cyan header bar. Violet
+              stays the primary-action color everywhere below (the Generate
+              button); cyan is reserved for "this is the AI surface" and
+              "this content came from AI generation" signals only, per the
+              approved Signal & Structure direction. */}
+          <DialogTitle className="flex items-center gap-1.5">
+            <SparklesIcon className="text-ai size-4" aria-hidden="true" />
+            Create Issue with AI
+          </DialogTitle>
         </DialogHeader>
 
         <form onSubmit={handleGenerate} className="flex flex-col gap-4">
@@ -200,15 +211,27 @@ export function AIBreakdownDialog(props: { projectId: string; workspaceId: strin
           </div>
           {error && <p className="text-destructive text-sm">{error}</p>}
           <Button type="submit" disabled={breakdown.isPending} className="self-start">
+            {breakdown.isPending && (
+              <span
+                className="bg-ai size-1.5 shrink-0 animate-pulse rounded-full"
+                aria-hidden="true"
+              />
+            )}
             {breakdown.isPending ? "Generating..." : "Generate Plan"}
           </Button>
         </form>
 
         {tasks && tasks.length > 0 && (
-          <div className="flex flex-col gap-3 border-t pt-4">
-            <p className="text-foreground text-sm font-semibold">
-              AI-generated tasks — select which ones to add as Issues
-            </p>
+          <div className="border-ai/30 flex flex-col gap-3 border-t pt-4">
+            <div className="flex flex-col gap-0.5">
+              <p className="text-ai flex items-center gap-1.5 text-xs font-semibold tracking-wide uppercase">
+                <SparklesIcon className="size-3.5" aria-hidden="true" />
+                AI-generated tasks
+              </p>
+              <p className="text-muted-foreground text-xs">
+                Select which ones to add as Issues
+              </p>
+            </div>
             <ul className="flex max-h-64 flex-col gap-2 overflow-y-auto">
               {tasks.map((task, index) => {
                 const status = applyStatus.get(index);

@@ -4,7 +4,7 @@ import { Building2, Database, FolderKanban, Users } from "lucide-react";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
-import { StatCard } from "@/features/admin/components/stat-card";
+import { StatCard, StatStrip } from "@/features/admin/components/stat-card";
 import { useAdminHealth } from "@/features/admin/hooks/use-admin-health";
 import { useAdminOverview } from "@/features/admin/hooks/use-admin-overview";
 import { PriorityBreakdownChart } from "@/features/analytics/components/priority-breakdown-chart";
@@ -22,12 +22,7 @@ export function AdminOverviewSection() {
   if (overview.isLoading) {
     return (
       <div className="flex flex-col gap-4">
-        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
-          <Skeleton className="h-[68px]" />
-          <Skeleton className="h-[68px]" />
-          <Skeleton className="h-[68px]" />
-          <Skeleton className="h-[68px]" />
-        </div>
+        <Skeleton className="h-[68px] w-full rounded-xl" />
         <div className="grid gap-4 sm:grid-cols-2">
           <Skeleton className="h-56" />
           <Skeleton className="h-56" />
@@ -44,12 +39,12 @@ export function AdminOverviewSection() {
 
   return (
     <div className="flex flex-col gap-4">
-      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
+      <StatStrip>
         <StatCard label="Total Users" value={userCount} icon={Users} />
         <StatCard label="Total Workspaces" value={workspaceCount} icon={Building2} />
         <StatCard label="Total Projects" value={projectCount} icon={FolderKanban} />
         <HealthStatCard health={health} />
-      </div>
+      </StatStrip>
 
       <div className="grid gap-4 sm:grid-cols-2">
         <Card size="sm">
@@ -80,51 +75,48 @@ export function AdminOverviewSection() {
 // but reporting `reachable: false` means "we know, and it's down." Each
 // gets its own message rather than collapsing both into one generic
 // error, since they call for different operator reactions.
+// Plain cell (was its own Card) — same Phase 5 change as StatCard, so it
+// sits inside StatStrip as the fourth column instead of a fifth
+// individually-raised box.
 function HealthStatCard({ health }: { health: ReturnType<typeof useAdminHealth> }) {
-  if (health.isLoading) return <Skeleton className="h-20" />;
+  if (health.isLoading) return <Skeleton className="h-full min-h-[68px] w-full" />;
 
   if (health.isError || !health.data) {
     return (
-      <Card size="sm">
-        <CardContent className="flex items-center gap-3">
-          <Database className="text-destructive size-5 shrink-0" strokeWidth={1.5} />
-          <div className="flex flex-col">
-            <span className="text-muted-foreground text-xs">Database</span>
-            <span className="text-destructive text-sm font-semibold">
-              API call failed
-            </span>
-          </div>
-        </CardContent>
-      </Card>
+      <div className="flex items-center gap-3 px-4 py-3">
+        <Database className="text-destructive size-5 shrink-0" strokeWidth={1.5} />
+        <div className="flex flex-col">
+          <span className="text-muted-foreground text-xs">Database</span>
+          <span className="text-destructive text-sm font-semibold">API call failed</span>
+        </div>
+      </div>
     );
   }
 
   const { reachable, latencyMs } = health.data.database;
 
   return (
-    <Card size="sm">
-      <CardContent className="flex items-center gap-3">
-        <Database
+    <div className="flex items-center gap-3 px-4 py-3">
+      <Database
+        className={
+          reachable
+            ? "text-muted-foreground size-5 shrink-0"
+            : "text-destructive size-5 shrink-0"
+        }
+        strokeWidth={1.5}
+      />
+      <div className="flex flex-col">
+        <span className="text-muted-foreground text-xs">Database</span>
+        <span
           className={
             reachable
-              ? "text-muted-foreground size-5 shrink-0"
-              : "text-destructive size-5 shrink-0"
+              ? "text-foreground font-mono text-sm font-semibold"
+              : "text-destructive text-sm font-semibold"
           }
-          strokeWidth={1.5}
-        />
-        <div className="flex flex-col">
-          <span className="text-muted-foreground text-xs">Database</span>
-          <span
-            className={
-              reachable
-                ? "text-foreground text-sm font-semibold"
-                : "text-destructive text-sm font-semibold"
-            }
-          >
-            {reachable ? `Online (${latencyMs}ms)` : "Unresponsive"}
-          </span>
-        </div>
-      </CardContent>
-    </Card>
+        >
+          {reachable ? `Online (${latencyMs}ms)` : "Unresponsive"}
+        </span>
+      </div>
+    </div>
   );
 }

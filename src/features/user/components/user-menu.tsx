@@ -46,7 +46,7 @@ export function UserMenu({ isAdmin = false }: { isAdmin?: boolean }) {
           0/1/many memberships the same way login does, so it's always a
           valid "back to the app" destination regardless of which
           workspace the user is in. */}
-      <div className="hidden items-center gap-2 md:flex">
+      <div className="border-border hidden items-center gap-2 md:ml-1 md:flex md:border-l md:pl-2">
         <Button variant="ghost" size="sm" asChild>
           <Link href="/workspaces">{t("workspace")}</Link>
         </Button>

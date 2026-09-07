@@ -154,11 +154,16 @@ export function AdminUserDetail({
           {data.workspaces.length === 0 ? (
             <EmptyState icon={Users} title="Not a member of any workspace" />
           ) : (
-            <div className="flex flex-col gap-2">
+            // Phase 5: plain rows with a hairline divider between them, not
+            // one bordered/rounded box per workspace — this card was doing
+            // the same "card-in-card" nesting the Issue Detail sidebar had
+            // before Phase 4, just one level shallower (Card > bordered
+            // div, instead of Card > 6 bordered divs).
+            <div className="divide-border-muted flex flex-col divide-y">
               {data.workspaces.map((workspace) => (
                 <div
                   key={workspace.id}
-                  className="border-border flex items-center justify-between gap-2 rounded-xl border p-3"
+                  className="flex items-center justify-between gap-2 py-3 first:pt-0 last:pb-0"
                 >
                   <div>
                     <p className="text-foreground text-sm font-medium">

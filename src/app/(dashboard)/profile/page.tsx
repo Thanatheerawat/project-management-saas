@@ -30,7 +30,7 @@ export default function ProfilePage() {
           <p className="text-muted-foreground text-sm">Manage your account information</p>
         </div>
       </div>
-      <div className="border-border bg-surface ring-accent/5 rounded-xl border p-6 shadow-sm ring-1">
+      <div className="border-border bg-surface-raised ring-accent/5 rounded-xl border p-6 shadow-sm ring-1">
         <ProfileForm />
       </div>
     </div>

@@ -64,11 +64,12 @@ export function AdminAuditLogList() {
           icon={ScrollText}
           title="No audit log entries found"
           description="Try changing the action filter"
-          className="border-border rounded-xl border border-dashed"
+          className="border-border rounded-lg border border-dashed"
         />
       ) : (
         <div className="flex flex-col gap-3">
-          <div className="border-border overflow-hidden rounded-xl border">
+          {/* Phase 5: see AdminUserList's identical comment. */}
+          <div className="bg-surface-raised ring-border shadow-elevation-1 overflow-hidden rounded-lg ring-1">
             <Table aria-label="All audit log entries">
               <TableHeader>
                 <TableRow>
@@ -81,12 +82,19 @@ export function AdminAuditLogList() {
                 {data.items.map((entry) => (
                   <TableRow key={entry.id}>
                     <TableCell>
-                      <Badge variant="outline">{entry.action}</Badge>
+                      {/* font-mono: AUDIT_ACTIONS values (LOGIN_SUCCESS,
+                          PASSWORD_RESET_REQUESTED, ...) are technical
+                          action codes, not human-written text — same
+                          "system metadata gets mono" rule the project key
+                          Badge on RecentProjectCard already follows. */}
+                      <Badge variant="outline" className="font-mono text-[11px]">
+                        {entry.action}
+                      </Badge>
                     </TableCell>
                     <TableCell className="text-foreground text-sm">
                       {entry.user?.name ?? entry.user?.email ?? "Unknown user"}
                     </TableCell>
-                    <TableCell className="text-muted-foreground text-right text-xs">
+                    <TableCell className="text-muted-foreground text-right font-mono text-xs">
                       {new Date(entry.createdAt).toLocaleString("en-US")}
                     </TableCell>
                   </TableRow>

@@ -37,7 +37,7 @@ export function KanbanBoard({
     return (
       <div className="flex gap-3 overflow-x-auto pb-2">
         {ISSUE_STATUSES.map((status) => (
-          <Skeleton key={status} className="h-64 w-72 shrink-0 rounded-xl" />
+          <Skeleton key={status} className="h-64 w-72 shrink-0 rounded-lg" />
         ))}
       </div>
     );
@@ -61,7 +61,7 @@ export function KanbanBoard({
   }
 
   return (
-    <div className="flex gap-4 overflow-x-auto pb-2">
+    <div className="flex gap-3 overflow-x-auto pb-2">
       {ISSUE_STATUSES.map((status) => (
         <KanbanColumn
           key={status}

@@ -13,9 +13,9 @@ import { getTranslations } from "next-intl/server";
 import { Footer } from "@/components/layout/footer";
 import { LanguageSwitcher } from "@/components/layout/language-switcher";
 import { Navbar } from "@/components/layout/navbar";
+import { OrbitBrand } from "@/components/layout/orbit-brand";
 import { PageContainer } from "@/components/layout/page-container";
 import { ThemeToggle } from "@/components/layout/theme-toggle";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 
@@ -105,11 +105,7 @@ export default async function Home() {
   return (
     <div className="flex min-h-screen flex-col">
       <Navbar
-        brand={
-          <Link href="/" className="text-foreground text-sm font-bold">
-            Orbit
-          </Link>
-        }
+        brand={<OrbitBrand href="/" />}
         actions={
           <>
             {/* alwaysVisible: the public Navbar has no mobile drawer/menu
@@ -170,9 +166,12 @@ export default async function Home() {
             </div>
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
               {CAPABILITIES.map(({ icon: Icon, title, description }) => (
+                // Phase 5: same ring-only hover as every other card in the
+                // app (IssueCard, RecentProjectCard) — was a border-color +
+                // hover:shadow-lg lift predating that convention.
                 <Card
                   key={title}
-                  className="hover:border-accent/40 hover:shadow-accent/5 transition-all hover:shadow-lg"
+                  className="ring-border hover:ring-accent/50 transition-colors"
                 >
                   <CardHeader>
                     <div className="bg-accent/10 flex size-10 items-center justify-center rounded-lg">
@@ -201,7 +200,14 @@ export default async function Home() {
             <div className="flex flex-col items-center gap-4 sm:flex-row sm:justify-center sm:gap-2">
               {WORKFLOW_STEPS.map(({ icon: Icon, label }, index) => (
                 <div key={label} className="flex items-center gap-2 sm:gap-4">
-                  <div className="border-border bg-background hover:border-accent/40 flex flex-col items-center gap-2 rounded-xl border px-6 py-4 transition-colors">
+                  {/* Phase 5: bg-surface-raised (was bg-background) — this
+                      chip sits on the section's bg-surface canvas, so it
+                      needs to read as raised *above* that tier, not drop to
+                      bg-background (the page-canvas tier, one step further
+                      down, meant for the least-elevated surface in the
+                      whole hierarchy). Hover matches every other raised
+                      element's ring-only treatment. */}
+                  <div className="bg-surface-raised ring-border hover:ring-accent/50 shadow-elevation-1 flex flex-col items-center gap-2 rounded-xl px-6 py-4 ring-1 transition-colors">
                     <Icon className="text-accent size-5" aria-hidden="true" />
                     <span className="text-foreground text-sm font-medium">{label}</span>
                   </div>
@@ -230,23 +236,36 @@ export default async function Home() {
                 {t("landing.previewDescription")}
               </p>
             </div>
+            {/* Phase 5: rebuilt on the real KanbanColumn/IssueCard's own
+                classes (Phase 3) rather than a lookalike hand-rolled
+                treatment — since this section explicitly claims to be an
+                "abstract representation of the real Kanban board," it
+                should use the literal same tokens that board uses:
+                a recessed bg-muted/30 column with raised bg-surface-raised
+                item chips (the column is a container, not a card, so it
+                sits *below* its items, not above them — the opposite of
+                the old bg-surface-raised column / bg-background item
+                pairing this replaces), mono item count instead of a Badge
+                pill, uppercase tracking-wide column label. */}
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
               {PREVIEW_COLUMNS.map((column) => (
                 <div
                   key={column.label}
-                  className="border-border bg-surface flex flex-col gap-3 rounded-xl border p-4"
+                  className="bg-muted/30 border-border/60 flex flex-col gap-3 rounded-lg border p-3"
                 >
-                  <div className="flex items-center justify-between">
-                    <span className="text-foreground text-sm font-semibold">
+                  <div className="flex items-center justify-between px-1">
+                    <span className="text-foreground text-xs font-semibold tracking-wide uppercase">
                       {column.label}
                     </span>
-                    <Badge variant="outline">{column.items.length}</Badge>
+                    <span className="text-muted-foreground font-mono text-xs">
+                      {column.items.length}
+                    </span>
                   </div>
                   <div className="flex flex-col gap-2">
                     {column.items.map((item) => (
                       <div
                         key={item}
-                        className="border-border bg-background rounded-lg border px-3 py-2 text-sm"
+                        className="bg-surface-raised ring-border rounded-lg px-3 py-2 text-sm ring-1"
                       >
                         {item}
                       </div>

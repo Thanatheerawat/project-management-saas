@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 
 import { Navbar } from "@/components/layout/navbar";
+import { OrbitBrand } from "@/components/layout/orbit-brand";
 import { PageContainer } from "@/components/layout/page-container";
 import { ThemeToggle } from "@/components/layout/theme-toggle";
 import { UserMenu } from "@/features/user/components/user-menu";
@@ -25,7 +26,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
   return (
     <div className="flex min-h-screen flex-col">
       <Navbar
-        brand={<span className="text-foreground text-sm font-bold">Orbit Admin</span>}
+        brand={<OrbitBrand label="Orbit Admin" />}
         actions={
           <>
             <ThemeToggle />

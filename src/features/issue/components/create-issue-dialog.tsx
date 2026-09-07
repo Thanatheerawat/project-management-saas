@@ -118,7 +118,13 @@ export function CreateIssueDialog({
               onChange={(e) => setDescription(e.target.value)}
             />
           </div>
-          <div className="flex gap-3">
+          {/* Properties sub-group: a hairline divider separates "what the
+              issue is" (title/description) from "how it's triaged"
+              (priority/assignee) — the same grouping language as the
+              Issue Detail panel's Properties section, applied here at
+              dialog scale (a divider is enough; a full SectionLabel would
+              be too heavy for a form this compact). */}
+          <div className="border-border-muted flex gap-3 border-t pt-4">
             <div className="flex flex-1 flex-col gap-1.5">
               <label
                 htmlFor="issue-priority"

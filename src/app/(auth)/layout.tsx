@@ -3,6 +3,7 @@ import { getTranslations } from "next-intl/server";
 
 import { Footer } from "@/components/layout/footer";
 import { LanguageSwitcher } from "@/components/layout/language-switcher";
+import { OrbitBrand } from "@/components/layout/orbit-brand";
 import { PageContainer } from "@/components/layout/page-container";
 
 // Created now (not in Foundation) specifically because real pages exist
@@ -37,10 +38,19 @@ export default async function AuthLayout({ children }: { children: React.ReactNo
           <div className="flex w-full justify-end">
             <LanguageSwitcher alwaysVisible />
           </div>
-          <Link href="/" className="text-foreground text-lg font-bold">
-            Orbit
-          </Link>
-          <div className="border-border bg-surface ring-accent/5 w-full rounded-xl border p-6 shadow-lg ring-1">
+          {/* Phase 5: the Orbit ring-mark (Phase 2's shared brand
+              component), not a bare text link — every other chrome
+              location in the app (Sidebar, admin Navbar) already carries
+              the mark; the auth pages were the one place still using plain
+              text. */}
+          <OrbitBrand href="/" className="text-lg" />
+          {/* shadow-elevation-2 (was shadow-lg): the generic Tailwind
+              shadow predates Phase 1's elevation tokens — this card is a
+              floating, dialog-like surface, so it gets the same token
+              Dialog itself uses instead of an untokened one-off. The
+              accent-tinted ring stays: a restrained brand touch, not a
+              glow effect. */}
+          <div className="border-border bg-surface-raised ring-accent/5 shadow-elevation-2 w-full rounded-xl border p-6 ring-1">
             {children}
           </div>
           <Link

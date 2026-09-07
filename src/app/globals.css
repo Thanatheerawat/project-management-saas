@@ -2,15 +2,30 @@
 @import "tw-animate-css";
 
 /*
- * Orbit design tokens — from the approved UI/UX Design System doc.
- * Raw values live here (:root / .dark); @theme inline maps them to
- * Tailwind utilities (bg-accent, text-status-done, etc.) so the same
- * class works in both themes without conditional logic in components.
+ * Orbit design tokens — "Signal & Structure" visual direction (Phase 1:
+ * Design Foundation). Raw values live here (:root / .dark); @theme inline
+ * maps them to Tailwind utilities (bg-accent, text-status-done, etc.) so
+ * the same class works in both themes without conditional logic in
+ * components.
+ *
+ * Surface hierarchy (new in Phase 1): three tiers, not two.
+ *   --background     page canvas (deepest/lightest extreme)
+ *   --surface         "chrome" — nav, sidebar, footer (one step up)
+ *   --surface-raised  cards, dialogs, popovers, dropdowns (front-most)
+ * Previously --card/--popover both aliased directly to --surface, so
+ * chrome and floating content were visually identical — the root cause
+ * of the "everything is one flat plane" finding from the UI audit.
+ * --chrome is a semantic alias for --surface, added so future work can
+ * reach for the name that matches its role (nav/sidebar) rather than the
+ * more generic "surface".
  */
 :root {
-  --background: #f5f6f5;
-  --surface: #ffffff;
-  --border: #e1e4e2;
+  --background: #eef0f4;
+  --surface: #f7f8fa;
+  --surface-raised: #ffffff;
+  --chrome: var(--surface);
+  --border: #dbdfe6;
+  --border-muted: #e6e9ee;
   --foreground: #1a1d1f;
   --muted: #ececea;
   --muted-foreground: #62696c;
@@ -18,11 +33,20 @@
 
   /* Violet brand accent (contrast-verified against WCAG relative-luminance
      math, not guessed): #7c3aed on white text = 5.70:1, and on this
-     theme's --background = 5.26:1 — both comfortably clear AA's 4.5:1 for
-     normal-size text. */
+     theme's --background = 5.0:1 — both comfortably clear AA's 4.5:1 for
+     normal-size text. Recomputed against the new cooler --background
+     introduced in Phase 1 (previously 5.26:1 against the old #f5f6f5). */
   --accent: #7c3aed;
   --accent-hover: #6d28d9;
   --accent-foreground: #ffffff;
+
+  /* Cyan — reserved exclusively for AI / live / system-state signals, not
+     a general-purpose secondary accent (Signal & Structure direction).
+     #0e7490 (not a brighter cyan) so white text on a filled cyan surface
+     still clears AA: 5.36:1. Nothing consumes this yet in Phase 1 — it's
+     foundation for the AI Breakdown treatment in a later phase. */
+  --ai: #0e7490;
+  --ai-foreground: #ffffff;
 
   /* shadcn/ui component tokens — mapped onto Orbit's own palette above,
      not shadcn's defaults, so generated components match the design
@@ -33,9 +57,9 @@
   --secondary-foreground: var(--foreground);
   --destructive: #a5382b;
   --destructive-foreground: #ffffff;
-  --card: var(--surface);
+  --card: var(--surface-raised);
   --card-foreground: var(--foreground);
-  --popover: var(--surface);
+  --popover: var(--surface-raised);
   --popover-foreground: var(--foreground);
   --input: var(--border);
   --ring: var(--accent);
@@ -60,6 +84,16 @@
      "roundedness family" as cards instead of visibly tighter — a small,
      token-only nudge toward the more rounded, premium-SaaS feel. */
   --radius-lg: 12px;
+
+  /* Elevation — light theme reads depth through shadow (it has somewhere
+     for a shadow to fall). Restrained: soft, low-opacity, no hard edges. */
+  --shadow-elevation-1:
+    0 1px 2px rgba(20, 22, 26, 0.04), 0 1px 1px rgba(20, 22, 26, 0.03);
+  --shadow-elevation-2:
+    0 8px 24px rgba(20, 22, 26, 0.08), 0 2px 6px rgba(20, 22, 26, 0.05);
+  /* No glow in light mode — the direction calls for glow as a dark-mode
+     signal specifically, not a universal effect. */
+  --shadow-glow-accent: none;
 }
 
 .dark {
@@ -68,7 +102,14 @@
      "dark mode." */
   --background: #0a0a0f;
   --surface: #121218;
+  /* New raised tier, lighter than chrome — in dark mode elevation is read
+     through lightness first (a shadow barely registers against near-
+     black), so this is the token doing most of the "this is a card, not
+     the page" work in this theme. */
+  --surface-raised: #1a1a22;
+  --chrome: var(--surface);
   --border: #26262f;
+  --border-muted: #1e1e26;
   --foreground: #f1f1f5;
   --muted: #1c1c24;
   --muted-foreground: #9d9daa;
@@ -83,15 +124,21 @@
   --accent-hover: #8b6ef0;
   --accent-foreground: #0a0a0f;
 
+  /* Cyan, dark: vivid against near-black (10.9:1 as text on --background)
+     but paired with a dark ink foreground, not white, when used as a
+     fill — same "light accent + dark text" convention as --accent above. */
+  --ai: #22d3ee;
+  --ai-foreground: #06161a;
+
   --primary: var(--accent);
   --primary-foreground: var(--accent-foreground);
   --secondary: var(--surface);
   --secondary-foreground: var(--foreground);
   --destructive: #d97361;
   --destructive-foreground: #ffffff;
-  --card: var(--surface);
+  --card: var(--surface-raised);
   --card-foreground: var(--foreground);
-  --popover: var(--surface);
+  --popover: var(--surface-raised);
   --popover-foreground: var(--foreground);
   --input: var(--border);
   --ring: var(--accent);
@@ -108,12 +155,26 @@
   --priority-medium: #dbb949;
   --priority-low: #9aa0a3;
   --priority-none: #4a5155;
+
+  /* Elevation — dark theme reads depth through the lighter --surface-raised
+     background first; shadow is a faint secondary cue, not the primary
+     one (a shadow cast on near-black is barely visible by definition).
+     --shadow-glow-accent is the one genuinely dark-mode-specific effect:
+     an extremely restrained ambient glow, meant for primary actions only. */
+  --shadow-elevation-1: 0 1px 2px rgba(0, 0, 0, 0.4);
+  --shadow-elevation-2: 0 16px 40px rgba(0, 0, 0, 0.55);
+  --shadow-glow-accent:
+    0 0 0 1px color-mix(in oklch, var(--accent) 25%, transparent),
+    0 0 18px -4px color-mix(in oklch, var(--accent) 50%, transparent);
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-surface: var(--surface);
+  --color-surface-raised: var(--surface-raised);
+  --color-chrome: var(--chrome);
   --color-border: var(--border);
+  --color-border-muted: var(--border-muted);
   --color-foreground: var(--foreground);
   --color-muted-foreground: var(--muted-foreground);
   --color-faint: var(--faint);
@@ -121,6 +182,8 @@
   --color-accent: var(--accent);
   --color-accent-hover: var(--accent-hover);
   --color-accent-foreground: var(--accent-foreground);
+  --color-ai: var(--ai);
+  --color-ai-foreground: var(--ai-foreground);
 
   --color-primary: var(--primary);
   --color-primary-foreground: var(--primary-foreground);
@@ -157,7 +220,13 @@
      did in M6.5 — Noto Sans Thai is only ever reached for codepoints
      Inter has no glyph for, i.e. Thai. This is plain CSS font fallback,
      not a locale switch: a Thai page with an English project name in it
-     still renders that name in Inter, within the same line. */
+     still renders that name in Inter, within the same line.
+     Usage convention (Signal & Structure direction): --font-sans for
+     anything a person wrote (titles, descriptions, labels); --font-mono
+     for anything the system generated (issue keys, timestamps, counts,
+     IDs). No new token needed for this — it's a usage rule for the
+     existing two font families, applied component-by-component in later
+     phases, not a Phase 1 change. */
   --font-sans: var(--font-inter), var(--font-noto-sans-thai);
   --font-mono: var(--font-jetbrains-mono);
 }
@@ -170,6 +239,17 @@ body {
     -apple-system,
     "Segoe UI",
     sans-serif;
+  /* App-wide technical ground texture — the same dot-grid previously
+     confined to the landing/auth pages (.bg-dot-grid below), now applied
+     as the default canvas everywhere. Deliberately faint (the dot color
+     is --border itself, already a low-contrast token) and fixed so it
+     reads as the page's own material rather than scrolling content.
+     Anything with its own opaque background (Navbar, Sidebar, Card,
+     Dialog, ...) simply paints over it — this only ever shows through on
+     bare page canvas. */
+  background-image: radial-gradient(var(--color-border) 1px, transparent 1px);
+  background-size: 32px 32px;
+  background-attachment: fixed;
 }
 
 /* Portfolio-inspired public-page texture — pure CSS, no images/deps.
@@ -187,6 +267,23 @@ body {
     color-mix(in oklch, var(--color-accent) 16%, transparent),
     transparent 70%
   );
+}
+
+/* Elevation utilities (Phase 1 foundation) — semantic depth levels rather
+   than one-off shadow/ring values repeated per component. Each token
+   already resolves differently per theme (see :root / .dark above), so
+   these three classes are the only thing a component needs to reach for;
+   no dark: variant is ever required at the call site. */
+.shadow-elevation-1 {
+  box-shadow: var(--shadow-elevation-1);
+}
+
+.shadow-elevation-2 {
+  box-shadow: var(--shadow-elevation-2);
+}
+
+.shadow-glow-accent {
+  box-shadow: var(--shadow-glow-accent);
 }
 
 /* M6.5 final polish: a user with prefers-reduced-motion set gets every

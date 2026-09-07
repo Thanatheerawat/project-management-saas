@@ -3,6 +3,7 @@ import { getTranslations } from "next-intl/server";
 
 import { LanguageSwitcher } from "@/components/layout/language-switcher";
 import { Navbar } from "@/components/layout/navbar";
+import { OrbitBrand } from "@/components/layout/orbit-brand";
 import { PageContainer } from "@/components/layout/page-container";
 import { ThemeToggle } from "@/components/layout/theme-toggle";
 import { Button } from "@/components/ui/button";
@@ -31,11 +32,7 @@ export default async function DashboardLayout({
   return (
     <div className="flex min-h-screen flex-col">
       <Navbar
-        brand={
-          <Link href="/workspaces" className="text-foreground text-sm font-bold">
-            Orbit
-          </Link>
-        }
+        brand={<OrbitBrand href="/workspaces" />}
         actions={
           <>
             {isAdmin && (

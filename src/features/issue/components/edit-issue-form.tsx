@@ -99,7 +99,9 @@ export function EditIssueForm({
           onChange={(e) => setDescription(e.target.value)}
         />
       </div>
-      <div className="flex gap-3">
+      {/* Same Properties sub-grouping as CreateIssueDialog — a hairline
+          divider ahead of the triage fields, not a new box. */}
+      <div className="border-border-muted flex gap-3 border-t pt-4">
         <div className="flex flex-1 flex-col gap-1.5">
           <label
             htmlFor="edit-issue-priority"

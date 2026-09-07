@@ -43,7 +43,7 @@ export function WorkspaceAnalyticsSection({ workspaceId }: { workspaceId: string
         icon={BarChart3}
         title="No data to analyze yet"
         description="Create issues in this workspace's projects to see an overview"
-        className="border-border rounded-xl border border-dashed"
+        className="border-border rounded-lg border border-dashed"
       />
     );
   }

@@ -1,9 +1,9 @@
 "use client";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Badge } from "@/components/ui/badge";
+import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
-import { ISSUE_PRIORITY_LABEL } from "@/constants/issue";
+import { ISSUE_PRIORITY_COLOR, ISSUE_PRIORITY_LABEL } from "@/constants/issue";
 import { CommentSection } from "@/features/issue/components/comment-section";
 import { EditIssueForm } from "@/features/issue/components/edit-issue-form";
 import { IssueLabelSection } from "@/features/issue/components/issue-label-section";
@@ -40,6 +40,17 @@ interface IssueDetailPanelProps {
 // they were already independent instant-apply sections before this
 // increment (see IssueStatusSelect's and IssueLabelSection's own
 // comments), so relocating them changes nothing about how they save.
+//
+// Phase 4 (Signal & Structure): the audit's "card-in-card nesting" finding
+// pointed at this exact panel — six independently bordered/rounded boxes
+// stacked in the sidebar (one per field), sitting on a page canvas with no
+// containing surface of its own. Fixed purely visually: the whole panel is
+// now one raised surface (Card) instead of a bare page-canvas div, and the
+// old per-field boxes are gone in favor of PropertyRow (label above value,
+// no border) grouped under two SectionLabels ("Properties" / "Timestamps")
+// separated by a single hairline divider — same "surface tiers + spacing +
+// restrained dividers, not more boxes" direction Phase 1-3 already
+// established. No prop, hook, or mutation call in this file changed.
 export function IssueDetailPanel({
   issueId,
   projectId,
@@ -53,21 +64,23 @@ export function IssueDetailPanel({
 
   if (issue.isLoading) {
     return (
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
-        <div className="flex flex-col gap-4 lg:col-span-2">
+      <Card className="[--card-spacing:--spacing(6)]">
+        <CardContent className="flex flex-col gap-6">
           <Skeleton className="h-8 w-2/3" />
-          <Skeleton className="h-32 w-full" />
-          <Skeleton className="h-24 w-full" />
-        </div>
-        <div className="flex flex-col gap-4">
-          <Skeleton className="h-16 w-full" />
-          <Skeleton className="h-16 w-full" />
-          <Skeleton className="h-16 w-full" />
-          <Skeleton className="h-16 w-full" />
-          <Skeleton className="h-16 w-full" />
-          <Skeleton className="h-16 w-full" />
-        </div>
-      </div>
+          <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
+            <div className="flex flex-col gap-4 lg:col-span-2">
+              <Skeleton className="h-32 w-full" />
+              <Skeleton className="h-24 w-full" />
+            </div>
+            <div className="border-border-muted flex flex-col gap-4 border-t pt-6 lg:border-t-0 lg:border-l lg:pt-0 lg:pl-6">
+              <Skeleton className="h-4 w-full" />
+              <Skeleton className="h-4 w-full" />
+              <Skeleton className="h-4 w-full" />
+              <Skeleton className="h-4 w-full" />
+            </div>
+          </div>
+        </CardContent>
+      </Card>
     );
   }
 
@@ -81,18 +94,17 @@ export function IssueDetailPanel({
     : undefined;
 
   return (
-    <div className="flex flex-col gap-4">
-      <div className="flex flex-col gap-1">
-        <span className="text-muted-foreground font-mono text-sm">{data.key}</span>
-        <h1 className="text-foreground text-2xl font-bold tracking-tight">
-          {data.title}
-        </h1>
-      </div>
+    <Card className="[--card-spacing:--spacing(6)]">
+      <CardContent className="flex flex-col gap-6">
+        <div className="border-border-muted flex flex-col gap-1 border-b pb-6">
+          <span className="text-muted-foreground font-mono text-sm">{data.key}</span>
+          <h1 className="text-foreground text-2xl font-bold tracking-tight">
+            {data.title}
+          </h1>
+        </div>
 
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
-        <div className="flex min-w-0 flex-col gap-6 lg:col-span-2">
-          <section className="flex flex-col gap-2">
-            <h2 className="text-foreground text-sm font-semibold">Edit Issue</h2>
+        <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
+          <div className="flex min-w-0 flex-col gap-6 lg:col-span-2">
             <EditIssueForm
               issueId={issueId}
               projectId={projectId}
@@ -102,86 +114,120 @@ export function IssueDetailPanel({
               initialPriority={data.priority}
               initialAssigneeId={data.assigneeId}
             />
-          </section>
 
-          <section className="flex flex-col gap-2">
-            <h2 className="text-foreground text-sm font-semibold">Comments</h2>
-            <CommentSection
-              issueId={issueId}
-              currentUserId={currentUserId}
-              canModerate={canModerateComments}
-            />
-          </section>
-        </div>
-
-        <aside className="flex min-w-0 flex-col gap-4 lg:col-span-1">
-          <SidebarField label="Status">
-            <IssueStatusSelect
-              issueId={issueId}
-              projectId={projectId}
-              currentStatus={data.status}
-            />
-          </SidebarField>
-
-          <SidebarField label="Priority">
-            {data.priority === "NONE" ? (
-              <span className="text-muted-foreground text-sm">None</span>
-            ) : (
-              <Badge variant="outline">{ISSUE_PRIORITY_LABEL[data.priority]}</Badge>
-            )}
-          </SidebarField>
-
-          <SidebarField label="Assignee">
-            {assignee ? (
-              <div className="flex items-center gap-2">
-                <Avatar className="size-6">
-                  {assignee.image && <AvatarImage src={assignee.image} alt="" />}
-                  <AvatarFallback className="text-[10px]">
-                    {getInitials(assignee)}
-                  </AvatarFallback>
-                </Avatar>
-                <span className="text-foreground text-sm">
-                  {assignee.name ?? assignee.email}
-                </span>
+            <div className="border-border-muted border-t pt-6">
+              <SectionLabel>Comments</SectionLabel>
+              <div className="mt-3">
+                <CommentSection
+                  issueId={issueId}
+                  currentUserId={currentUserId}
+                  canModerate={canModerateComments}
+                />
               </div>
-            ) : (
-              <span className="text-muted-foreground text-sm">Unassigned</span>
-            )}
-          </SidebarField>
+            </div>
+          </div>
 
-          <SidebarField label="Label">
-            <IssueLabelSection
-              issueId={issueId}
-              projectId={projectId}
-              workspaceId={workspaceId}
-              canManageLabels={canManageLabels}
-            />
-          </SidebarField>
+          {/* Secondary panel: grouped by section rather than one bordered
+              box per field (the audit's "card-in-card" finding) — a single
+              hairline divider between the two groups, none between
+              individual rows within a group. */}
+          <aside className="border-border-muted flex min-w-0 flex-col gap-5 border-t pt-6 lg:col-span-1 lg:border-t-0 lg:border-l lg:pt-0 lg:pl-6">
+            <section className="flex flex-col gap-4">
+              <SectionLabel>Properties</SectionLabel>
 
-          <SidebarField label="Created">
-            <span className="text-foreground text-sm">
-              {new Date(data.createdAt).toLocaleString("en-US")}
-            </span>
-          </SidebarField>
+              <PropertyRow label="Status">
+                <IssueStatusSelect
+                  issueId={issueId}
+                  projectId={projectId}
+                  currentStatus={data.status}
+                />
+              </PropertyRow>
 
-          <SidebarField label="Updated">
-            <span className="text-foreground text-sm">
-              {new Date(data.updatedAt).toLocaleString("en-US")}
-            </span>
-          </SidebarField>
-        </aside>
-      </div>
-    </div>
+              <PropertyRow label="Priority">
+                {data.priority === "NONE" ? (
+                  <span className="text-muted-foreground text-sm">None</span>
+                ) : (
+                  <span className="inline-flex items-center gap-1.5 text-sm font-medium">
+                    <span
+                      className="size-1.5 shrink-0 rounded-full"
+                      style={{ backgroundColor: ISSUE_PRIORITY_COLOR[data.priority] }}
+                      aria-hidden="true"
+                    />
+                    <span style={{ color: ISSUE_PRIORITY_COLOR[data.priority] }}>
+                      {ISSUE_PRIORITY_LABEL[data.priority]}
+                    </span>
+                  </span>
+                )}
+              </PropertyRow>
+
+              <PropertyRow label="Assignee">
+                {assignee ? (
+                  <div className="flex items-center gap-2">
+                    <Avatar className="size-6">
+                      {assignee.image && <AvatarImage src={assignee.image} alt="" />}
+                      <AvatarFallback className="text-[10px]">
+                        {getInitials(assignee)}
+                      </AvatarFallback>
+                    </Avatar>
+                    <span className="text-foreground text-sm">
+                      {assignee.name ?? assignee.email}
+                    </span>
+                  </div>
+                ) : (
+                  <span className="text-muted-foreground text-sm">Unassigned</span>
+                )}
+              </PropertyRow>
+
+              <PropertyRow label="Labels">
+                <IssueLabelSection
+                  issueId={issueId}
+                  projectId={projectId}
+                  workspaceId={workspaceId}
+                  canManageLabels={canManageLabels}
+                />
+              </PropertyRow>
+            </section>
+
+            <section className="border-border-muted flex flex-col gap-4 border-t pt-5">
+              <SectionLabel>Timestamps</SectionLabel>
+
+              <PropertyRow label="Created">
+                <span className="text-foreground font-mono text-xs">
+                  {new Date(data.createdAt).toLocaleString("en-US")}
+                </span>
+              </PropertyRow>
+
+              <PropertyRow label="Updated">
+                <span className="text-foreground font-mono text-xs">
+                  {new Date(data.updatedAt).toLocaleString("en-US")}
+                </span>
+              </PropertyRow>
+            </section>
+          </aside>
+        </div>
+      </CardContent>
+    </Card>
   );
 }
 
-// Local to this panel — the label/value stack the sidebar repeats 6 times,
-// same visual convention as AdminUserDetail's DetailRow (muted xs label
-// above foreground sm value), not exported since nothing outside this
-// file needs it.
-function SidebarField({ label, children }: { label: string; children: React.ReactNode }) {
+// Local to this panel. SectionLabel matches KanbanColumn's own status-label
+// treatment (text-xs font-semibold tracking-wide uppercase) so the same
+// "structured panel" vocabulary reads consistently between the board and
+// the detail page. PropertyRow replaces the old SidebarField — label above
+// value, no border/rounded/background of its own — so grouping now comes
+// from SectionLabel + a hairline divider between the two sections, not
+// from one bordered box per field.
+function SectionLabel({ children }: { children: React.ReactNode }) {
   return (
-    <div className="border-border flex flex-col gap-1.5 rounded-xl border p-3">
+    <h2 className="text-foreground text-xs font-semibold tracking-wide uppercase">
+      {children}
+    </h2>
+  );
+}
+
+function PropertyRow({ label, children }: { label: string; children: React.ReactNode }) {
+  return (
+    <div className="flex flex-col gap-1.5">
       <span className="text-muted-foreground text-xs">{label}</span>
       {children}
     </div>

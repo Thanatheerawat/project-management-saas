@@ -1,5 +1,6 @@
 import { getTranslations } from "next-intl/server";
 
+import { OrbitBrand } from "@/components/layout/orbit-brand";
 import { PageContainer } from "@/components/layout/page-container";
 
 // Deliberately minimal — no invented links (no fake blog/docs/social
@@ -14,7 +15,7 @@ export async function Footer() {
     <footer className="border-border border-t">
       <PageContainer className="flex flex-col gap-4 py-8 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex flex-col gap-1">
-          <span className="text-foreground text-sm font-bold">Orbit</span>
+          <OrbitBrand />
           <p className="text-muted-foreground text-sm">{t("tagline")}</p>
         </div>
         <p className="text-faint text-xs">

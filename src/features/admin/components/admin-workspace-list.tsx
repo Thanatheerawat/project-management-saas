@@ -4,7 +4,6 @@ import { Building2 } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
 
-import { Badge } from "@/components/ui/badge";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
@@ -47,14 +46,15 @@ export function AdminWorkspaceList() {
         icon={Building2}
         title="No workspaces found"
         description="Workspaces created in the system will appear here"
-        className="border-border rounded-xl border border-dashed"
+        className="border-border rounded-lg border border-dashed"
       />
     );
   }
 
   return (
     <div className="flex flex-col gap-3">
-      <div className="border-border overflow-hidden rounded-xl border">
+      {/* Phase 5: see AdminUserList's identical comment. */}
+      <div className="bg-surface-raised ring-border shadow-elevation-1 overflow-hidden rounded-lg ring-1">
         <Table aria-label="All workspaces">
           <TableHeader>
             <TableRow>
@@ -84,8 +84,13 @@ export function AdminWorkspaceList() {
                 <TableCell className="text-muted-foreground text-xs">
                   {workspace.ownerName ?? workspace.ownerEmail ?? "—"}
                 </TableCell>
-                <TableCell className="text-right">
-                  <Badge variant="outline">{workspace.memberCount}</Badge>
+                {/* Phase 5: a plain mono numeral, not a Badge pill — same
+                    "system-generated count" treatment KanbanColumn already
+                    uses for its issue count (Phase 3), matching the plain
+                    Project Count/Created columns beside it rather than
+                    standing out as the row's one pill. */}
+                <TableCell className="text-foreground text-right font-mono text-xs">
+                  {workspace.memberCount}
                 </TableCell>
                 <TableCell className="text-muted-foreground text-right text-xs">
                   {workspace.projectCount}

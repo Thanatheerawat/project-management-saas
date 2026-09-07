@@ -163,7 +163,12 @@ function CommentRow({
   }
 
   return (
-    <div className="border-border flex flex-col gap-2 rounded-xl border p-3">
+    // rounded-lg + border-border-muted (was rounded-xl + border-border):
+    // this row now sits one level inside the Issue Detail panel's own
+    // raised surface (Phase 4), so it reads as a plain list row rather
+    // than a second elevated card stacked on the first — same intent as
+    // KanbanColumn's rounded-lg "structured panel" radius.
+    <div className="border-border-muted flex flex-col gap-2 rounded-lg border p-3">
       <div className="flex items-center justify-between gap-2">
         <div className="flex flex-col">
           <span className="text-foreground text-sm font-medium">

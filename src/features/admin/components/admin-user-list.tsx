@@ -71,11 +71,18 @@ export function AdminUserList() {
           icon={Users}
           title="No users found"
           description="Try searching a different email"
-          className="border-border rounded-xl border border-dashed"
+          className="border-border rounded-lg border border-dashed"
         />
       ) : (
         <div className="flex flex-col gap-3">
-          <div className="border-border overflow-hidden rounded-xl border">
+          {/* Phase 5: was a plain `border` box — the app's other raised
+              containers (Card, the Issue Detail panel) all use
+              bg-surface-raised + ring-border + shadow-elevation-1, so this
+              table read as an "old card treatment" next to them. rounded-lg
+              (not Card's rounded-xl) matches KanbanColumn's own
+              "structured data panel" radius, since a table is closer in
+              kind to that than to a soft content card. */}
+          <div className="bg-surface-raised ring-border shadow-elevation-1 overflow-hidden rounded-lg ring-1">
             <Table aria-label="All users">
               <TableHeader>
                 <TableRow>

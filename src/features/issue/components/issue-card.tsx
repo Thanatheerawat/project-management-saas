@@ -36,24 +36,35 @@ export function IssueCard({
       href={`/w/${slug}/projects/${issue.projectId}/issues/${issue.id}`}
       className="focus-visible:ring-ring/50 block rounded-xl outline-none focus-visible:ring-[3px]"
     >
-      <Card
-        size="sm"
-        className="hover:border-foreground/20 border border-transparent transition-all hover:shadow-xs"
-      >
+      {/* Phase 3 (Signal & Structure): elevation and edge now come from the
+          Phase 1 ring/shadow tokens already on Card itself — hover shifts
+          only the ring's color toward the accent, a single subtle change
+          rather than stacking a second border + a second shadow on top
+          (no lift, no glow, per the approved direction). */}
+      <Card size="sm" className="ring-border hover:ring-accent/50 transition-colors">
         <CardHeader>
           <div className="flex flex-col gap-1.5">
             <div className="flex items-center justify-between gap-2">
               <span className="text-muted-foreground font-mono text-xs">{issue.key}</span>
+              {/* Priority: a dot + label, not a filled/outlined badge — the
+                  audit flagged full colour badges on every card as visual
+                  noise across a busy board. The dot carries the signal,
+                  the label confirms it in text (kept in the same colour so
+                  it's still scannable at a glance, but as plain text, not
+                  a pill, so it stays visually subordinate to the title
+                  below it). Status is deliberately not repeated here at
+                  all — the column itself is the status context. */}
               {issue.priority !== "NONE" && (
-                <Badge
-                  variant="outline"
-                  style={{
-                    color: ISSUE_PRIORITY_COLOR[issue.priority],
-                    borderColor: ISSUE_PRIORITY_COLOR[issue.priority],
-                  }}
-                >
-                  {ISSUE_PRIORITY_LABEL[issue.priority]}
-                </Badge>
+                <span className="inline-flex shrink-0 items-center gap-1.5 text-xs font-medium">
+                  <span
+                    className="size-1.5 shrink-0 rounded-full"
+                    style={{ backgroundColor: ISSUE_PRIORITY_COLOR[issue.priority] }}
+                    aria-hidden="true"
+                  />
+                  <span style={{ color: ISSUE_PRIORITY_COLOR[issue.priority] }}>
+                    {ISSUE_PRIORITY_LABEL[issue.priority]}
+                  </span>
+                </span>
               )}
             </div>
             {/* Deliberately not CardTitle/a heading element: this card's

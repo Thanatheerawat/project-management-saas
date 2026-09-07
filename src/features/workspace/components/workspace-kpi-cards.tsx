@@ -3,7 +3,7 @@
 import { CheckCircle2, FolderKanban, ListTodo, Users } from "lucide-react";
 
 import { Skeleton } from "@/components/ui/skeleton";
-import { StatCard } from "@/features/admin/components/stat-card";
+import { StatCard, StatStrip } from "@/features/admin/components/stat-card";
 import { useWorkspaceAnalyticsOverview } from "@/features/analytics/hooks/use-workspace-analytics-overview";
 import { useWorkspaceMembers } from "@/features/workspace/hooks/use-workspace-members";
 
@@ -32,18 +32,11 @@ export function WorkspaceKpiCards({
   const members = useWorkspaceMembers(workspaceId);
 
   if (overview.isLoading || members.isLoading) {
-    return (
-      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
-        <Skeleton className="h-[68px]" />
-        <Skeleton className="h-[68px]" />
-        <Skeleton className="h-[68px]" />
-        <Skeleton className="h-[68px]" />
-      </div>
-    );
+    return <Skeleton className="h-[68px] w-full rounded-xl" />;
   }
 
   return (
-    <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
+    <StatStrip>
       <StatCard label="Total Projects" value={projectCount} icon={FolderKanban} />
       <StatCard label="Total Issues" value={overview.data?.total ?? 0} icon={ListTodo} />
       <StatCard
@@ -56,6 +49,6 @@ export function WorkspaceKpiCards({
         value={overview.data?.byStatus.DONE ?? 0}
         icon={CheckCircle2}
       />
-    </div>
+    </StatStrip>
   );
 }

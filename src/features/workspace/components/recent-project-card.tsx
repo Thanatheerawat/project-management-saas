@@ -23,7 +23,10 @@ export function RecentProjectCard({
       href={href}
       className="focus-visible:ring-ring/50 block rounded-xl outline-none focus-visible:ring-[3px]"
     >
-      <Card size="sm" className="hover:bg-muted/50 transition-colors">
+      {/* Phase 5: same ring-only hover as IssueCard (Phase 3) — a single
+          ring-color shift instead of a background tint, so every
+          clickable card in the app hovers the same way. */}
+      <Card size="sm" className="ring-border hover:ring-accent/50 transition-colors">
         <CardHeader>
           <div className="flex items-start justify-between gap-2">
             <div className="flex min-w-0 flex-col gap-0.5">
@@ -54,13 +57,18 @@ export function RecentProjectCard({
           </div>
         </CardHeader>
         <CardContent>
+          {/* Only the date itself goes mono — "Updated" is human-facing
+              label text, same split Issue Detail's Timestamps section uses
+              (label in the default sans, value in JetBrains Mono). */}
           <p className="text-muted-foreground text-xs">
             Updated{" "}
-            {new Date(project.updatedAt).toLocaleDateString("en-US", {
-              day: "numeric",
-              month: "short",
-              year: "numeric",
-            })}
+            <span className="font-mono">
+              {new Date(project.updatedAt).toLocaleDateString("en-US", {
+                day: "numeric",
+                month: "short",
+                year: "numeric",
+              })}
+            </span>
           </p>
         </CardContent>
       </Card>
