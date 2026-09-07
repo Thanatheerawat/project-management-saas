@@ -383,14 +383,84 @@ via Prisma in test setup, since `register()` only ever creates `USER` —
 `tests/e2e/scripts/promote-user.ts`), including a real deactivate-then-
 login-fails round trip through the actual credentials provider.
 
+## AI Features (Milestone 7)
+
+A free-tier AI copilot: the user describes a task in plain language, an
+`AIProvider` breaks it into a reviewable list of draft tasks, and the
+user selects which ones to create as real Issues. Human-in-the-loop by
+design — no Issue is ever created without an explicit Apply click.
+Built entirely on `feature/m7-ai-features` (branched off `v0.6.5`), not
+yet merged to `main`.
+
+**One provider interface, two implementations, no route-level branching.**
+`AIProvider` (`src/services/ai/ai-provider.ts`) exposes a single
+`generateBreakdown(prompt)` method. `MockAIProvider` is deterministic
+and makes no network call — the same prompt always produces the same 3
+tasks — used for local development, every automated test, and whenever
+`AI_PROVIDER` is unset or `"mock"` (`src/config/env.ts`'s default).
+`GroqAIProvider` calls Groq's Chat Completions API (model
+`openai/gpt-oss-20b`, verified against Groq's own docs rather than
+assumed) with `response_format: json_schema` derived directly from
+`aiBreakdownOutputSchema` via `z.toJSONSchema()` — the shape sent to
+Groq and the shape validated on the way back can never drift apart,
+because there is exactly one schema. `createAIProvider()` (the factory)
+takes the provider type and the Groq key as explicit parameters rather
+than reading `env.ts` itself, so both provider classes and the factory
+stay importable from a plain unit test without triggering `env.ts`'s
+eager `DATABASE_URL`/`NEXTAUTH_SECRET` validation.
+
+**`AiGenerationJob` is bookkeeping, not a content store.** The model
+(purely additive migration, no changes to any existing table) records
+one row per generation attempt — workspace, user, provider, prompt,
+status, timestamps — used to enforce the daily quota
+(`AI_DAILY_QUOTA_PER_WORKSPACE = 10`, counting every attempt regardless
+of outcome, `POST /api/workspaces/[workspaceId]/ai/breakdown`) and as a
+server-side audit trail on failure (`errorMessage`). It deliberately
+never stores the generated tasks themselves or the raw provider
+response — those exist only in the mutation's result and the
+`AIBreakdownDialog`'s own state until the user applies them.
+
+**Validation on both sides of the AI boundary.** The request prompt
+reuses the same 1–2000 character limit as everywhere else free text is
+accepted. The output — from either provider — is parsed through
+`aiBreakdownOutputSchema` (`.strict()`, capped at
+`MAX_TASKS_PER_BREAKDOWN`, `priority` reusing the existing
+`ISSUE_PRIORITIES` enum): this is the one unconditional gate every
+provider must satisfy, so `MockAIProvider`'s own output passing it is a
+live proof the contract is satisfiable, not just documentation of it.
+
+**Apply reuses the existing Issue API — no bulk endpoint.**
+`AIBreakdownDialog` calls the same `POST /api/projects/[projectId]/issues`
+used by `CreateIssueDialog`, once per selected draft, sequentially (not
+`Promise.all`) so partial-failure bookkeeping never races. An
+`applyStatus` map (not the checkbox `selected` state) is the single
+source of truth for what's already been created, so retrying after a
+partial failure can never recreate a draft that already succeeded.
+
+**Testing.** Unit tests cover both schemas, both providers (including
+every Groq HTTP error case: 401/429/500+/malformed JSON/timeout/network
+failure), and the factory. Integration tests cover the route's
+auth/membership/quota boundaries. `AIBreakdownDialog`'s apply
+orchestration has this project's first component-level test
+(`@testing-library/react`, previously installed but unused). Playwright
+e2e covers the full generate → review → select/deselect → apply →
+Kanban round trip against `MockAIProvider` (deterministic, no real
+network call in CI); the partial-failure retry path is covered only at
+the component level, not e2e, since forcing one of several sequential
+API calls to fail deterministically would require introducing an
+HTTP-mocking convention this project's e2e suite doesn't otherwise have.
+
 ## Current state
 
 Milestone 2 (Identity & Access Management), Milestone 3 (Workspace &
 Project Management Core), Milestone 4 (Issue Tracking Core), Milestone 5
 (Dashboard & Analytics), and Milestone 6 (Admin Dashboard) are all
-implemented and covered by unit, integration, and e2e tests. See the
+implemented on `main` and covered by unit, integration, and e2e tests.
+Milestone 7 (AI Features, above) is implemented and covered by unit,
+integration, and e2e tests on `feature/m7-ai-features`, but that branch
+is **not yet merged to `main`** and not yet pushed to `origin`. See the
 root [README.md](../README.md) and [session-log.md](./session-log.md)
-for exact scope and what's still designed-but-not-built (AI copilot,
-GitHub integration, drag-and-drop, activity feed, trend/velocity
-charts, admin nav/sidebar — later milestones/deferred decisions per the
-Development Plan).
+for exact scope and what's still designed-but-not-built (GitHub
+integration, drag-and-drop, activity feed, trend/velocity charts, admin
+nav/sidebar — later milestones/deferred decisions per the Development
+Plan).
