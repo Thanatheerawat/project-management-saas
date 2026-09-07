@@ -10,13 +10,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 A free-tier AI copilot that turns a plain-language prompt into a
 reviewable list of draft tasks, which the user can select and apply as
 real Issues — the first AI feature in the product, built on
-`feature/m7-ai-features` (branched off `v0.6.5`). Human-in-the-loop by
-design: nothing is created until the user explicitly selects drafts and
-clicks Apply. Built and approved strictly increment-by-increment (4
-increments, a closing QA/documentation increment, and a merge
-reconciliation pass against the Thai→English i18n work that landed on
-`main` after this branch was created), with a purely additive migration
-and no changes to any existing model. Awaiting merge to `main`. See
+`feature/m7-ai-features` (branched off `v0.6.5`) and merged into `main`.
+Human-in-the-loop by design: nothing is created until the user
+explicitly selects drafts and clicks Apply. Built and approved strictly
+increment-by-increment (4 increments, a closing QA/documentation
+increment, and a merge reconciliation pass against the Thai→English
+i18n work that landed on `main` after this branch was created), with a
+purely additive migration and no changes to any existing model. See
 `docs/session-log.md` for the full history.
 
 ### Added
@@ -69,9 +69,11 @@ and no changes to any existing model. Awaiting merge to `main`. See
   (`CreateIssueDialog`, `KanbanBoard`, admin/workspace/project forms) —
   deliberately not wired into `next-intl`, which on `main` is scoped only
   to chrome, the landing page, auth, and system-state pages
-- Still not yet merged to `main` and not yet pushed to `origin` — this
-  milestone lives entirely on `feature/m7-ai-features` pending an
-  explicit merge/release decision
+- Merged into `main` locally (`git merge --no-ff feature/m7-ai-features`,
+  one resolved import conflict in the project detail page — both
+  `main`'s `PROJECT_STATUS_LABEL` import and this milestone's
+  `AIBreakdownDialog` import were kept); **not yet pushed to `origin`**,
+  pending an explicit push/release decision
 - Deferred, not forgotten: e2e coverage of the partial-failure retry
   path (already covered deterministically at the component level, see
   `ai-breakdown-dialog.test.tsx`)

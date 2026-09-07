@@ -390,8 +390,8 @@ A free-tier AI copilot: the user describes a task in plain language, an
 user selects which ones to create as real Issues. Human-in-the-loop by
 design — no Issue is ever created without an explicit Apply click.
 Built on `feature/m7-ai-features` (branched off `v0.6.5`), reconciled
-against `main`'s subsequent Thai→English i18n work, and awaiting merge.
-`AIBreakdownDialog` deliberately does not use `next-intl` — its UI
+against `main`'s subsequent Thai→English i18n work, and merged into
+`main`. `AIBreakdownDialog` deliberately does not use `next-intl` — its UI
 strings are plain hardcoded English, matching every other feature-area
 component on `main` (`CreateIssueDialog`, `KanbanBoard`, admin/workspace/
 project forms). `next-intl` on `main` is scoped only to chrome, the
@@ -461,12 +461,13 @@ HTTP-mocking convention this project's e2e suite doesn't otherwise have.
 
 Milestone 2 (Identity & Access Management), Milestone 3 (Workspace &
 Project Management Core), Milestone 4 (Issue Tracking Core), Milestone 5
-(Dashboard & Analytics), and Milestone 6 (Admin Dashboard) are all
-implemented on `main` and covered by unit, integration, and e2e tests.
-Milestone 7 (AI Features, above) is implemented, covered by unit,
-integration, and e2e tests, and reconciled against `main`'s i18n work,
-all on `feature/m7-ai-features` — but that branch is **not yet merged to
-`main`** and not yet pushed to `origin`. See the
+(Dashboard & Analytics), Milestone 6 (Admin Dashboard), and Milestone 7
+(AI Features) are all implemented on `main` and covered by unit,
+integration, and e2e tests. Milestone 7 was developed on
+`feature/m7-ai-features`, reconciled against `main`'s i18n work, and
+merged into `main` via a single resolved import conflict in the project
+detail page — **`main` is not yet pushed to `origin`** past that merge.
+See the
 root [README.md](../README.md) and [session-log.md](./session-log.md)
 for exact scope and what's still designed-but-not-built (GitHub
 integration, drag-and-drop, activity feed, trend/velocity charts, admin
