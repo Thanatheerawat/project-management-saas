@@ -19,6 +19,12 @@ area.
 - API routes re-check the session server-side even though middleware
   already gated the page — a client-side redirect is not an access control
   boundary by itself.
+- **Milestone 7 (AI):** `POST /api/workspaces/[workspaceId]/ai/breakdown`
+  requires a session and workspace membership (`requireWorkspaceAccess`,
+  `MEMBER`+ — the same floor as Issue creation, not a new tier) before
+  anything else runs. A nonexistent workspace and one the caller isn't a
+  member of both 404 identically, the same enumeration-safe pattern used
+  everywhere else in this app.
 
 ## A02:2021 — Cryptographic Failures
 
@@ -36,6 +42,12 @@ area.
   boundary, not passed through.
 - All database access goes through Prisma (parameterized queries) via the
   repository layer — no raw SQL string concatenation anywhere.
+- **Milestone 7 (AI):** validation runs on both sides of the AI boundary,
+  not just the inbound request — the prompt is Zod-validated like any
+  other free text, and the provider's _output_ (mock or real Groq) is
+  parsed through the same `.strict()` schema before it ever reaches the
+  client, treating AI-generated content as untrusted input, not a
+  trusted internal source.
 
 ## A04:2021 — Insecure Design
 
@@ -48,6 +60,11 @@ area.
 - Email verification is mocked but the _flow_ (token generated, consumed
   once, expires) is real — swapping in a real email provider later doesn't
   change the security model, only the delivery mechanism.
+- **Milestone 7 (AI):** a per-workspace daily quota (10 generations/day,
+  counting every attempt regardless of success or failure) throttles AI
+  usage without needing external infrastructure — the same
+  cost/abuse-prevention role the failed-login counter above plays for
+  authentication.
 
 ## A05:2021 — Security Misconfiguration
 
@@ -57,6 +74,17 @@ area.
 - Generic error messages returned to clients (`docs/auth-flow.md`) — stack
   traces and internal error detail are logged server-side via `logger`,
   never sent to the browser.
+- **Milestone 7 (AI):** `GROQ_API_KEY` follows the same `.env`-only rule
+  as every other secret — `GroqAIProvider` receives it as an explicit
+  constructor argument rather than reading `env.ts` itself, and never
+  logs it. A failed Groq request's HTTP status is used to fail the
+  request, but its response body is never read into the error message
+  that reaches the client — only a generic "AI generation failed" is
+  returned, while the real detail is logged server-side and kept on the
+  `AiGenerationJob` row. No workspace or user identifiers are ever sent
+  to Groq — only the user's prompt plus a fixed system instruction — and
+  the raw provider response is never persisted anywhere, only a task
+  count on success.
 
 ## A07:2021 — Identification and Authentication Failures
 

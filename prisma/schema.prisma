@@ -63,6 +63,7 @@ model User {
   assignedIssues       Issue[]              @relation("IssueAssignee")
   reportedIssues       Issue[]              @relation("IssueReporter")
   comments             Comment[]
+  aiGenerationJobs     AiGenerationJob[]
 }
 
 // Auth.js Adapter contract — required shape even though only the
@@ -170,9 +171,10 @@ model Workspace {
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
-  members  WorkspaceMember[]
-  projects Project[]
-  labels   Label[]
+  members          WorkspaceMember[]
+  projects         Project[]
+  labels           Label[]
+  aiGenerationJobs AiGenerationJob[]
 }
 
 // Exactly one OWNER per workspace is an application-level invariant (see
@@ -344,4 +346,46 @@ model Comment {
   author User  @relation(fields: [authorId], references: [id], onDelete: Restrict)
 
   @@index([issueId])
+}
+
+// --- Milestone 7: AI Features -------------------------------------------
+
+enum AiProviderType {
+  MOCK
+  GROQ
+}
+
+enum AiGenerationStatus {
+  PENDING
+  SUCCEEDED
+  FAILED
+}
+
+// One row per AI breakdown request — the source of truth for the
+// per-workspace daily quota (Increment 2) and an audit trail of what was
+// generated, by whom, and with which provider. Deliberately does not store
+// the raw provider response (see the M7 audit's AI Safety requirements) —
+// only validated output ever reaches application logic in the first place.
+model AiGenerationJob {
+  id           String             @id @default(uuid())
+  workspaceId  String
+  userId       String?
+  provider     AiProviderType
+  status       AiGenerationStatus @default(PENDING)
+  prompt       String             @db.Text
+  taskCount    Int?
+  errorMessage String?
+  createdAt    DateTime           @default(now())
+  completedAt  DateTime?
+
+  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  // SetNull, matching AuditLog's reasoning: this is a log/quota record, not
+  // an ownership relation — deleting a user shouldn't be blocked by, or
+  // erase, their past AI generation history.
+  user      User?     @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  // Backs the quota check (Increment 2): COUNT(*) WHERE workspaceId = ...
+  // AND createdAt >= start-of-day.
+  @@index([workspaceId, createdAt])
+  @@index([userId])
 }

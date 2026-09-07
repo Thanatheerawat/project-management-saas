@@ -6,6 +6,7 @@ import { Breadcrumb } from "@/components/layout/breadcrumb";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { PROJECT_STATUS_LABEL } from "@/constants/project";
+import { AIBreakdownDialog } from "@/features/ai/components/ai-breakdown-dialog";
 import { ProjectAnalyticsSummary } from "@/features/analytics/components/project-analytics-summary";
 import { CreateIssueDialog } from "@/features/issue/components/create-issue-dialog";
 import { KanbanBoard } from "@/features/issue/components/kanban-board";
@@ -95,7 +96,10 @@ export default async function ProjectDetailPage({
       <div className="flex flex-col gap-3">
         <div className="flex items-center justify-between gap-2">
           <h2 className="text-foreground text-sm font-semibold">Issue</h2>
-          <CreateIssueDialog projectId={project.id} workspaceId={workspace.id} />
+          <div className="flex items-center gap-2">
+            <AIBreakdownDialog projectId={project.id} workspaceId={workspace.id} />
+            <CreateIssueDialog projectId={project.id} workspaceId={workspace.id} />
+          </div>
         </div>
         <KanbanBoard projectId={project.id} slug={slug} workspaceId={workspace.id} />
       </div>

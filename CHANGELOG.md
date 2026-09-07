@@ -5,6 +5,77 @@ All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.7.0] - 2026-09-07 - Milestone 7: AI Features (AI Breakdown)
+
+A free-tier AI copilot that turns a plain-language prompt into a
+reviewable list of draft tasks, which the user can select and apply as
+real Issues — the first AI feature in the product, built on
+`feature/m7-ai-features` (branched off `v0.6.5`). Human-in-the-loop by
+design: nothing is created until the user explicitly selects drafts and
+clicks Apply. Built and approved strictly increment-by-increment (4
+increments, a closing QA/documentation increment, and a merge
+reconciliation pass against the Thai→English i18n work that landed on
+`main` after this branch was created), with a purely additive migration
+and no changes to any existing model. Awaiting merge to `main`. See
+`docs/session-log.md` for the full history.
+
+### Added
+
+- `AiGenerationJob` model (additive migration) recording every AI
+  generation attempt (workspace, user, provider, prompt, status,
+  timestamps) — used for daily quota accounting, not for storing
+  generated content
+- `AIProvider` interface with two implementations behind one factory:
+  `MockAIProvider` (deterministic, offline, always returns the same 3
+  tasks for a given prompt — used in development, tests, and whenever
+  `AI_PROVIDER=mock`) and `GroqAIProvider` (real integration with Groq's
+  Chat Completions API, model `openai/gpt-oss-20b`, structured JSON
+  output derived directly from the same Zod schema the response is
+  validated against, 30s timeout, no retry)
+- `POST /api/workspaces/[workspaceId]/ai/breakdown` — generates a
+  breakdown for any workspace Member (same role floor as Issue
+  creation), enforcing a daily quota of 10 generations per workspace
+  (`AI_DAILY_QUOTA_PER_WORKSPACE`, counts every attempt, not just
+  successes)
+- Zod validation on both sides of the AI boundary: the request prompt
+  (reusing the existing 1-2000 character limit) and the provider's
+  output (`draftTaskSchema`/`aiBreakdownOutputSchema`, capped at 20
+  tasks) — every provider, mock or real, must satisfy the same contract
+- `AIBreakdownDialog` — prompt entry → Generate → review the draft tasks
+  (selected by default) → select/deselect → Apply, which creates one
+  real Issue per selected draft through the existing
+  `POST /api/projects/[projectId]/issues` (no new bulk endpoint).
+  Partial-failure handling: successes and failures are both reported
+  clearly, a failed draft can be retried without ever re-creating a
+  draft that already succeeded
+- `Checkbox` UI primitive (`src/components/ui/checkbox.tsx`), the first
+  multi-select control in the app
+- Unit tests (schemas, both providers, the factory, and this project's
+  first component-level test for `AIBreakdownDialog`'s apply
+  orchestration), integration tests (route auth/membership/quota
+  boundaries), and Playwright e2e coverage of the full generate → review
+  → select → apply → Kanban round trip against the Mock provider
+
+### Notes
+
+- Quality gate passed on every increment: `lint`, `typecheck`, `test`,
+  `test:integration`, `build`, and `test:e2e` (baseline unchanged at
+  70/76 — see the M6.6 entry above for the pre-existing unrelated
+  failure this refers to)
+- Reconciled for merge: `AIBreakdownDialog`'s UI strings were translated
+  from Thai to English (its original language while this branch was
+  isolated from `main`'s i18n work), matching the plain hardcoded-English
+  convention `main` already uses for every other feature-area component
+  (`CreateIssueDialog`, `KanbanBoard`, admin/workspace/project forms) —
+  deliberately not wired into `next-intl`, which on `main` is scoped only
+  to chrome, the landing page, auth, and system-state pages
+- Still not yet merged to `main` and not yet pushed to `origin` — this
+  milestone lives entirely on `feature/m7-ai-features` pending an
+  explicit merge/release decision
+- Deferred, not forgotten: e2e coverage of the partial-failure retry
+  path (already covered deterministically at the component level, see
+  `ai-breakdown-dialog.test.tsx`)
+
 ## [0.6.0] - 2026-08-04 - Milestone 6: Admin Dashboard
 
 A platform-wide admin dashboard — the first real consumer of
