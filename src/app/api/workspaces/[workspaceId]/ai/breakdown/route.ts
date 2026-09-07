@@ -82,7 +82,9 @@ export async function POST(request: Request, { params }: RouteContext) {
     });
 
     try {
-      const provider = createAIProvider(env.AI_PROVIDER);
+      const provider = createAIProvider(env.AI_PROVIDER, {
+        groqApiKey: env.GROQ_API_KEY,
+      });
       const result = await provider.generateBreakdown(data.prompt);
 
       const completed = await aiGenerationJobRepository.markSucceeded(

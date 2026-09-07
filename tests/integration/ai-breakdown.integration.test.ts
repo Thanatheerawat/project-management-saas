@@ -318,5 +318,43 @@ describe("POST /api/workspaces/[workspaceId]/ai/breakdown", () => {
     // env.ts there would throw on missing DATABASE_URL/NEXTAUTH_SECRET
     // rather than exercise this default.
     expect(env.AI_PROVIDER).toBe("mock");
+    expect(env.GROQ_API_KEY).toBeUndefined();
+  });
+});
+
+// Separate describe block: these tests mutate process.env and re-import
+// env.ts fresh via vi.resetModules() to exercise the M7 Increment 3
+// conditional-requirement branch (GROQ_API_KEY required only when
+// AI_PROVIDER=groq) — the module-level `import { env }` above is bound
+// once at file-load time and is never affected by this, so every other
+// test in this file keeps seeing the real, unmodified local .env values.
+describe("env — GROQ_API_KEY required only when AI_PROVIDER=groq", () => {
+  const originalAiProvider = process.env.AI_PROVIDER;
+  const originalGroqApiKey = process.env.GROQ_API_KEY;
+
+  afterEach(() => {
+    if (originalAiProvider === undefined) delete process.env.AI_PROVIDER;
+    else process.env.AI_PROVIDER = originalAiProvider;
+    if (originalGroqApiKey === undefined) delete process.env.GROQ_API_KEY;
+    else process.env.GROQ_API_KEY = originalGroqApiKey;
+    vi.resetModules();
+  });
+
+  it("fails env validation when AI_PROVIDER=groq and GROQ_API_KEY is unset", async () => {
+    delete process.env.GROQ_API_KEY;
+    process.env.AI_PROVIDER = "groq";
+    vi.resetModules();
+
+    await expect(import("@/config/env")).rejects.toThrow(/GROQ_API_KEY/);
+  });
+
+  it("passes env validation when AI_PROVIDER=groq and GROQ_API_KEY is set", async () => {
+    process.env.AI_PROVIDER = "groq";
+    process.env.GROQ_API_KEY = "fake-test-key-not-real";
+    vi.resetModules();
+
+    const { env: freshEnv } = await import("@/config/env");
+    expect(freshEnv.AI_PROVIDER).toBe("groq");
+    expect(freshEnv.GROQ_API_KEY).toBe("fake-test-key-not-real");
   });
 });
