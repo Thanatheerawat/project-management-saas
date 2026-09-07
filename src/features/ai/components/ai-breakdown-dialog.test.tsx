@@ -1,7 +1,10 @@
 import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { NextIntlClientProvider } from "next-intl";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { AIBreakdownDialog } from "@/features/ai/components/ai-breakdown-dialog";
+
+import messages from "../../../../messages/en.json";
 
 // First component-level test in this codebase — @testing-library/react is
 // an installed dependency but unused elsewhere, so there's no existing
@@ -13,6 +16,15 @@ import { AIBreakdownDialog } from "@/features/ai/components/ai-breakdown-dialog"
 // Apply orchestration (which drafts get sent, sequential ordering,
 // partial-failure bookkeeping, duplicate-submission guarding), not
 // re-verifying TanStack Query or the network layer.
+//
+// NextIntlClientProvider wrapper (post-M7-merge addition): dialog.tsx's
+// DialogContent/DialogFooter call useTranslations("common") since main's
+// M6.6 work (the "Close" sr-only text), which throws without this
+// context — the real app gets it for free from the root AppProviders
+// (src/providers/index.tsx), which a component-level render() bypasses
+// entirely. Reuses the app's real messages/en.json rather than inventing
+// mock translation strings, so this test breaks the same way production
+// would if a key ever went missing.
 const mockBreakdownMutateAsync = vi.fn();
 vi.mock("@/features/ai/hooks/use-ai-breakdown", () => ({
   useAIBreakdown: () => ({
@@ -38,7 +50,11 @@ async function renderGenerated(tasks = DRAFT_TASKS) {
     tasks,
   });
 
-  render(<AIBreakdownDialog projectId="project-1" workspaceId="workspace-1" />);
+  render(
+    <NextIntlClientProvider locale="en" messages={messages}>
+      <AIBreakdownDialog projectId="project-1" workspaceId="workspace-1" />
+    </NextIntlClientProvider>,
+  );
   fireEvent.click(screen.getByRole("button", { name: "AI Breakdown" }));
   fireEvent.change(screen.getByRole("textbox"), {
     target: { value: "Build a login page" },

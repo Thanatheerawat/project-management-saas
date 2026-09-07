@@ -14,10 +14,14 @@ const workspaceName = uniqueSlug("ai-breakdown-ws");
 const projectName = `AI Breakdown Project ${Date.now()}`;
 const prompt = `Redesign the checkout flow ${Date.now()}`;
 const taskTitles = [`Design: ${prompt}`, `Implement: ${prompt}`, `Test: ${prompt}`];
+// Title Case, not the raw enum: IssueCard renders
+// ISSUE_PRIORITY_LABEL[priority] (src/constants/issue.ts), a main-only
+// change from the M6.5 i18n round that predates this branch — confirmed
+// live in a real browser during the M7 merge's post-merge smoke check.
 const taskPriority: Record<string, string> = {
-  [taskTitles[0]]: "HIGH",
-  [taskTitles[1]]: "MEDIUM",
-  [taskTitles[2]]: "MEDIUM",
+  [taskTitles[0]]: "High",
+  [taskTitles[1]]: "Medium",
+  [taskTitles[2]]: "Medium",
 };
 
 // M7 Increment 5: end-to-end coverage of the AI Breakdown workflow
