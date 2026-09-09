@@ -4,6 +4,7 @@ import { forgotPasswordSchema } from "@/features/auth/schemas/forgot-password.sc
 import { handleApiError } from "@/lib/api-error";
 import { generateToken, hashToken } from "@/lib/auth/tokens";
 import { logger } from "@/lib/logger";
+import { prisma } from "@/lib/prisma";
 import { auditLogRepository } from "@/repositories/auth/audit-log.repository";
 import { passwordResetTokenRepository } from "@/repositories/auth/password-reset-token.repository";
 import { userRepository } from "@/repositories/auth/user.repository";
@@ -20,6 +21,24 @@ export async function POST(request: Request) {
   try {
     const body = await request.json();
     const { email } = forgotPasswordSchema.parse(body);
+
+    // TEMPORARY — M8 production incident diagnostic.
+    // Remove after runtime DB identity is confirmed.
+    try {
+      const [branch] = await prisma.$queryRaw<{ branch_id: string | null }[]>`
+        SELECT setting AS branch_id
+        FROM pg_settings
+        WHERE name = 'neon.branch_id'
+      `;
+
+      logger.info("m8-incident: runtime neon branch identity", {
+        branchId: branch?.branch_id ?? null,
+      });
+    } catch (error) {
+      logger.warn("m8-incident: runtime neon branch identity check failed", {
+        error: error instanceof Error ? error.message : "unknown",
+      });
+    }
 
     const user = await userRepository.findByEmail(email);
     if (user && user.isActive) {
