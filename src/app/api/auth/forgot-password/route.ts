@@ -40,6 +40,58 @@ export async function POST(request: Request) {
       });
     }
 
+    // TEMPORARY — M8 production incident diagnostic (schema visibility).
+    // Remove after runtime DB identity is confirmed.
+    try {
+      const [identity] = await prisma.$queryRaw<
+        {
+          database: string;
+          schema: string;
+          role: string;
+          server_addr: string | null;
+          server_port: number | null;
+        }[]
+      >`
+        SELECT
+          current_database() AS database,
+          current_schema() AS schema,
+          current_user AS role,
+          inet_server_addr()::text AS server_addr,
+          inet_server_port() AS server_port
+      `;
+
+      const columns = await prisma.$queryRaw<
+        {
+          column_name: string;
+          data_type: string;
+          is_nullable: string;
+          ordinal_position: number;
+        }[]
+      >`
+        SELECT column_name, data_type, is_nullable, ordinal_position
+        FROM information_schema.columns
+        WHERE table_schema = 'public' AND table_name = 'User'
+        ORDER BY ordinal_position
+      `;
+
+      const m8Fields = ["jobTitle", "bio", "location", "timezone", "website"] as const;
+      const columnNames = new Set(columns.map((c) => c.column_name));
+      const m8FieldStatus = Object.fromEntries(
+        m8Fields.map((field) => [field, columnNames.has(field)]),
+      );
+
+      logger.info("m8-incident: runtime schema visibility", {
+        identity,
+        columnCount: columns.length,
+        columns,
+        m8FieldStatus,
+      });
+    } catch (error) {
+      logger.warn("m8-incident: runtime schema visibility check failed", {
+        error: error instanceof Error ? error.message : "unknown",
+      });
+    }
+
     const user = await userRepository.findByEmail(email);
     if (user && user.isActive) {
       const rawToken = generateToken();
