@@ -53,9 +53,9 @@ export async function POST(request: Request) {
         }[]
       >`
         SELECT
-          current_database() AS database,
-          current_schema() AS schema,
-          current_user AS role,
+          current_database()::text AS database,
+          current_schema()::text AS schema,
+          current_user::text AS role,
           inet_server_addr()::text AS server_addr,
           inet_server_port() AS server_port
       `;
