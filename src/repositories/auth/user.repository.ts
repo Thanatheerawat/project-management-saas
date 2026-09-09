@@ -19,7 +19,22 @@ export const userRepository = {
     return prisma.user.create({ data });
   },
 
-  updateProfile(id: string, data: { name?: string; image?: string }) {
+  // M8.5: explicit narrow param type is the second layer of defense (the
+  // first is profileSchema stripping unknown keys) — even a looser caller
+  // can never smuggle role/isActive/passwordHash/etc. through this method,
+  // since those keys don't type-check against this signature at all.
+  updateProfile(
+    id: string,
+    data: {
+      name?: string;
+      image?: string;
+      jobTitle?: string | null;
+      bio?: string | null;
+      location?: string | null;
+      timezone?: string | null;
+      website?: string | null;
+    },
+  ) {
     return prisma.user.update({ where: { id }, data });
   },
 

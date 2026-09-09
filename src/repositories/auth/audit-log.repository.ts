@@ -27,4 +27,19 @@ export const auditLogRepository = {
   countAll(action?: AuditAction) {
     return prisma.auditLog.count({ where: action ? { action } : undefined });
   },
+
+  // --- Milestone 8.6: Security Activity -------------------------------
+  // Scoped to exactly one user (never a caller-supplied filter beyond
+  // that) and an explicit `select` — metadata is never fetched at all
+  // for this path, not just omitted from the response later. This is the
+  // *only* read path into this table that isn't admin-gated, so it's
+  // deliberately narrower than findMany() above.
+  findRecentForUser(userId: string, take: number, actions?: AuditAction[]) {
+    return prisma.auditLog.findMany({
+      where: { userId, ...(actions ? { action: { in: actions } } : {}) },
+      orderBy: { createdAt: "desc" },
+      take,
+      select: { id: true, action: true, createdAt: true },
+    });
+  },
 };

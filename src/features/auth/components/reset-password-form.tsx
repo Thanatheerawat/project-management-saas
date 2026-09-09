@@ -1,6 +1,7 @@
 "use client";
 
-import { useRouter, useSearchParams } from "next/navigation";
+import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { useState } from "react";
 import { toast } from "sonner";
@@ -13,17 +14,26 @@ import { translateValidationMessage } from "@/features/auth/schemas/validation-m
 import { ApiError } from "@/lib/api-client";
 
 export function ResetPasswordForm() {
-  const router = useRouter();
   const searchParams = useSearchParams();
   const t = useTranslations("auth");
   const token = searchParams.get("token") ?? "";
   const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
   const resetPassword = useResetPassword();
 
   async function handleSubmit(event: React.FormEvent) {
     event.preventDefault();
     setError(null);
+
+    // Client-only check — confirmPassword is never sent to the server
+    // (resetPasswordSchema, shared with the API route, only ever accepts
+    // {token, newPassword}; adding a field there would change the wire
+    // contract for no server-side benefit).
+    if (newPassword !== confirmPassword) {
+      setError(t("validation.passwordsDoNotMatch"));
+      return;
+    }
 
     const parsed = resetPasswordSchema.safeParse({ token, newPassword });
     if (!parsed.success) {
@@ -34,16 +44,21 @@ export function ResetPasswordForm() {
     try {
       await resetPassword.mutateAsync(parsed.data);
       toast.success(t("resetPasswordSuccessToast"));
-      router.push("/login");
     } catch (err) {
-      // Known stable code -> its own translated message; anything else
+      // Known stable codes -> their own translated message; anything else
       // (an ApiError with an unrecognized code, or no ApiError at all)
       // falls back to the same generic message, never the server's raw
-      // English `err.message`.
+      // English `err.message`. token_expired/token_used (M8.3) distinguish
+      // the two cases the backend now reports separately; invalid_token
+      // (never issued) keeps the original combined copy.
       const message =
-        err instanceof ApiError && err.code === "invalid_token"
-          ? t("errors.invalidResetToken")
-          : t("errors.linkInvalidOrExpired");
+        err instanceof ApiError && err.code === "token_expired"
+          ? t("errors.resetTokenExpired")
+          : err instanceof ApiError && err.code === "token_used"
+            ? t("errors.resetTokenUsed")
+            : err instanceof ApiError && err.code === "invalid_token"
+              ? t("errors.invalidResetToken")
+              : t("errors.linkInvalidOrExpired");
       setError(message);
       toast.error(message);
     }
@@ -51,6 +66,21 @@ export function ResetPasswordForm() {
 
   if (!token) {
     return <p className="text-destructive text-sm">{t("resetPasswordLinkInvalid")}</p>;
+  }
+
+  // Dedicated success view (M8.3), same shape as VerifyEmailPanel's own
+  // success state: a persistent message plus an explicit action, not an
+  // automatic redirect out from under the user — "user returns to Login"
+  // is a click, not something that happens to them.
+  if (resetPassword.isSuccess) {
+    return (
+      <div className="flex flex-col gap-4">
+        <p className="text-foreground text-sm">{t("resetPasswordSuccessMessage")}</p>
+        <Button asChild>
+          <Link href="/login">{t("goToLogin")}</Link>
+        </Button>
+      </div>
+    );
   }
 
   return (
@@ -64,6 +94,20 @@ export function ResetPasswordForm() {
           type="password"
           value={newPassword}
           onChange={(e) => setNewPassword(e.target.value)}
+          autoComplete="new-password"
+          required
+        />
+        <p className="text-muted-foreground text-xs">{t("passwordMinHint")}</p>
+      </div>
+      <div className="flex flex-col gap-1.5">
+        <label htmlFor="confirmPassword" className="text-foreground text-sm font-medium">
+          {t("confirmPassword")}
+        </label>
+        <Input
+          id="confirmPassword"
+          type="password"
+          value={confirmPassword}
+          onChange={(e) => setConfirmPassword(e.target.value)}
           autoComplete="new-password"
           required
         />

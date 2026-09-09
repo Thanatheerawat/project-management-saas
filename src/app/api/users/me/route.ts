@@ -32,6 +32,15 @@ export async function GET() {
       image: user.image,
       emailVerified: user.emailVerified,
       role: user.role,
+      // M8.5: explicit whitelist, same as every field above — never a
+      // spread of the raw Prisma row, which would leak passwordHash.
+      jobTitle: user.jobTitle,
+      bio: user.bio,
+      location: user.location,
+      timezone: user.timezone,
+      website: user.website,
+      createdAt: user.createdAt,
+      lastLoginAt: user.lastLoginAt,
     });
   } catch (error) {
     return handleApiError(error);

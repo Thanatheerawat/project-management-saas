@@ -104,9 +104,13 @@
     "forgotPasswordSuccessMessage": "If an account exists for this email, we've sent a password reset link.",
     "forgotPasswordRequestFailed": "Request failed, please try again",
     "resetPassword": "Reset Password",
+    "confirmPassword": "Confirm Password",
+    "passwordMinHint": "At least 8 characters",
     "saving": "Saving...",
     "resetPasswordSuccessToast": "Password reset successfully",
+    "resetPasswordSuccessMessage": "Your password has been reset. Sign in with your new password.",
     "resetPasswordLinkInvalid": "This link is invalid",
+    "goToLogin": "Go to Login",
     "verifyEmail": "Verify Email",
     "verifying": "Verifying...",
     "verifyEmailMockBanner": "MOCK — there's no real email delivery yet; this link simulates the email you'd receive.",
@@ -115,18 +119,123 @@
     "verifyEmailToastSuccess": "Email verified",
     "verifyEmailToastError": "Failed to verify email",
     "goToWorkspace": "Go to Workspace",
+    "resendVerification": "Resend verification email",
+    "currentPassword": "Current Password",
+    "changePasswordSectionTitle": "Password & Security",
+    "changePasswordSectionDescription": "Update the password used to sign in to your account.",
+    "changePasswordButton": "Change Password",
+    "changingPassword": "Changing...",
+    "changePasswordSuccessToast": "Password changed successfully",
+    "verificationBanner": {
+      "title": "Verify your email",
+      "description": "Check your inbox for the verification email we sent you.",
+      "resendSuccess": "Verification email sent",
+      "needNewLink": "Need a new link?"
+    },
     "validation": {
       "passwordRequired": "Password is required",
       "nameRequired": "Name is required",
       "passwordMin8": "Password must be at least 8 characters",
       "tokenRequired": "Token is required",
-      "invalidInput": "Invalid input"
+      "invalidInput": "Invalid input",
+      "passwordsDoNotMatch": "Passwords do not match"
     },
     "errors": {
       "emailTaken": "An account with this email already exists",
       "registerFailed": "Failed to create account",
       "invalidResetToken": "This reset link is invalid or has expired",
-      "linkInvalidOrExpired": "This link is invalid or has expired"
+      "linkInvalidOrExpired": "This link is invalid or has expired",
+      "tokenExpired": "This verification link has expired",
+      "tokenInvalid": "This verification link is invalid or has already been used",
+      "resendFailed": "Failed to send verification email",
+      "resendRateLimited": "Please wait before requesting another verification email",
+      "resetTokenExpired": "This reset link has expired",
+      "resetTokenUsed": "This reset link has already been used",
+      "currentPasswordIncorrect": "Current password is incorrect.",
+      "newPasswordSameAsCurrent": "New password must be different from your current password.",
+      "changePasswordFailed": "Failed to change password. Please try again."
+    }
+  },
+  "profile": {
+    "header": {
+      "verified": "Verified",
+      "notVerified": "Not verified"
+    },
+    "personalInformation": "Personal Information",
+    "personalInformationDescription": "Update your profile details.",
+    "accountInformation": "Account Information",
+    "accountInformationDescription": "Information associated with your account.",
+    "fullName": "Full Name",
+    "jobTitle": "Job Title",
+    "jobTitlePlaceholder": "e.g. Frontend Developer",
+    "location": "Location",
+    "locationPlaceholder": "e.g. Bangkok, Thailand",
+    "timezone": "Timezone",
+    "timezoneNotSet": "Not set",
+    "website": "Website",
+    "websitePlaceholder": "https://example.com",
+    "bio": "Bio",
+    "bioPlaceholder": "Tell us a little about yourself",
+    "saveChanges": "Save Changes",
+    "saving": "Saving...",
+    "changesSaved": "Changes saved",
+    "email": "Email",
+    "emailManagedSeparately": "Email address changes are not currently supported.",
+    "memberSince": "Member since",
+    "lastLogin": "Last login",
+    "never": "Never",
+    "validation": {
+      "nameRequired": "Name is required",
+      "jobTitleTooLong": "Job title must be 100 characters or fewer",
+      "bioTooLong": "Bio must be 500 characters or fewer",
+      "locationTooLong": "Location must be 100 characters or fewer",
+      "invalidTimezone": "Please select a valid timezone",
+      "invalidWebsite": "Please enter a valid website URL (e.g. https://example.com)",
+      "invalidInput": "Invalid input"
+    },
+    "errors": {
+      "updateFailed": "Failed to update profile. Please try again.",
+      "loadFailed": "Failed to load profile"
+    },
+    "securityActivity": {
+      "title": "Security Activity",
+      "description": "Recent account and sign-in activity.",
+      "empty": "No recent security activity.",
+      "loadFailed": "Failed to load security activity.",
+      "events": {
+        "register": {
+          "label": "Account created",
+          "description": "Your account was created."
+        },
+        "loginSuccess": {
+          "label": "Signed in",
+          "description": "You signed in to your account."
+        },
+        "loginFailed": {
+          "label": "Failed sign-in attempt",
+          "description": "A sign-in attempt with an incorrect password was made."
+        },
+        "logout": {
+          "label": "Signed out",
+          "description": "You signed out of your account."
+        },
+        "passwordResetRequested": {
+          "label": "Password reset requested",
+          "description": "A password reset was requested for your account."
+        },
+        "passwordResetCompleted": {
+          "label": "Password reset completed",
+          "description": "Your password was reset using a reset link."
+        },
+        "emailVerified": {
+          "label": "Email verified",
+          "description": "Your email address was verified."
+        },
+        "passwordChanged": {
+          "label": "Password changed",
+          "description": "Your account password was changed."
+        }
+      }
     }
   },
   "system": {

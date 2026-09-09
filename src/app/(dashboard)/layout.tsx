@@ -7,6 +7,7 @@ import { OrbitBrand } from "@/components/layout/orbit-brand";
 import { PageContainer } from "@/components/layout/page-container";
 import { ThemeToggle } from "@/components/layout/theme-toggle";
 import { Button } from "@/components/ui/button";
+import { VerificationBanner } from "@/features/auth/components/verification-banner";
 import { UserMenu } from "@/features/user/components/user-menu";
 import { auth } from "@/lib/auth/auth";
 import { hasRole } from "@/lib/auth/rbac";
@@ -47,7 +48,10 @@ export default async function DashboardLayout({
         }
       />
       <main className="flex-1">
-        <PageContainer className="max-w-5xl py-10">{children}</PageContainer>
+        <PageContainer className="max-w-5xl py-10">
+          <VerificationBanner />
+          {children}
+        </PageContainer>
       </main>
     </div>
   );

@@ -34,8 +34,13 @@ export function ForgotPasswordForm() {
       // This route never returns a distinguishing error code (A04 — same
       // response whether or not the account exists), so there is nothing
       // to map; a thrown error here only ever means the request itself
-      // failed (network, 500, etc.).
-      toast.error(t("forgotPasswordRequestFailed"));
+      // failed (network, 500, etc.). M8.3: also sets the persistent inline
+      // error (was toast-only before — `error` was already declared and
+      // rendered below but never actually set on this path), matching
+      // every sibling auth form's error-state convention.
+      const message = t("forgotPasswordRequestFailed");
+      setError(message);
+      toast.error(message);
     }
   }
 

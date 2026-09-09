@@ -1,15 +1,18 @@
-import { UserCircle } from "lucide-react";
 import type { Metadata } from "next";
 import Link from "next/link";
 
+import { ChangePasswordForm } from "@/features/user/components/change-password-form";
 import { ProfileForm } from "@/features/user/components/profile-form";
+import { SecurityActivitySection } from "@/features/user/components/security-activity-section";
 
 export const metadata: Metadata = { title: "Profile — Orbit" };
 
-// M6.5 finalization: added the account-icon badge + ring-based card so
-// this reads as a proper settings page rather than a bare form — same
-// visual language as the auth card (accent-tinted ring, not a flat
-// border), no change to the form itself or the "Profile" heading text/role.
+// M8.5: the old plain "Profile" icon+heading block (M6.5 finalization) is
+// superseded by ProfileForm's own richer ProfileHeader (avatar, name, job
+// title/location, email + verification glance) — keeping both would stack
+// two headers. This page is now just the back-link shell + self-contained
+// sections, same "own heading, no page-level wrapper" shape
+// ChangePasswordForm (M8.4) already established.
 export default function ProfilePage() {
   return (
     <div className="flex max-w-lg flex-col gap-6">
@@ -21,18 +24,9 @@ export default function ProfilePage() {
       >
         ← Back to Workspace
       </Link>
-      <div className="flex items-center gap-3">
-        <div className="bg-accent/10 flex size-11 items-center justify-center rounded-full">
-          <UserCircle className="text-accent size-6" aria-hidden="true" />
-        </div>
-        <div className="flex flex-col gap-1">
-          <h1 className="text-foreground text-2xl font-bold tracking-tight">Profile</h1>
-          <p className="text-muted-foreground text-sm">Manage your account information</p>
-        </div>
-      </div>
-      <div className="border-border bg-surface-raised ring-accent/5 rounded-xl border p-6 shadow-sm ring-1">
-        <ProfileForm />
-      </div>
+      <ProfileForm />
+      <ChangePasswordForm />
+      <SecurityActivitySection />
     </div>
   );
 }

@@ -61,7 +61,12 @@ describe("POST /api/auth/reset-password", () => {
     expect(logs).toHaveLength(1);
   });
 
-  it("rejects an expired token and leaves the password unchanged", async () => {
+  it("rejects an expired token with the token_expired code and leaves the password unchanged", async () => {
+    // M8.3: reset-password/route.ts now distinguishes "existed but
+    // expired" from "already used" from "never existed" for a clearer UI
+    // message — this row still exists (just past expiresAt), so it must
+    // come back as token_expired specifically, not the generic
+    // invalid_token below.
     const email = uniqueEmail("reset-expired");
     createdEmails.push(email);
     const user = await prisma.user.create({
@@ -82,17 +87,17 @@ describe("POST /api/auth/reset-password", () => {
     const body = (await response.json()) as { error: string };
 
     expect(response.status).toBe(400);
-    expect(body.error).toBe("invalid_token");
+    expect(body.error).toBe("token_expired");
 
     const unchanged = await prisma.user.findUniqueOrThrow({ where: { id: user.id } });
     expect(unchanged.passwordHash).toBe("original-hash");
   });
 
-  it("rejects an already-used token", async () => {
+  it("rejects an already-used token with the token_used code and leaves the password unchanged", async () => {
     const email = uniqueEmail("reset-used");
     createdEmails.push(email);
     const user = await prisma.user.create({
-      data: { email, name: "Reset Used", passwordHash: "x" },
+      data: { email, name: "Reset Used", passwordHash: "original-hash" },
     });
     const rawToken = generateToken();
     await prisma.passwordResetToken.create({
@@ -107,7 +112,13 @@ describe("POST /api/auth/reset-password", () => {
     const response = await POST(
       resetPasswordRequest({ token: rawToken, newPassword: "brand new password" }),
     );
+    const body = (await response.json()) as { error: string };
+
     expect(response.status).toBe(400);
+    expect(body.error).toBe("token_used");
+
+    const unchanged = await prisma.user.findUniqueOrThrow({ where: { id: user.id } });
+    expect(unchanged.passwordHash).toBe("original-hash");
   });
 
   it("rejects an unknown token", async () => {

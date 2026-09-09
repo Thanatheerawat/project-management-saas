@@ -56,7 +56,11 @@ describe("POST /api/auth/verify-email", () => {
     expect(logs).toHaveLength(1);
   });
 
-  it("rejects an expired token", async () => {
+  it("rejects an expired token with the token_expired code", async () => {
+    // M8.2: verify-email/route.ts now distinguishes "existed but expired"
+    // from "never existed / already used" for a clearer UI message — this
+    // row still exists (just past `expires`), so it must come back as
+    // token_expired specifically, not the generic invalid_token below.
     const email = uniqueEmail("verify-expired");
     createdEmails.push(email);
     await prisma.user.create({
@@ -72,6 +76,20 @@ describe("POST /api/auth/verify-email", () => {
     });
 
     const response = await POST(verifyEmailRequest({ email, token: rawToken }));
+    const body = (await response.json()) as { error: string };
+
+    expect(response.status).toBe(400);
+    expect(body.error).toBe("token_expired");
+  });
+
+  it("rejects a token that was never issued with the invalid_token code", async () => {
+    const email = uniqueEmail("verify-never-issued");
+    createdEmails.push(email);
+    await prisma.user.create({
+      data: { email, name: "Verify Never Issued", passwordHash: "x" },
+    });
+
+    const response = await POST(verifyEmailRequest({ email, token: generateToken() }));
     const body = (await response.json()) as { error: string };
 
     expect(response.status).toBe(400);

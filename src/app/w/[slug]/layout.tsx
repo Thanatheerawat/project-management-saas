@@ -8,6 +8,7 @@ import { PageContainer } from "@/components/layout/page-container";
 import { SidebarMobileTrigger } from "@/components/layout/sidebar";
 import { ThemeToggle } from "@/components/layout/theme-toggle";
 import { Button } from "@/components/ui/button";
+import { VerificationBanner } from "@/features/auth/components/verification-banner";
 import { UserMenu } from "@/features/user/components/user-menu";
 import { WorkspaceSidebar } from "@/features/workspace/components/workspace-sidebar";
 import { WorkspaceSwitcher } from "@/features/workspace/components/workspace-switcher";
@@ -78,7 +79,10 @@ export default async function WorkspaceLayout({
       <div className="flex flex-1 overflow-hidden">
         <WorkspaceSidebar slug={slug} />
         <main className="min-w-0 flex-1 overflow-y-auto">
-          <PageContainer className="max-w-5xl py-10">{children}</PageContainer>
+          <PageContainer className="max-w-5xl py-10">
+            <VerificationBanner />
+            {children}
+          </PageContainer>
         </main>
       </div>
     </div>

@@ -27,6 +27,11 @@ export async function PATCH(request: Request) {
       name: user.name,
       email: user.email,
       image: user.image,
+      jobTitle: user.jobTitle,
+      bio: user.bio,
+      location: user.location,
+      timezone: user.timezone,
+      website: user.website,
     });
   } catch (error) {
     return handleApiError(error);

@@ -104,9 +104,13 @@
     "forgotPasswordSuccessMessage": "หากมีบัญชีสำหรับอีเมลนี้ เราได้ส่งลิงก์รีเซ็ตรหัสผ่านให้แล้ว",
     "forgotPasswordRequestFailed": "คำขอล้มเหลว กรุณาลองใหม่อีกครั้ง",
     "resetPassword": "รีเซ็ตรหัสผ่าน",
+    "confirmPassword": "ยืนยันรหัสผ่าน",
+    "passwordMinHint": "อย่างน้อย 8 ตัวอักษร",
     "saving": "กำลังบันทึก...",
     "resetPasswordSuccessToast": "รีเซ็ตรหัสผ่านสำเร็จ",
+    "resetPasswordSuccessMessage": "รีเซ็ตรหัสผ่านของคุณเรียบร้อยแล้ว เข้าสู่ระบบด้วยรหัสผ่านใหม่",
     "resetPasswordLinkInvalid": "ลิงก์นี้ไม่ถูกต้อง",
+    "goToLogin": "ไปที่หน้าเข้าสู่ระบบ",
     "verifyEmail": "ยืนยันอีเมล",
     "verifying": "กำลังยืนยัน...",
     "verifyEmailMockBanner": "จำลอง — ยังไม่มีการส่งอีเมลจริง ลิงก์นี้จำลองอีเมลที่คุณจะได้รับ",
@@ -115,18 +119,123 @@
     "verifyEmailToastSuccess": "ยืนยันอีเมลแล้ว",
     "verifyEmailToastError": "ยืนยันอีเมลไม่สำเร็จ",
     "goToWorkspace": "ไปที่เวิร์กสเปซ",
+    "resendVerification": "ส่งอีเมลยืนยันอีกครั้ง",
+    "currentPassword": "รหัสผ่านปัจจุบัน",
+    "changePasswordSectionTitle": "รหัสผ่านและความปลอดภัย",
+    "changePasswordSectionDescription": "เปลี่ยนรหัสผ่านที่ใช้เข้าสู่ระบบบัญชีของคุณ",
+    "changePasswordButton": "เปลี่ยนรหัสผ่าน",
+    "changingPassword": "กำลังเปลี่ยน...",
+    "changePasswordSuccessToast": "เปลี่ยนรหัสผ่านสำเร็จ",
+    "verificationBanner": {
+      "title": "ยืนยันอีเมลของคุณ",
+      "description": "ตรวจสอบกล่องจดหมายของคุณสำหรับอีเมลยืนยันที่เราส่งให้",
+      "resendSuccess": "ส่งอีเมลยืนยันแล้ว",
+      "needNewLink": "ต้องการลิงก์ใหม่ใช่ไหม?"
+    },
     "validation": {
       "passwordRequired": "กรุณากรอกรหัสผ่าน",
       "nameRequired": "กรุณากรอกชื่อ",
       "passwordMin8": "รหัสผ่านต้องมีอย่างน้อย 8 ตัวอักษร",
       "tokenRequired": "ต้องระบุโทเคน",
-      "invalidInput": "ข้อมูลไม่ถูกต้อง"
+      "invalidInput": "ข้อมูลไม่ถูกต้อง",
+      "passwordsDoNotMatch": "รหัสผ่านไม่ตรงกัน"
     },
     "errors": {
       "emailTaken": "มีบัญชีที่ใช้อีเมลนี้อยู่แล้ว",
       "registerFailed": "สร้างบัญชีไม่สำเร็จ",
       "invalidResetToken": "ลิงก์รีเซ็ตนี้ไม่ถูกต้องหรือหมดอายุแล้ว",
-      "linkInvalidOrExpired": "ลิงก์นี้ไม่ถูกต้องหรือหมดอายุแล้ว"
+      "linkInvalidOrExpired": "ลิงก์นี้ไม่ถูกต้องหรือหมดอายุแล้ว",
+      "tokenExpired": "ลิงก์ยืนยันนี้หมดอายุแล้ว",
+      "tokenInvalid": "ลิงก์ยืนยันนี้ไม่ถูกต้องหรือถูกใช้ไปแล้ว",
+      "resendFailed": "ส่งอีเมลยืนยันไม่สำเร็จ",
+      "resendRateLimited": "กรุณารอสักครู่ก่อนขอส่งอีเมลยืนยันอีกครั้ง",
+      "resetTokenExpired": "ลิงก์รีเซ็ตนี้หมดอายุแล้ว",
+      "resetTokenUsed": "ลิงก์รีเซ็ตนี้ถูกใช้ไปแล้ว",
+      "currentPasswordIncorrect": "รหัสผ่านปัจจุบันไม่ถูกต้อง",
+      "newPasswordSameAsCurrent": "รหัสผ่านใหม่ต้องแตกต่างจากรหัสผ่านปัจจุบัน",
+      "changePasswordFailed": "เปลี่ยนรหัสผ่านไม่สำเร็จ กรุณาลองใหม่อีกครั้ง"
+    }
+  },
+  "profile": {
+    "header": {
+      "verified": "ยืนยันแล้ว",
+      "notVerified": "ยังไม่ยืนยัน"
+    },
+    "personalInformation": "ข้อมูลส่วนตัว",
+    "personalInformationDescription": "อัปเดตรายละเอียดโปรไฟล์ของคุณ",
+    "accountInformation": "ข้อมูลบัญชี",
+    "accountInformationDescription": "ข้อมูลที่เกี่ยวข้องกับบัญชีของคุณ",
+    "fullName": "ชื่อ-นามสกุล",
+    "jobTitle": "ตำแหน่งงาน",
+    "jobTitlePlaceholder": "เช่น Frontend Developer",
+    "location": "ที่ตั้ง",
+    "locationPlaceholder": "เช่น กรุงเทพฯ ประเทศไทย",
+    "timezone": "เขตเวลา",
+    "timezoneNotSet": "ไม่ได้ตั้งค่า",
+    "website": "เว็บไซต์",
+    "websitePlaceholder": "https://example.com",
+    "bio": "เกี่ยวกับฉัน",
+    "bioPlaceholder": "เล่าเกี่ยวกับตัวคุณสั้นๆ",
+    "saveChanges": "บันทึกการเปลี่ยนแปลง",
+    "saving": "กำลังบันทึก...",
+    "changesSaved": "บันทึกการเปลี่ยนแปลงแล้ว",
+    "email": "อีเมล",
+    "emailManagedSeparately": "ยังไม่รองรับการเปลี่ยนที่อยู่อีเมลในขณะนี้",
+    "memberSince": "เป็นสมาชิกตั้งแต่",
+    "lastLogin": "เข้าสู่ระบบล่าสุด",
+    "never": "ไม่เคย",
+    "validation": {
+      "nameRequired": "กรุณากรอกชื่อ",
+      "jobTitleTooLong": "ตำแหน่งงานต้องมีความยาวไม่เกิน 100 ตัวอักษร",
+      "bioTooLong": "ข้อมูลเกี่ยวกับฉันต้องมีความยาวไม่เกิน 500 ตัวอักษร",
+      "locationTooLong": "ที่ตั้งต้องมีความยาวไม่เกิน 100 ตัวอักษร",
+      "invalidTimezone": "กรุณาเลือกเขตเวลาที่ถูกต้อง",
+      "invalidWebsite": "กรุณากรอก URL เว็บไซต์ที่ถูกต้อง (เช่น https://example.com)",
+      "invalidInput": "ข้อมูลไม่ถูกต้อง"
+    },
+    "errors": {
+      "updateFailed": "อัปเดตโปรไฟล์ไม่สำเร็จ กรุณาลองใหม่อีกครั้ง",
+      "loadFailed": "โหลดโปรไฟล์ไม่สำเร็จ"
+    },
+    "securityActivity": {
+      "title": "กิจกรรมความปลอดภัย",
+      "description": "กิจกรรมบัญชีและการเข้าสู่ระบบล่าสุด",
+      "empty": "ไม่มีกิจกรรมความปลอดภัยล่าสุด",
+      "loadFailed": "โหลดกิจกรรมความปลอดภัยไม่สำเร็จ",
+      "events": {
+        "register": {
+          "label": "สร้างบัญชีแล้ว",
+          "description": "บัญชีของคุณถูกสร้างขึ้น"
+        },
+        "loginSuccess": {
+          "label": "เข้าสู่ระบบ",
+          "description": "คุณเข้าสู่ระบบบัญชีของคุณ"
+        },
+        "loginFailed": {
+          "label": "การเข้าสู่ระบบล้มเหลว",
+          "description": "มีความพยายามเข้าสู่ระบบด้วยรหัสผ่านที่ไม่ถูกต้อง"
+        },
+        "logout": {
+          "label": "ออกจากระบบ",
+          "description": "คุณออกจากระบบบัญชีของคุณ"
+        },
+        "passwordResetRequested": {
+          "label": "ขอรีเซ็ตรหัสผ่าน",
+          "description": "มีการขอรีเซ็ตรหัสผ่านสำหรับบัญชีของคุณ"
+        },
+        "passwordResetCompleted": {
+          "label": "รีเซ็ตรหัสผ่านสำเร็จ",
+          "description": "รหัสผ่านของคุณถูกรีเซ็ตผ่านลิงก์รีเซ็ต"
+        },
+        "emailVerified": {
+          "label": "ยืนยันอีเมลแล้ว",
+          "description": "อีเมลของคุณได้รับการยืนยันแล้ว"
+        },
+        "passwordChanged": {
+          "label": "เปลี่ยนรหัสผ่านแล้ว",
+          "description": "รหัสผ่านบัญชีของคุณถูกเปลี่ยน"
+        }
+      }
     }
   },
   "system": {

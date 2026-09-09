@@ -19,4 +19,14 @@ export const passwordResetTokenRepository = {
       data: { usedAt: new Date() },
     });
   },
+
+  // M8.3: raw lookup with no usedAt/expiresAt filter — used only to
+  // distinguish "expired" from "already used" from "never existed" for a
+  // clearer reset-password error message. Never used to authorize
+  // anything; the actual reset gate is still findValid alone. Same
+  // "diagnostic-only, doesn't touch the real gate" pattern M8.2 added to
+  // verificationTokenRepository.findByIdentifierAndToken.
+  findByTokenHash(tokenHash: string) {
+    return prisma.passwordResetToken.findFirst({ where: { tokenHash } });
+  },
 };

@@ -10,6 +10,13 @@ export interface ProfileResponse {
   image: string | null;
   emailVerified: string | null;
   role: PlatformRole;
+  jobTitle: string | null;
+  bio: string | null;
+  location: string | null;
+  timezone: string | null;
+  website: string | null;
+  createdAt: string;
+  lastLoginAt: string | null;
 }
 
 export function useProfile() {

@@ -8,6 +8,11 @@ interface UpdateProfileResponse {
   name: string | null;
   email: string;
   image: string | null;
+  jobTitle: string | null;
+  bio: string | null;
+  location: string | null;
+  timezone: string | null;
+  website: string | null;
 }
 
 export function useUpdateProfile() {

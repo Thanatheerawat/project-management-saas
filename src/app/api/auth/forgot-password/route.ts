@@ -3,6 +3,7 @@ import { NextResponse } from "next/server";
 import { forgotPasswordSchema } from "@/features/auth/schemas/forgot-password.schema";
 import { handleApiError } from "@/lib/api-error";
 import { generateToken, hashToken } from "@/lib/auth/tokens";
+import { logger } from "@/lib/logger";
 import { auditLogRepository } from "@/repositories/auth/audit-log.repository";
 import { passwordResetTokenRepository } from "@/repositories/auth/password-reset-token.repository";
 import { userRepository } from "@/repositories/auth/user.repository";
@@ -31,7 +32,19 @@ export async function POST(request: Request) {
       await auditLogRepository.record("PASSWORD_RESET_REQUESTED", user.id);
 
       const resetUrl = new URL(`/reset-password?token=${rawToken}`, request.url);
-      await emailService.sendPasswordResetEmail(user.email, resetUrl.toString());
+      // M8.3: a provider failure (e.g. Resend down/misconfigured) must
+      // never change this endpoint's response — letting it propagate to
+      // the outer catch would return a 500 only for emails that belong to
+      // a real active account, which is exactly the account-enumeration
+      // side channel this route's generic-response design exists to
+      // prevent. Logged server-side only; never surfaced to the caller.
+      try {
+        await emailService.sendPasswordResetEmail(user.email, resetUrl.toString());
+      } catch (emailError) {
+        logger.error("Failed to send password reset email", {
+          message: emailError instanceof Error ? emailError.message : String(emailError),
+        });
+      }
     }
 
     return NextResponse.json({ message: GENERIC_MESSAGE });

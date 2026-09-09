@@ -14,10 +14,26 @@ export async function POST(request: Request) {
 
     const record = await verificationTokenRepository.findValid(email, hashToken(token));
     if (!record) {
+      // M8.2: findValid already filters out an expired row, so distinguish
+      // "existed but expired" (findByIdentifierAndToken still sees it)
+      // from "never existed / already consumed" for a clearer UI message
+      // — the actual verification gate is unchanged, still findValid
+      // alone; this is purely an extra read for better error copy.
+      const expired = await verificationTokenRepository.findByIdentifierAndToken(
+        email,
+        hashToken(token),
+      );
+      if (expired) {
+        return NextResponse.json(
+          { error: "token_expired", message: "This verification link has expired" },
+          { status: 400 },
+        );
+      }
+
       return NextResponse.json(
         {
           error: "invalid_token",
-          message: "This verification link is invalid or has expired",
+          message: "This verification link is invalid or has already been used",
         },
         { status: 400 },
       );

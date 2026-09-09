@@ -37,6 +37,10 @@ enum AuditAction {
   PASSWORD_RESET_COMPLETED
   EMAIL_VERIFIED
   PROFILE_UPDATED
+  // M8.4: distinct from PASSWORD_RESET_COMPLETED — this is an
+  // authenticated self-service change (knows the current password),
+  // not the token-based forgot-password flow.
+  PASSWORD_CHANGED
 }
 
 model User {
@@ -51,6 +55,19 @@ model User {
   lastLoginAt         DateTime?
   failedLoginAttempts Int          @default(0)
   lockedUntil         DateTime?
+  // M8.5: realistic account-profile fields, all nullable/optional so
+  // existing rows need no backfill — every one already reads correctly as
+  // "not set." `website` and `location` are free text; `timezone` is a
+  // canonical IANA identifier (see src/constants/timezone.ts), validated
+  // server-side, never a free-text label. Deliberately no `company` —
+  // Workspace already models organization membership, so duplicating that
+  // concept on the global User profile would be redundant (see the M8.5
+  // scope decision).
+  jobTitle            String?
+  bio                 String?
+  location            String?
+  timezone            String?
+  website             String?
   createdAt           DateTime     @default(now())
   updatedAt           DateTime     @updatedAt
 

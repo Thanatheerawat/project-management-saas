@@ -31,10 +31,30 @@ const envSchema = z
     // itself never reads this directly — it receives the value as an
     // explicit constructor argument (see ai-provider-factory.ts).
     GROQ_API_KEY: z.string().min(1).optional(),
+    // M8.1: same "default to mock, require real credentials only for the
+    // real provider" pattern as AI_PROVIDER/GROQ_API_KEY above — see the
+    // two .refine()s below. email.service.ts is the one place that reads
+    // these and calls createEmailProvider() (src/services/email/
+    // email-provider-factory.ts); ResendEmailProvider itself never reads
+    // env directly, same reasoning as GroqAIProvider.
+    EMAIL_PROVIDER: z.enum(["mock", "resend"]).default("mock"),
+    RESEND_API_KEY: z.string().min(1).optional(),
+    // Not validated as a strict email address — Resend's `from` accepts
+    // either a bare address or a "Display Name <address>" form, and a
+    // z.email() check would reject the latter.
+    EMAIL_FROM: z.string().min(1).optional(),
   })
   .refine((data) => data.AI_PROVIDER !== "groq" || !!data.GROQ_API_KEY, {
     message: "GROQ_API_KEY is required when AI_PROVIDER=groq",
     path: ["GROQ_API_KEY"],
+  })
+  .refine((data) => data.EMAIL_PROVIDER !== "resend" || !!data.RESEND_API_KEY, {
+    message: "RESEND_API_KEY is required when EMAIL_PROVIDER=resend",
+    path: ["RESEND_API_KEY"],
+  })
+  .refine((data) => data.EMAIL_PROVIDER !== "resend" || !!data.EMAIL_FROM, {
+    message: "EMAIL_FROM is required when EMAIL_PROVIDER=resend",
+    path: ["EMAIL_FROM"],
   });
 
 function loadEnv() {
