@@ -1,11 +1,14 @@
 import { z } from "zod";
 
-// `name`/`password`'s messages are translation keys — see
-// validation-messages.ts. `email` is untouched.
+import { passwordPolicySchema } from "@/features/auth/schemas/password-policy";
+
+// `name`'s message is a translation key — see validation-messages.ts.
+// `email` is untouched. `password` uses the shared policy (length +
+// uppercase + lowercase + number) — see password-policy.ts.
 export const registerSchema = z.object({
   name: z.string().min(1, "validation.nameRequired").max(100),
   email: z.email(),
-  password: z.string().min(8, "validation.passwordMin8"),
+  password: passwordPolicySchema,
 });
 
 export type RegisterInput = z.infer<typeof registerSchema>;

@@ -9,6 +9,8 @@ import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { PasswordInput } from "@/components/ui/password-input";
+import { PasswordRequirementsChecklist } from "@/features/auth/components/password-requirements-checklist";
 import { useRegister } from "@/features/auth/hooks/use-register";
 import { registerSchema } from "@/features/auth/schemas/register.schema";
 import { translateValidationMessage } from "@/features/auth/schemas/validation-messages";
@@ -90,14 +92,16 @@ export function RegisterForm() {
         <label htmlFor="password" className="text-foreground text-sm font-medium">
           {t("password")}
         </label>
-        <Input
+        <PasswordInput
           id="password"
-          type="password"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
           autoComplete="new-password"
+          showPasswordLabel={t("showPassword")}
+          hidePasswordLabel={t("hidePassword")}
           required
         />
+        <PasswordRequirementsChecklist password={password} />
       </div>
       {error && <p className="text-destructive text-sm">{error}</p>}
       <Button type="submit" disabled={register.isPending}>

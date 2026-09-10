@@ -1,12 +1,14 @@
 import { z } from "zod";
 
-// Both messages are translation keys — see validation-messages.ts. Reuses
-// the exact same keys register.schema.ts uses for the identical rules
-// (min-8 password, required token), so the translated text can't drift
-// between the two schemas.
+import { passwordPolicySchema } from "@/features/auth/schemas/password-policy";
+
+// `token`'s message is a translation key — see validation-messages.ts.
+// `newPassword` uses the shared policy (password-policy.ts), the same
+// one register.schema.ts/change-password.schema.ts use, so the rule
+// can't drift between schemas.
 export const resetPasswordSchema = z.object({
   token: z.string().min(1, "validation.tokenRequired"),
-  newPassword: z.string().min(8, "validation.passwordMin8"),
+  newPassword: passwordPolicySchema,
 });
 
 export type ResetPasswordInput = z.infer<typeof resetPasswordSchema>;

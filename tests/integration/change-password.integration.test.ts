@@ -33,7 +33,7 @@ describe("POST /api/users/password", () => {
     mockedAuth.mockResolvedValue(null);
 
     const response = await POST(
-      changePasswordRequest({ currentPassword: "whatever", newPassword: "newpassword1" }),
+      changePasswordRequest({ currentPassword: "whatever", newPassword: "Newpassword1" }),
     );
     expect(response.status).toBe(401);
   });
@@ -51,7 +51,7 @@ describe("POST /api/users/password", () => {
     await prisma.user.delete({ where: { id: user.id } });
 
     const response = await POST(
-      changePasswordRequest({ currentPassword: "old-pass", newPassword: "newpassword1" }),
+      changePasswordRequest({ currentPassword: "old-pass", newPassword: "Newpassword1" }),
     );
     expect(response.status).toBe(404);
   });
@@ -77,6 +77,30 @@ describe("POST /api/users/password", () => {
     expect(unchanged.passwordHash).toBe(originalHash);
   });
 
+  it("rejects a new password missing uppercase/number with validation_error and leaves the password unchanged", async () => {
+    const email = uniqueEmail("changepw-weak");
+    createdEmails.push(email);
+    const originalHash = await hashPassword("old-password");
+    const user = await prisma.user.create({
+      data: { email, name: "Change PW Weak", passwordHash: originalHash },
+    });
+    mockedAuth.mockResolvedValue(sessionFor(user.id));
+
+    const response = await POST(
+      changePasswordRequest({
+        currentPassword: "old-password",
+        newPassword: "alllowercase",
+      }),
+    );
+    const body = (await response.json()) as { error: string };
+
+    expect(response.status).toBe(400);
+    expect(body.error).toBe("validation_error");
+
+    const unchanged = await prisma.user.findUniqueOrThrow({ where: { id: user.id } });
+    expect(unchanged.passwordHash).toBe(originalHash);
+  });
+
   it("rejects an incorrect current password with current_password_incorrect and leaves the password unchanged", async () => {
     const email = uniqueEmail("changepw-wrong-current");
     createdEmails.push(email);
@@ -89,7 +113,7 @@ describe("POST /api/users/password", () => {
     const response = await POST(
       changePasswordRequest({
         currentPassword: "totally-wrong",
-        newPassword: "brand-new-password",
+        newPassword: "Brand-new-password1",
       }),
     );
     const body = (await response.json()) as { error: string; message: string };
@@ -106,7 +130,7 @@ describe("POST /api/users/password", () => {
   it("rejects a new password identical to the current one with password_unchanged and leaves the password unchanged", async () => {
     const email = uniqueEmail("changepw-same");
     createdEmails.push(email);
-    const originalHash = await hashPassword("same-password-123");
+    const originalHash = await hashPassword("Same-password-123");
     const user = await prisma.user.create({
       data: { email, name: "Change PW Same", passwordHash: originalHash },
     });
@@ -114,8 +138,8 @@ describe("POST /api/users/password", () => {
 
     const response = await POST(
       changePasswordRequest({
-        currentPassword: "same-password-123",
-        newPassword: "same-password-123",
+        currentPassword: "Same-password-123",
+        newPassword: "Same-password-123",
       }),
     );
     const body = (await response.json()) as { error: string };
@@ -139,7 +163,7 @@ describe("POST /api/users/password", () => {
     const response = await POST(
       changePasswordRequest({
         currentPassword: "old-password-123",
-        newPassword: "brand-new-password-456",
+        newPassword: "Brand-new-password-456",
       }),
     );
     const body = (await response.json()) as { message: string };
@@ -156,7 +180,7 @@ describe("POST /api/users/password", () => {
       verifyPassword("old-password-123", updated.passwordHash ?? ""),
     ).resolves.toBe(false);
     await expect(
-      verifyPassword("brand-new-password-456", updated.passwordHash ?? ""),
+      verifyPassword("Brand-new-password-456", updated.passwordHash ?? ""),
     ).resolves.toBe(true);
 
     const logs = await prisma.auditLog.findMany({

@@ -106,6 +106,11 @@
     "resetPassword": "Reset Password",
     "confirmPassword": "Confirm Password",
     "passwordMinHint": "At least 8 characters",
+    "passwordRequirementUppercase": "One uppercase letter",
+    "passwordRequirementLowercase": "One lowercase letter",
+    "passwordRequirementNumber": "One number",
+    "showPassword": "Show password",
+    "hidePassword": "Hide password",
     "saving": "Saving...",
     "resetPasswordSuccessToast": "Password reset successfully",
     "resetPasswordSuccessMessage": "Your password has been reset. Sign in with your new password.",
@@ -138,7 +143,10 @@
       "passwordMin8": "Password must be at least 8 characters",
       "tokenRequired": "Token is required",
       "invalidInput": "Invalid input",
-      "passwordsDoNotMatch": "Passwords do not match"
+      "passwordsDoNotMatch": "Passwords do not match",
+      "passwordUppercase": "Password must contain at least one uppercase letter",
+      "passwordLowercase": "Password must contain at least one lowercase letter",
+      "passwordNumber": "Password must contain at least one number"
     },
     "errors": {
       "emailTaken": "An account with this email already exists",

@@ -38,7 +38,7 @@ describe("POST /api/auth/reset-password", () => {
     });
 
     const response = await POST(
-      resetPasswordRequest({ token: rawToken, newPassword: "brand new password" }),
+      resetPasswordRequest({ token: rawToken, newPassword: "BrandNewPassword1" }),
     );
     const body = (await response.json()) as { message: string };
 
@@ -47,7 +47,7 @@ describe("POST /api/auth/reset-password", () => {
 
     const updated = await prisma.user.findUniqueOrThrow({ where: { id: user.id } });
     await expect(
-      verifyPassword("brand new password", updated.passwordHash ?? ""),
+      verifyPassword("BrandNewPassword1", updated.passwordHash ?? ""),
     ).resolves.toBe(true);
 
     const usedToken = await prisma.passwordResetToken.findUniqueOrThrow({
@@ -82,7 +82,7 @@ describe("POST /api/auth/reset-password", () => {
     });
 
     const response = await POST(
-      resetPasswordRequest({ token: rawToken, newPassword: "brand new password" }),
+      resetPasswordRequest({ token: rawToken, newPassword: "BrandNewPassword1" }),
     );
     const body = (await response.json()) as { error: string };
 
@@ -110,7 +110,7 @@ describe("POST /api/auth/reset-password", () => {
     });
 
     const response = await POST(
-      resetPasswordRequest({ token: rawToken, newPassword: "brand new password" }),
+      resetPasswordRequest({ token: rawToken, newPassword: "BrandNewPassword1" }),
     );
     const body = (await response.json()) as { error: string };
 
@@ -121,9 +121,41 @@ describe("POST /api/auth/reset-password", () => {
     expect(unchanged.passwordHash).toBe("original-hash");
   });
 
+  it("rejects a valid token with a policy-non-compliant new password, and does not consume the token", async () => {
+    const email = uniqueEmail("reset-weak-password");
+    createdEmails.push(email);
+    const user = await prisma.user.create({
+      data: { email, name: "Reset Weak Password", passwordHash: "original-hash" },
+    });
+    const rawToken = generateToken();
+    const tokenRow = await prisma.passwordResetToken.create({
+      data: {
+        userId: user.id,
+        tokenHash: hashToken(rawToken),
+        expiresAt: new Date(Date.now() + 60_000),
+      },
+    });
+
+    const response = await POST(
+      resetPasswordRequest({ token: rawToken, newPassword: "alllowercase1" }),
+    );
+    const body = (await response.json()) as { error: string };
+
+    expect(response.status).toBe(400);
+    expect(body.error).toBe("validation_error");
+
+    const unchanged = await prisma.user.findUniqueOrThrow({ where: { id: user.id } });
+    expect(unchanged.passwordHash).toBe("original-hash");
+
+    const untouchedToken = await prisma.passwordResetToken.findUniqueOrThrow({
+      where: { id: tokenRow.id },
+    });
+    expect(untouchedToken.usedAt).toBeNull();
+  });
+
   it("rejects an unknown token", async () => {
     const response = await POST(
-      resetPasswordRequest({ token: generateToken(), newPassword: "brand new password" }),
+      resetPasswordRequest({ token: generateToken(), newPassword: "BrandNewPassword1" }),
     );
     const body = (await response.json()) as { error: string };
 

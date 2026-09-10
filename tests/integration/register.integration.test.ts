@@ -29,7 +29,7 @@ describe("POST /api/auth/register", () => {
       registerRequest({
         name: "Test User",
         email,
-        password: "correct horse battery staple",
+        password: "CorrectHorseBattery1",
       }),
     );
     const body = (await response.json()) as {
@@ -46,7 +46,7 @@ describe("POST /api/auth/register", () => {
     expect(user).not.toBeNull();
     expect(user?.emailVerified).toBeNull();
     expect(user?.isActive).toBe(true);
-    expect(user?.passwordHash).not.toBe("correct horse battery staple");
+    expect(user?.passwordHash).not.toBe("CorrectHorseBattery1");
 
     const rawToken = new URL(
       body.mockVerifyUrl,
@@ -70,12 +70,12 @@ describe("POST /api/auth/register", () => {
     createdEmails.push(email);
 
     const first = await POST(
-      registerRequest({ name: "First", email, password: "correct horse battery" }),
+      registerRequest({ name: "First", email, password: "CorrectHorseBattery1" }),
     );
     expect(first.status).toBe(201);
 
     const second = await POST(
-      registerRequest({ name: "Second", email, password: "another password" }),
+      registerRequest({ name: "Second", email, password: "AnotherPassword1" }),
     );
     const body = (await second.json()) as { error: string };
 

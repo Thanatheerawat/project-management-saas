@@ -1,4 +1,11 @@
-import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
+import {
+  cleanup,
+  fireEvent,
+  render,
+  screen,
+  waitFor,
+  within,
+} from "@testing-library/react";
 import { NextIntlClientProvider } from "next-intl";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
@@ -60,16 +67,51 @@ describe("ChangePasswordForm", () => {
     ).toBeInTheDocument();
   });
 
-  it("renders all three password fields", () => {
+  it("renders all three password fields and the requirements checklist under New Password only", () => {
     renderForm();
     expect(screen.getByLabelText("Current Password")).toBeInTheDocument();
     expect(screen.getByLabelText("New Password")).toBeInTheDocument();
     expect(screen.getByLabelText("Confirm Password")).toBeInTheDocument();
+    expect(screen.getAllByRole("listitem")).toHaveLength(4);
+    expect(screen.getByText("At least 8 characters")).toBeInTheDocument();
+    expect(screen.getByText("One uppercase letter")).toBeInTheDocument();
+    expect(screen.getByText("One lowercase letter")).toBeInTheDocument();
+    expect(screen.getByText("One number")).toBeInTheDocument();
+  });
+
+  it("updates the checklist in real time as New Password is typed", () => {
+    renderForm();
+    const newPasswordInput = screen.getByLabelText("New Password");
+
+    for (const item of screen.getAllByRole("listitem")) {
+      expect(item.querySelector("svg")).not.toBeInTheDocument();
+    }
+
+    fireEvent.change(newPasswordInput, { target: { value: "Newpassword1" } });
+
+    for (const item of screen.getAllByRole("listitem")) {
+      expect(item.querySelector("svg")).toBeInTheDocument();
+    }
+  });
+
+  it("toggles New Password visibility independently of Current/Confirm Password", () => {
+    renderForm();
+    const newPasswordInput = screen.getByLabelText("New Password");
+    const currentPasswordInput = screen.getByLabelText("Current Password");
+    expect(newPasswordInput).toHaveAttribute("type", "password");
+
+    const toggle = within(newPasswordInput.parentElement as HTMLElement).getByRole(
+      "button",
+    );
+    fireEvent.click(toggle);
+
+    expect(newPasswordInput).toHaveAttribute("type", "text");
+    expect(currentPasswordInput).toHaveAttribute("type", "password");
   });
 
   it("rejects submission client-side when the new password and confirmation don't match, without calling the API", async () => {
     renderForm();
-    fillAndSubmit("current-pass", "newpassword1", "newpassword2");
+    fillAndSubmit("current-pass", "Newpassword1", "newpassword2");
 
     await waitFor(() => {
       expect(screen.getByText("Passwords do not match")).toBeInTheDocument();
@@ -92,12 +134,12 @@ describe("ChangePasswordForm", () => {
   it("submits {currentPassword, newPassword} only (no confirmPassword) when the new password and confirmation match", async () => {
     mockMutateAsync.mockResolvedValue({ message: "Password changed successfully" });
     renderForm();
-    fillAndSubmit("current-pass", "newpassword1", "newpassword1");
+    fillAndSubmit("current-pass", "Newpassword1", "Newpassword1");
 
     await waitFor(() => expect(mockMutateAsync).toHaveBeenCalledTimes(1));
     expect(mockMutateAsync).toHaveBeenCalledWith({
       currentPassword: "current-pass",
-      newPassword: "newpassword1",
+      newPassword: "Newpassword1",
     });
   });
 
@@ -113,7 +155,7 @@ describe("ChangePasswordForm", () => {
   it("clears all three fields after a successful change, keeping the form (not a success view) on screen", async () => {
     mockMutateAsync.mockResolvedValue({ message: "Password changed successfully" });
     renderForm();
-    fillAndSubmit("current-pass", "newpassword1", "newpassword1");
+    fillAndSubmit("current-pass", "Newpassword1", "Newpassword1");
 
     await waitFor(() => {
       expect(screen.getByLabelText("Current Password")).toHaveValue("");
@@ -135,7 +177,7 @@ describe("ChangePasswordForm", () => {
       ),
     );
     renderForm();
-    fillAndSubmit("wrong-current", "newpassword1", "newpassword1");
+    fillAndSubmit("wrong-current", "Newpassword1", "Newpassword1");
 
     await waitFor(() => {
       expect(screen.getByText("Current password is incorrect.")).toBeInTheDocument();
@@ -152,7 +194,7 @@ describe("ChangePasswordForm", () => {
       ),
     );
     renderForm();
-    fillAndSubmit("current-pass", "current-pass1", "current-pass1");
+    fillAndSubmit("current-pass", "Current-pass1", "Current-pass1");
 
     await waitFor(() => {
       expect(
@@ -164,7 +206,7 @@ describe("ChangePasswordForm", () => {
   it("falls back to a generic error message for an unrecognized/server failure", async () => {
     mockMutateAsync.mockRejectedValue(new Error("network down"));
     renderForm();
-    fillAndSubmit("current-pass", "newpassword1", "newpassword1");
+    fillAndSubmit("current-pass", "Newpassword1", "Newpassword1");
 
     await waitFor(() => {
       expect(

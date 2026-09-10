@@ -1,4 +1,11 @@
-import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
+import {
+  cleanup,
+  fireEvent,
+  render,
+  screen,
+  waitFor,
+  within,
+} from "@testing-library/react";
 import { NextIntlClientProvider } from "next-intl";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
@@ -54,18 +61,64 @@ describe("ResetPasswordForm", () => {
     expect(screen.queryByLabelText("New Password")).not.toBeInTheDocument();
   });
 
-  it("renders both password fields and a length hint", () => {
+  it("renders both password fields and the requirements checklist", () => {
     renderForm();
     expect(screen.getByLabelText("New Password")).toBeInTheDocument();
     expect(screen.getByLabelText("Confirm Password")).toBeInTheDocument();
     expect(screen.getByText("At least 8 characters")).toBeInTheDocument();
+    expect(screen.getByText("One uppercase letter")).toBeInTheDocument();
+    expect(screen.getByText("One lowercase letter")).toBeInTheDocument();
+    expect(screen.getByText("One number")).toBeInTheDocument();
+  });
+
+  it("updates the checklist in real time as New Password is typed, starting fully unmet", () => {
+    renderForm();
+    const newPasswordInput = screen.getByLabelText("New Password");
+
+    // Empty password: every requirement's checklist item starts with no
+    // checkmark icon rendered.
+    const checklistItems = screen.getAllByRole("listitem");
+    expect(checklistItems).toHaveLength(4);
+    for (const item of checklistItems) {
+      expect(item.querySelector("svg")).not.toBeInTheDocument();
+    }
+
+    fireEvent.change(newPasswordInput, { target: { value: "Password123" } });
+
+    // All four requirements now met — each checklist item renders a
+    // checkmark icon once its condition is satisfied.
+    for (const item of screen.getAllByRole("listitem")) {
+      expect(item.querySelector("svg")).toBeInTheDocument();
+    }
+  });
+
+  it("toggles New Password visibility via its own show/hide button", () => {
+    renderForm();
+    const newPasswordInput = screen.getByLabelText("New Password");
+    expect(newPasswordInput).toHaveAttribute("type", "password");
+
+    // Both password fields render their own toggle button, both initially
+    // labeled "Show password" — scope to the New Password field's own
+    // wrapper so this doesn't accidentally interact with Confirm
+    // Password's toggle instead.
+    const toggle = within(newPasswordInput.parentElement as HTMLElement).getByRole(
+      "button",
+    );
+
+    fireEvent.click(toggle);
+    expect(newPasswordInput).toHaveAttribute("type", "text");
+    expect(toggle).toHaveAttribute("aria-label", "Hide password");
+
+    fireEvent.click(toggle);
+    expect(newPasswordInput).toHaveAttribute("type", "password");
+    expect(toggle).toHaveAttribute("aria-label", "Show password");
   });
 
   it("rejects submission client-side when the two passwords don't match, without calling the API", async () => {
     renderForm();
 
     fireEvent.change(screen.getByLabelText("New Password"), {
-      target: { value: "password123" },
+      target: { value: "Password123" },
     });
     fireEvent.change(screen.getByLabelText("Confirm Password"), {
       target: { value: "password456" },
@@ -83,17 +136,17 @@ describe("ResetPasswordForm", () => {
     renderForm();
 
     fireEvent.change(screen.getByLabelText("New Password"), {
-      target: { value: "password123" },
+      target: { value: "Password123" },
     });
     fireEvent.change(screen.getByLabelText("Confirm Password"), {
-      target: { value: "password123" },
+      target: { value: "Password123" },
     });
     fireEvent.click(screen.getByRole("button", { name: "Reset Password" }));
 
     await waitFor(() => expect(mockMutateAsync).toHaveBeenCalledTimes(1));
     expect(mockMutateAsync).toHaveBeenCalledWith({
       token: "valid-token",
-      newPassword: "password123",
+      newPassword: "Password123",
     });
   });
 
@@ -124,10 +177,10 @@ describe("ResetPasswordForm", () => {
     renderForm();
 
     fireEvent.change(screen.getByLabelText("New Password"), {
-      target: { value: "password123" },
+      target: { value: "Password123" },
     });
     fireEvent.change(screen.getByLabelText("Confirm Password"), {
-      target: { value: "password123" },
+      target: { value: "Password123" },
     });
     fireEvent.click(screen.getByRole("button", { name: "Reset Password" }));
 

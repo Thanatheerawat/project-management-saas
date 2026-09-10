@@ -19,6 +19,9 @@ const AUTH_VALIDATION_KEYS = new Set([
   "validation.nameRequired",
   "validation.passwordMin8",
   "validation.tokenRequired",
+  "validation.passwordUppercase",
+  "validation.passwordLowercase",
+  "validation.passwordNumber",
 ]);
 
 // Every real caller passes `useTranslations("auth")`'s return value —

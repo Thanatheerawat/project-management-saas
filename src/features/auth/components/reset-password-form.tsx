@@ -7,7 +7,8 @@ import { useState } from "react";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { PasswordInput } from "@/components/ui/password-input";
+import { PasswordRequirementsChecklist } from "@/features/auth/components/password-requirements-checklist";
 import { useResetPassword } from "@/features/auth/hooks/use-reset-password";
 import { resetPasswordSchema } from "@/features/auth/schemas/reset-password.schema";
 import { translateValidationMessage } from "@/features/auth/schemas/validation-messages";
@@ -89,26 +90,28 @@ export function ResetPasswordForm() {
         <label htmlFor="newPassword" className="text-foreground text-sm font-medium">
           {t("newPassword")}
         </label>
-        <Input
+        <PasswordInput
           id="newPassword"
-          type="password"
           value={newPassword}
           onChange={(e) => setNewPassword(e.target.value)}
           autoComplete="new-password"
+          showPasswordLabel={t("showPassword")}
+          hidePasswordLabel={t("hidePassword")}
           required
         />
-        <p className="text-muted-foreground text-xs">{t("passwordMinHint")}</p>
+        <PasswordRequirementsChecklist password={newPassword} />
       </div>
       <div className="flex flex-col gap-1.5">
         <label htmlFor="confirmPassword" className="text-foreground text-sm font-medium">
           {t("confirmPassword")}
         </label>
-        <Input
+        <PasswordInput
           id="confirmPassword"
-          type="password"
           value={confirmPassword}
           onChange={(e) => setConfirmPassword(e.target.value)}
           autoComplete="new-password"
+          showPasswordLabel={t("showPassword")}
+          hidePasswordLabel={t("hidePassword")}
           required
         />
       </div>

@@ -13,7 +13,8 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
+import { PasswordInput } from "@/components/ui/password-input";
+import { PasswordRequirementsChecklist } from "@/features/auth/components/password-requirements-checklist";
 import { translateValidationMessage } from "@/features/auth/schemas/validation-messages";
 import { useChangePassword } from "@/features/user/hooks/use-change-password";
 import { changePasswordSchema } from "@/features/user/schemas/change-password.schema";
@@ -94,12 +95,13 @@ export function ChangePasswordForm() {
             >
               {t("currentPassword")}
             </label>
-            <Input
+            <PasswordInput
               id="currentPassword"
-              type="password"
               value={currentPassword}
               onChange={(e) => setCurrentPassword(e.target.value)}
               autoComplete="current-password"
+              showPasswordLabel={t("showPassword")}
+              hidePasswordLabel={t("hidePassword")}
               required
             />
           </div>
@@ -107,15 +109,16 @@ export function ChangePasswordForm() {
             <label htmlFor="newPassword" className="text-foreground text-sm font-medium">
               {t("newPassword")}
             </label>
-            <Input
+            <PasswordInput
               id="newPassword"
-              type="password"
               value={newPassword}
               onChange={(e) => setNewPassword(e.target.value)}
               autoComplete="new-password"
+              showPasswordLabel={t("showPassword")}
+              hidePasswordLabel={t("hidePassword")}
               required
             />
-            <p className="text-muted-foreground text-xs">{t("passwordMinHint")}</p>
+            <PasswordRequirementsChecklist password={newPassword} />
           </div>
           <div className="flex flex-col gap-1.5">
             <label
@@ -124,12 +127,13 @@ export function ChangePasswordForm() {
             >
               {t("confirmPassword")}
             </label>
-            <Input
+            <PasswordInput
               id="confirmNewPassword"
-              type="password"
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}
               autoComplete="new-password"
+              showPasswordLabel={t("showPassword")}
+              hidePasswordLabel={t("hidePassword")}
               required
             />
           </div>
