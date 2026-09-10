@@ -1,6 +1,26 @@
 import { env } from "@/config/env";
-import type { EmailMessage } from "@/services/email/email-provider";
+import type { EmailMessage, EmailProvider } from "@/services/email/email-provider";
 import { createEmailProvider } from "@/services/email/email-provider-factory";
+
+// M8 incident follow-up: NODE_ENV=production must never silently resolve
+// to MockEmailProvider — that provider only logs the message (including
+// the raw verification/reset URL, i.e. the raw token) instead of sending
+// it, which in production means password-reset and email-verification
+// tokens would end up in server logs rather than ever reaching the user.
+// Constructing this guard is always safe (no throw); only calling send()
+// throws, and only when actually reached — so a misconfigured production
+// deploy fails loudly per email attempt instead of crashing every route
+// that imports this module at cold start. The message names only which
+// env vars are missing, never a value.
+class ProductionMockGuardProvider implements EmailProvider {
+  async send(): Promise<void> {
+    throw new Error(
+      "Email provider misconfigured: EMAIL_PROVIDER=mock is not permitted when " +
+        "NODE_ENV=production. Set EMAIL_PROVIDER=resend with RESEND_API_KEY and " +
+        "EMAIL_FROM configured.",
+    );
+  }
+}
 
 // M8.1: the actual swap point is now createEmailProvider() — this module
 // is the one place (analogous to the M7 AI breakdown Route Handler
@@ -12,10 +32,13 @@ import { createEmailProvider } from "@/services/email/email-provider-factory";
 // env.ts). Every existing caller (register/forgot-password routes) keeps
 // using exactly the same public API as before; none of them know or care
 // which provider is active.
-const provider = createEmailProvider(env.EMAIL_PROVIDER, {
-  resendApiKey: env.RESEND_API_KEY,
-  emailFrom: env.EMAIL_FROM,
-});
+const provider: EmailProvider =
+  env.NODE_ENV === "production" && env.EMAIL_PROVIDER === "mock"
+    ? new ProductionMockGuardProvider()
+    : createEmailProvider(env.EMAIL_PROVIDER, {
+        resendApiKey: env.RESEND_API_KEY,
+        emailFrom: env.EMAIL_FROM,
+      });
 
 export const emailService = {
   async send(message: EmailMessage): Promise<void> {
