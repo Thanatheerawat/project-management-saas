@@ -9,6 +9,7 @@ import {
   VERIFICATION_RESEND_COOLDOWN_MS,
   VERIFICATION_TOKEN_TTL_MS,
 } from "@/repositories/auth/verification-token.repository";
+import { emailService } from "@/services/auth/email.service";
 
 import { deleteTestUser, uniqueEmail } from "./helpers";
 
@@ -89,6 +90,47 @@ describe("POST /api/auth/resend-verification", () => {
       "MOCK EMAIL — not actually sent",
       expect.objectContaining({ to: email, subject: "Verify your Orbit account" }),
     );
+  });
+
+  it("returns a controlled 502 and deletes the fresh token when the verification email fails to send", async () => {
+    const email = uniqueEmail("resend-email-fails");
+    createdEmails.push(email);
+    const user = await prisma.user.create({
+      data: { email, name: "Resend Email Fails", passwordHash: "x" },
+    });
+    mockedAuth.mockResolvedValue(sessionFor(user.id));
+    const sendSpy = vi
+      .spyOn(emailService, "sendVerificationEmail")
+      .mockRejectedValueOnce(
+        new Error("Resend request failed: validation_error (status 422)"),
+      );
+    const loggerErrorSpy = vi.spyOn(logger, "error").mockImplementation(() => {});
+
+    const response = await POST(resendRequest());
+    const body = (await response.json()) as { error: string; message: string };
+
+    // Never a bare 500 — a distinct, controlled failure code instead.
+    expect(response.status).toBe(502);
+    expect(response.status).not.toBe(500);
+    expect(body.error).toBe("email_delivery_failed");
+
+    // Never leaks the raw provider error into the response.
+    expect(JSON.stringify(body)).not.toContain("Resend request failed");
+    expect(JSON.stringify(body)).not.toContain("validation_error");
+
+    expect(sendSpy).toHaveBeenCalledTimes(1);
+    expect(loggerErrorSpy).toHaveBeenCalledWith(
+      "Failed to send verification email (resend)",
+      expect.objectContaining({
+        message: expect.stringContaining("Resend request failed"),
+      }),
+    );
+    loggerErrorSpy.mockRestore();
+
+    // The freshly-minted token was never delivered, so it must not be
+    // left behind — no dangling unreachable token, no cooldown started
+    // for a send that never happened.
+    expect(await tokenRowsFor(email)).toHaveLength(0);
   });
 
   it("returns a safe no-op response and creates no token when already verified", async () => {

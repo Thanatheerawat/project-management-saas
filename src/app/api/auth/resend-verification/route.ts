@@ -3,6 +3,7 @@ import { NextResponse } from "next/server";
 import { handleApiError } from "@/lib/api-error";
 import { auth } from "@/lib/auth/auth";
 import { generateToken, hashToken } from "@/lib/auth/tokens";
+import { logger } from "@/lib/logger";
 import { userRepository } from "@/repositories/auth/user.repository";
 import {
   VERIFICATION_RESEND_COOLDOWN_MS,
@@ -87,7 +88,31 @@ export async function POST(request: Request) {
       `/verify-email?email=${encodeURIComponent(user.email)}&token=${rawToken}`,
       request.url,
     );
-    await emailService.sendVerificationEmail(user.email, verifyUrl.toString());
+
+    // Unlike register.ts, this route's entire purpose is "did my email
+    // just send" — silently returning success here would leave the user
+    // with no signal at all and no live token to fall back on, so a
+    // delivery failure is surfaced explicitly instead. The token we just
+    // minted is removed on failure (never delivered, so keeping it would
+    // both dangle an unreachable-but-valid token *and* start the cooldown
+    // — which exists to rate-limit actual sends — for an email that never
+    // went out, blocking an immediate retry for no reason).
+    try {
+      await emailService.sendVerificationEmail(user.email, verifyUrl.toString());
+    } catch (emailError) {
+      logger.error("Failed to send verification email (resend)", {
+        message: emailError instanceof Error ? emailError.message : String(emailError),
+      });
+      await verificationTokenRepository.delete(user.email, hashToken(rawToken));
+      return NextResponse.json(
+        {
+          error: "email_delivery_failed",
+          message:
+            "We couldn't send the verification email right now. Please try again later.",
+        },
+        { status: 502 },
+      );
+    }
 
     return NextResponse.json({ message: "Verification email sent" });
   } catch (error) {

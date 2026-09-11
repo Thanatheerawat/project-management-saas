@@ -4,6 +4,7 @@ import { registerSchema } from "@/features/auth/schemas/register.schema";
 import { handleApiError } from "@/lib/api-error";
 import { hashPassword } from "@/lib/auth/password";
 import { generateToken, hashToken } from "@/lib/auth/tokens";
+import { logger } from "@/lib/logger";
 import { auditLogRepository } from "@/repositories/auth/audit-log.repository";
 import { userRepository } from "@/repositories/auth/user.repository";
 import { verificationTokenRepository } from "@/repositories/auth/verification-token.repository";
@@ -46,7 +47,22 @@ export async function POST(request: Request) {
       `/verify-email?email=${encodeURIComponent(user.email)}&token=${rawToken}`,
       request.url,
     );
-    await emailService.sendVerificationEmail(user.email, verifyUrl.toString());
+    // Account creation has already fully succeeded by this point (user,
+    // audit log, and token rows are all committed) — a delivery failure
+    // here is a background side effect, not a registration failure, and
+    // must never turn a created account into a 500. The user stays in
+    // the same unverified state the app already treats as normal (never
+    // hard-blocked, see VerificationBanner) and can retry via the
+    // existing resend-verification flow. Logged server-side only, same
+    // "never expose the raw provider error" posture as forgot-password's
+    // equivalent try/catch.
+    try {
+      await emailService.sendVerificationEmail(user.email, verifyUrl.toString());
+    } catch (emailError) {
+      logger.error("Failed to send verification email", {
+        message: emailError instanceof Error ? emailError.message : String(emailError),
+      });
+    }
 
     // Returning the mock verification URL here is intentional and safe:
     // a successful registration response already confirms the account
