@@ -4,7 +4,9 @@ import type { User, WorkspaceMember } from "@/generated/prisma/client";
 // return the same shape — never spreads the full User row, so
 // passwordHash and other sensitive fields can't leak by accident even if
 // the query that produced `member.user` changes later.
-export function toWorkspaceMemberResponse(member: WorkspaceMember & { user: User }) {
+export function toWorkspaceMemberResponse(
+  member: WorkspaceMember & { user: Pick<User, "id" | "name" | "email" | "image"> },
+) {
   return {
     id: member.id,
     role: member.role,

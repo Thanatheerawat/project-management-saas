@@ -4,15 +4,81 @@ import { prisma } from "@/lib/prisma";
 const MAX_FAILED_ATTEMPTS = 5;
 const LOCK_DURATION_MS = 15 * 60 * 1000;
 
+// P1-2: shared field set for the two safe-by-default lookups below —
+// every field an existing non-credential caller actually reads (see
+// user.repository's callers: register's dup-check, forgot-password,
+// verify-email, resend-verification, /api/users/me, workspace member
+// invite, ProjectDetailPage's owner display), and nothing else.
+// Deliberately excludes `passwordHash` (only two call sites ever need
+// it — see findByEmailWithPasswordHash/findByIdWithPasswordHash below),
+// `lockedUntil`/`failedLoginAttempts` (login-lockout state, only read
+// by auth.config.ts, which uses the password-aware method instead), and
+// `updatedAt` (no caller reads it through these methods).
+const SAFE_USER_SELECT = {
+  id: true,
+  name: true,
+  email: true,
+  emailVerified: true,
+  image: true,
+  role: true,
+  isActive: true,
+  jobTitle: true,
+  bio: true,
+  location: true,
+  timezone: true,
+  website: true,
+  createdAt: true,
+  lastLoginAt: true,
+} as const;
+
 // The only place `prisma.user.*` is called from — Route Handlers and
 // auth.config.ts call these functions instead of Prisma directly.
 export const userRepository = {
+  // P1-2: narrowed via SAFE_USER_SELECT so `passwordHash` is structurally
+  // absent from the returned type, not just conventionally unused — see
+  // findByEmailWithPasswordHash for the one caller (login) that actually
+  // needs the hash.
   findByEmail(email: string) {
-    return prisma.user.findUnique({ where: { email } });
+    return prisma.user.findUnique({ where: { email }, select: SAFE_USER_SELECT });
   },
 
+  // P1-2: same reasoning as findByEmail — see findByIdWithPasswordHash
+  // for the one caller (change-password) that needs the hash.
   findById(id: string) {
-    return prisma.user.findUnique({ where: { id } });
+    return prisma.user.findUnique({ where: { id }, select: SAFE_USER_SELECT });
+  },
+
+  // P1-2: exists only for auth.config.ts's credentials authorize() —
+  // the single login call site that must verify a submitted password
+  // against the stored hash, and must also see isActive/lockedUntil to
+  // enforce the existing deactivated/locked-account checks. No other
+  // caller should ever reach for this method — see findByEmail above for
+  // everything else.
+  findByEmailWithPasswordHash(email: string) {
+    return prisma.user.findUnique({
+      where: { email },
+      select: {
+        id: true,
+        isActive: true,
+        passwordHash: true,
+        lockedUntil: true,
+        name: true,
+        email: true,
+        image: true,
+        role: true,
+      },
+    });
+  },
+
+  // P1-2: exists only for /api/users/password's change-password flow —
+  // the single other call site that needs the hash, to verify the
+  // submitted current password and reject a no-op "change" to the same
+  // password. No other caller should ever reach for this method.
+  findByIdWithPasswordHash(id: string) {
+    return prisma.user.findUnique({
+      where: { id },
+      select: { id: true, passwordHash: true },
+    });
   },
 
   create(data: { name: string; email: string; passwordHash: string }) {

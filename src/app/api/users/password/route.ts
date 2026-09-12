@@ -30,7 +30,9 @@ export async function POST(request: Request) {
     const body = await request.json();
     const { currentPassword, newPassword } = changePasswordSchema.parse(body);
 
-    const user = await userRepository.findById(session.user.id);
+    // P1-2: needs passwordHash to verify the current password — see
+    // user.repository.ts's findByIdWithPasswordHash comment.
+    const user = await userRepository.findByIdWithPasswordHash(session.user.id);
     if (!user) {
       return NextResponse.json(
         { error: "not_found", message: "Account not found" },

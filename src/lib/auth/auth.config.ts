@@ -29,7 +29,9 @@ export const authOptions: NextAuthOptions = {
         const parsed = loginSchema.safeParse(credentials);
         if (!parsed.success) return null;
 
-        const user = await userRepository.findByEmail(parsed.data.email);
+        // P1-2: needs passwordHash to verify the submitted password —
+        // see user.repository.ts's findByEmailWithPasswordHash comment.
+        const user = await userRepository.findByEmailWithPasswordHash(parsed.data.email);
 
         // Same null return whether the user doesn't exist, has no
         // password set, or is deactivated — never reveal which case it
