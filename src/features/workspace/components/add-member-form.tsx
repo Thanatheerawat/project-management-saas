@@ -55,54 +55,55 @@ export function AddMemberForm({ workspaceId }: { workspaceId: string }) {
   }
 
   return (
-    <form
-      onSubmit={handleSubmit}
-      className="flex flex-col gap-3 sm:flex-row sm:items-end"
-    >
-      <div className="flex flex-1 flex-col gap-1.5">
-        <label htmlFor="member-email" className="text-foreground text-sm font-medium">
-          Member Email
-        </label>
-        <Input
-          id="member-email"
-          type="email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          placeholder="name@example.com"
-          required
-        />
+    <form onSubmit={handleSubmit} className="flex flex-col gap-3">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-end">
+        <div className="flex min-w-0 flex-1 flex-col gap-1.5">
+          <label htmlFor="member-email" className="text-foreground text-sm font-medium">
+            Member Email
+          </label>
+          <Input
+            id="member-email"
+            type="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            placeholder="name@example.com"
+            required
+          />
+        </div>
+        <div className="flex shrink-0 flex-col gap-1.5">
+          <label htmlFor="member-role" className="text-foreground text-sm font-medium">
+            Role
+          </label>
+          <select
+            id="member-role"
+            value={role}
+            onChange={(e) =>
+              setRole(e.target.value as (typeof ASSIGNABLE_WORKSPACE_ROLES)[number])
+            }
+            className="border-input dark:bg-input/30 focus-visible:border-ring focus-visible:ring-ring/50 h-8 shrink-0 rounded-lg border bg-transparent px-2.5 text-sm outline-none focus-visible:ring-[3px]"
+          >
+            {ASSIGNABLE_WORKSPACE_ROLES.map((r) => (
+              <option key={r} value={r}>
+                {r}
+              </option>
+            ))}
+          </select>
+        </div>
+        <Button type="submit" className="shrink-0" disabled={addMember.isPending}>
+          {addMember.isPending ? "Adding..." : "Add or Invite"}
+        </Button>
       </div>
-      <div className="flex flex-col gap-1.5">
-        <label htmlFor="member-role" className="text-foreground text-sm font-medium">
-          Role
-        </label>
-        <select
-          id="member-role"
-          value={role}
-          onChange={(e) =>
-            setRole(e.target.value as (typeof ASSIGNABLE_WORKSPACE_ROLES)[number])
-          }
-          className="border-input dark:bg-input/30 focus-visible:border-ring focus-visible:ring-ring/50 h-8 rounded-lg border bg-transparent px-2.5 text-sm outline-none focus-visible:ring-[3px]"
-        >
-          {ASSIGNABLE_WORKSPACE_ROLES.map((r) => (
-            <option key={r} value={r}>
-              {r}
-            </option>
-          ))}
-        </select>
-      </div>
-      <Button type="submit" disabled={addMember.isPending}>
-        {addMember.isPending ? "Adding..." : "Add or Invite"}
-      </Button>
       {/* Communicates the branching behavior without a second control —
           the email itself is what decides which happens (see
           POST .../invitations, which makes that same decision
-          server-side). */}
-      <p className="text-muted-foreground text-xs sm:basis-full">
+          server-side). Kept out of the input row (its own block, not a flex
+          item there) so it can wrap normally instead of competing with the
+          email input for width. */}
+      <p className="text-muted-foreground text-xs">
         Existing Orbit accounts are added immediately. Anyone else is sent an email
         invitation.
       </p>
-      {error && <p className="text-destructive text-sm sm:basis-full">{error}</p>}
+      {error && <p className="text-destructive text-sm">{error}</p>}
     </form>
   );
 }
