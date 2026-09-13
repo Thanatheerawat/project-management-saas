@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { signIn } from "next-auth/react";
 import { useTranslations } from "next-intl";
 import { useState } from "react";
@@ -18,6 +18,7 @@ import { ApiError } from "@/lib/api-client";
 
 export function RegisterForm() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const t = useTranslations("auth");
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
@@ -46,7 +47,13 @@ export function RegisterForm() {
         redirect: false,
       });
       toast.success(t("accountCreated"));
-      router.push(result.mockVerifyUrl);
+      // An invitation link's "create account" button routes here with
+      // callbackUrl set (see (auth)/invitations/page.tsx) — respecting it
+      // takes the new user straight back to accept the invitation instead
+      // of stranding them on the mock verify-email link. Plain
+      // registration (no callbackUrl) keeps its original behavior
+      // unchanged.
+      router.push(searchParams.get("callbackUrl") ?? result.mockVerifyUrl);
       router.refresh();
     } catch (err) {
       // Known stable code -> its own translated message; anything else

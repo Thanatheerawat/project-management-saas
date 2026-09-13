@@ -48,6 +48,23 @@ export const userRepository = {
     return prisma.user.findUnique({ where: { id }, select: SAFE_USER_SELECT });
   },
 
+  // Workspace invitation hardening: User.email has never been stored
+  // normalized (register/login compare it exactly as typed — confirmed
+  // by inspection before adding this, not changed here), so an admin
+  // typing "John@Example.com" would otherwise fail to find an existing
+  // "john@example.com" account via findByEmail's exact match, and the
+  // invite route would incorrectly treat them as unregistered. Scoped to
+  // this one targeted use — deliberately not a replacement for
+  // findByEmail, and login/register are untouched. Uses findFirst (not
+  // findUnique) because Prisma's case-insensitive `mode` filter isn't
+  // expressible against a `@unique` field's exact-match lookup.
+  findByEmailCaseInsensitive(email: string) {
+    return prisma.user.findFirst({
+      where: { email: { equals: email, mode: "insensitive" } },
+      select: SAFE_USER_SELECT,
+    });
+  },
+
   // P1-2: exists only for auth.config.ts's credentials authorize() —
   // the single login call site that must verify a submitted password
   // against the stored hash, and must also see isActive/lockedUntil to

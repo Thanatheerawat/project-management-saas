@@ -90,4 +90,29 @@ export const emailService = {
       ].join("\n"),
     });
   },
+
+  // Workspace invitation: content only, same reasoning as the two methods
+  // above — no provider-abstraction change, no template engine. "7 days"
+  // is a plain-text restatement of WORKSPACE_INVITATION_TTL_MS
+  // (workspace-invitation.repository.ts), not a second source of truth
+  // for any actual expiry check (the repository/route own that).
+  async sendWorkspaceInvitationEmail(
+    to: string,
+    details: { workspaceName: string; inviterName: string; acceptUrl: string },
+  ): Promise<void> {
+    await this.send({
+      to,
+      subject: `You've been invited to join ${details.workspaceName} on Orbit`,
+      body: [
+        `${details.inviterName} has invited you to join the "${details.workspaceName}" workspace on Orbit.`,
+        "",
+        "Accept the invitation:",
+        details.acceptUrl,
+        "",
+        "This link expires in 7 days.",
+        "",
+        "If you weren't expecting this invitation, you can safely ignore this email.",
+      ].join("\n"),
+    });
+  },
 };

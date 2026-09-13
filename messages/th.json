@@ -131,6 +131,12 @@
     "changePasswordButton": "เปลี่ยนรหัสผ่าน",
     "changingPassword": "กำลังเปลี่ยน...",
     "changePasswordSuccessToast": "เปลี่ยนรหัสผ่านสำเร็จ",
+    "invitationHeading": "คำเชิญเข้าร่วมเวิร์กสเปซ",
+    "invitationSignInPrompt": "เข้าสู่ระบบหรือสร้างบัญชีด้วยอีเมลที่ได้รับเชิญเพื่อยอมรับคำเชิญนี้",
+    "invitationAcceptPrompt": "ยอมรับคำเชิญนี้เพื่อเข้าร่วมเวิร์กสเปซ",
+    "invitationAcceptedMessage": "คุณได้เข้าร่วม {workspace} แล้ว",
+    "acceptInvitation": "ยอมรับคำเชิญ",
+    "accepting": "กำลังยอมรับ...",
     "verificationBanner": {
       "title": "ยืนยันอีเมลของคุณ",
       "description": "ตรวจสอบกล่องจดหมายของคุณสำหรับอีเมลยืนยันที่เราส่งให้",
@@ -161,7 +167,11 @@
       "resetTokenUsed": "ลิงก์รีเซ็ตนี้ถูกใช้ไปแล้ว",
       "currentPasswordIncorrect": "รหัสผ่านปัจจุบันไม่ถูกต้อง",
       "newPasswordSameAsCurrent": "รหัสผ่านใหม่ต้องแตกต่างจากรหัสผ่านปัจจุบัน",
-      "changePasswordFailed": "เปลี่ยนรหัสผ่านไม่สำเร็จ กรุณาลองใหม่อีกครั้ง"
+      "changePasswordFailed": "เปลี่ยนรหัสผ่านไม่สำเร็จ กรุณาลองใหม่อีกครั้ง",
+      "invitationInvalid": "ลิงก์คำเชิญนี้ไม่ถูกต้อง",
+      "invitationExpired": "คำเชิญนี้หมดอายุแล้ว",
+      "invitationUsed": "คำเชิญนี้ถูกยอมรับไปแล้ว",
+      "invitationEmailMismatch": "คำเชิญนี้ถูกส่งไปยังอีเมลอื่น กรุณาเข้าสู่ระบบด้วยอีเมลที่ได้รับเชิญเพื่อยอมรับ"
     }
   },
   "profile": {

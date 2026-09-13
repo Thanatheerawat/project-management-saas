@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
+import { Suspense } from "react";
 
 import { RegisterForm } from "@/features/auth/components/register-form";
 
@@ -18,7 +19,9 @@ export default async function RegisterPage() {
       <h1 className="text-foreground text-2xl font-bold tracking-tight">
         {t("createAccount")}
       </h1>
-      <RegisterForm />
+      <Suspense>
+        <RegisterForm />
+      </Suspense>
     </div>
   );
 }

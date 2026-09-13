@@ -71,16 +71,17 @@ model User {
   createdAt           DateTime     @default(now())
   updatedAt           DateTime     @updatedAt
 
-  accounts             Account[]
-  sessions             Session[]
-  passwordResetTokens  PasswordResetToken[]
-  auditLogs            AuditLog[]
-  workspaceMemberships WorkspaceMember[]
-  ownedProjects        Project[]
-  assignedIssues       Issue[]              @relation("IssueAssignee")
-  reportedIssues       Issue[]              @relation("IssueReporter")
-  comments             Comment[]
-  aiGenerationJobs     AiGenerationJob[]
+  accounts                 Account[]
+  sessions                 Session[]
+  passwordResetTokens      PasswordResetToken[]
+  auditLogs                AuditLog[]
+  workspaceMemberships     WorkspaceMember[]
+  ownedProjects            Project[]
+  assignedIssues           Issue[]               @relation("IssueAssignee")
+  reportedIssues           Issue[]               @relation("IssueReporter")
+  comments                 Comment[]
+  aiGenerationJobs         AiGenerationJob[]
+  sentWorkspaceInvitations WorkspaceInvitation[]
 }
 
 // Auth.js Adapter contract — required shape even though only the
@@ -192,6 +193,7 @@ model Workspace {
   projects         Project[]
   labels           Label[]
   aiGenerationJobs AiGenerationJob[]
+  invitations      WorkspaceInvitation[]
 }
 
 // Exactly one OWNER per workspace is an application-level invariant (see
@@ -211,6 +213,44 @@ model WorkspaceMember {
 
   @@unique([workspaceId, userId])
   @@index([userId])
+}
+
+// Workspace invitation: same hashed-token/expiring/single-use shape as
+// PasswordResetToken, extended with the two fields an invite needs that a
+// password reset doesn't — which workspace it grants access to, and what
+// role the membership should be created with once accepted. Deliberately
+// no unconditional `@@unique([workspaceId, email])` — that would forbid
+// ever re-inviting the same address after a prior invite expired/was
+// used, which is a real legitimate case.
+//
+// Instead, "at most one *pending* invite per (workspace, email)" is
+// enforced by a hand-written partial unique index —
+// `UNIQUE ("workspaceId", "email") WHERE "acceptedAt" IS NULL` — added via
+// a manually-written migration (Prisma's schema DSL can't express a
+// filtered/partial unique index; same documented limitation as
+// WorkspaceMember's "exactly one OWNER" comment above). This is a real
+// database-enforced invariant, not just the application-layer
+// invalidate-then-create sequence in workspace-invitation.repository.ts
+// (which alone would not be safe under concurrent requests — see
+// the invitations route's own comment for how the resulting unique-
+// constraint race is handled). `email` here is always the
+// trimmed+lowercased canonical form (normalized at the route, not here),
+// so the invariant is effectively case-insensitive too.
+model WorkspaceInvitation {
+  id          String        @id @default(uuid())
+  workspaceId String
+  inviterId   String
+  email       String
+  role        WorkspaceRole @default(MEMBER)
+  tokenHash   String        @unique
+  expiresAt   DateTime
+  acceptedAt  DateTime?
+  createdAt   DateTime      @default(now())
+
+  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  inviter   User      @relation(fields: [inviterId], references: [id], onDelete: Cascade)
+
+  @@index([workspaceId, email])
 }
 
 // onDelete: Restrict on owner (not Cascade) — blocks deleting a user while

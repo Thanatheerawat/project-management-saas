@@ -131,6 +131,12 @@
     "changePasswordButton": "Change Password",
     "changingPassword": "Changing...",
     "changePasswordSuccessToast": "Password changed successfully",
+    "invitationHeading": "Workspace Invitation",
+    "invitationSignInPrompt": "Sign in or create an account with the invited email address to accept this invitation.",
+    "invitationAcceptPrompt": "Accept this invitation to join the workspace.",
+    "invitationAcceptedMessage": "You've joined {workspace}.",
+    "acceptInvitation": "Accept Invitation",
+    "accepting": "Accepting...",
     "verificationBanner": {
       "title": "Verify your email",
       "description": "Check your inbox for the verification email we sent you.",
@@ -161,7 +167,11 @@
       "resetTokenUsed": "This reset link has already been used",
       "currentPasswordIncorrect": "Current password is incorrect.",
       "newPasswordSameAsCurrent": "New password must be different from your current password.",
-      "changePasswordFailed": "Failed to change password. Please try again."
+      "changePasswordFailed": "Failed to change password. Please try again.",
+      "invitationInvalid": "This invitation link is invalid",
+      "invitationExpired": "This invitation has expired",
+      "invitationUsed": "This invitation has already been accepted",
+      "invitationEmailMismatch": "This invitation was sent to a different email address. Sign in with the invited email to accept it."
     }
   },
   "profile": {

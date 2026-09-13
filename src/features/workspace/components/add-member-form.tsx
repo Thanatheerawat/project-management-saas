@@ -32,12 +32,23 @@ export function AddMemberForm({ workspaceId }: { workspaceId: string }) {
     }
 
     try {
-      await addMember.mutateAsync(parsed.data);
-      toast.success("Member added");
+      const result = await addMember.mutateAsync(parsed.data);
+      toast.success(
+        result.status === "added" ? "Member added" : `Invitation sent to ${result.email}`,
+      );
       setEmail("");
       setRole("MEMBER");
     } catch (err) {
-      const message = err instanceof ApiError ? err.message : "Failed to add member";
+      // "email_delivery_failed" (the invite was created but couldn't be
+      // sent) gets its own message since "Failed to add member" would be
+      // actively misleading — the account-existence branch never reaches
+      // this catch block at all, only the invite-and-email branch can.
+      const message =
+        err instanceof ApiError && err.code === "email_delivery_failed"
+          ? "Couldn't send the invitation email. Please try again."
+          : err instanceof ApiError
+            ? err.message
+            : "Failed to add member";
       setError(message);
       toast.error(message);
     }
@@ -81,8 +92,16 @@ export function AddMemberForm({ workspaceId }: { workspaceId: string }) {
         </select>
       </div>
       <Button type="submit" disabled={addMember.isPending}>
-        {addMember.isPending ? "Adding..." : "Add Member"}
+        {addMember.isPending ? "Adding..." : "Add or Invite"}
       </Button>
+      {/* Communicates the branching behavior without a second control —
+          the email itself is what decides which happens (see
+          POST .../invitations, which makes that same decision
+          server-side). */}
+      <p className="text-muted-foreground text-xs sm:basis-full">
+        Existing Orbit accounts are added immediately. Anyone else is sent an email
+        invitation.
+      </p>
       {error && <p className="text-destructive text-sm sm:basis-full">{error}</p>}
     </form>
   );
