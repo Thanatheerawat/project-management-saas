@@ -94,7 +94,7 @@
   --priority-urgent: #c0392b;
   --priority-high: #b2551e;
   --priority-medium: #8a6d1a;
-  --priority-low: #6e7578;
+  --priority-low: #697073; /* 4.83:1 on --surface-raised (#6e7578 was 4.49) */
   --priority-none: #c7cbc9;
 
   --radius-sm: 4px;
