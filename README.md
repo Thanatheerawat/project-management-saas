@@ -80,6 +80,10 @@ tests/
 └── e2e/           # Full-browser tests against a production build (Playwright)
 ```
 
+## TODO
+
+- **Error messages have no icon.** Form/API errors are plain `<p className="text-destructive">` in ~35 places and there is no shared `FormMessage`/`Alert` component. With the red light theme, a destructive state is distinguished only by its wording ("Failed to…"), not by an icon. Add a shared error-message component with a warning icon and migrate the call sites.
+
 ## Docs
 
 - [Setup Guide](./docs/setup-guide.md) — get running locally

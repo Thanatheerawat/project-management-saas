@@ -73,7 +73,7 @@ export function VerificationBanner() {
     <Card className="ring-accent/20 mb-6 [--card-spacing:--spacing(4)]">
       <CardContent className="flex flex-col items-start gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex min-w-0 items-start gap-3">
-          <div className="bg-accent/10 flex size-9 shrink-0 items-center justify-center rounded-full">
+          <div className="bg-accent-soft flex size-9 shrink-0 items-center justify-center rounded-full">
             <MailWarning className="text-accent size-4.5" aria-hidden="true" />
           </div>
           <div className="flex flex-col gap-0.5">

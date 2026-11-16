@@ -77,7 +77,7 @@ export function ChangePasswordForm() {
     <Card>
       <CardHeader>
         <div className="flex items-center gap-3">
-          <div className="bg-accent/10 flex size-9 shrink-0 items-center justify-center rounded-full">
+          <div className="bg-accent-soft flex size-9 shrink-0 items-center justify-center rounded-full">
             <Lock className="text-accent size-4.5" aria-hidden="true" />
           </div>
           <div className="flex flex-col gap-0.5">

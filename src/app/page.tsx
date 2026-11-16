@@ -128,7 +128,7 @@ export default async function Home() {
         {/* Hero */}
         <section className="bg-dot-grid bg-hero-glow relative bg-repeat">
           <PageContainer className="flex flex-col items-center gap-5 py-24 text-center sm:py-32">
-            <span className="text-accent bg-accent/10 rounded-full px-3 py-1 text-xs font-semibold tracking-wide uppercase">
+            <span className="text-accent-on-soft bg-accent-soft rounded-full px-3 py-1 text-xs font-semibold tracking-wide uppercase">
               {t("landing.eyebrow")}
             </span>
             <h1 className="text-foreground max-w-2xl text-4xl font-bold tracking-tight text-balance sm:text-6xl">
@@ -174,7 +174,7 @@ export default async function Home() {
                   className="ring-border hover:ring-accent/50 transition-colors"
                 >
                   <CardHeader>
-                    <div className="bg-accent/10 flex size-10 items-center justify-center rounded-lg">
+                    <div className="bg-accent-soft flex size-10 items-center justify-center rounded-lg">
                       <Icon className="text-accent size-5" aria-hidden="true" />
                     </div>
                     <CardTitle className="mt-2">{title}</CardTitle>

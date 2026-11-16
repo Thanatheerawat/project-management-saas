@@ -20,25 +20,38 @@
  * more generic "surface".
  */
 :root {
-  --background: #eef0f4;
-  --surface: #f7f8fa;
-  --surface-raised: #ffffff;
+  /* Light theme: white + red, same palette as the frontend-showcase
+     project. Cards (--surface-raised) are one step *darker* than the page,
+     so depth in light mode comes from the border + a faint tint, not from
+     a bright card floating on a gray canvas. */
+  --background: #ffffff;
+  --surface: #ffffff;
+  --surface-raised: #fafafa;
   --chrome: var(--surface);
-  --border: #dbdfe6;
-  --border-muted: #e6e9ee;
-  --foreground: #1a1d1f;
-  --muted: #ececea;
-  --muted-foreground: #62696c;
-  --faint: #9aa0a3;
+  --border: #e5e7eb;
+  --border-muted: #f3f4f6;
+  --foreground: #111827;
+  --muted: #f3f4f6;
+  --muted-foreground: #4b5563;
+  --faint: #8e95a3;
+  /* Small readable text that used to sit on --faint (e.g. the footer ©).
+     --faint itself is 3.0:1 on white — fine for decorative icons, below
+     AA for text — so light mode points this at --muted-foreground. */
+  --text-subtle: var(--muted-foreground);
 
-  /* Violet brand accent (contrast-verified against WCAG relative-luminance
-     math, not guessed): #7c3aed on white text = 5.70:1, and on this
-     theme's --background = 5.0:1 — both comfortably clear AA's 4.5:1 for
-     normal-size text. Recomputed against the new cooler --background
-     introduced in Phase 1 (previously 5.26:1 against the old #f5f6f5). */
-  --accent: #7c3aed;
-  --accent-hover: #6d28d9;
+  /* Red brand accent (WCAG relative-luminance math): #dc2626 on white =
+     4.83:1, on --surface-raised #fafafa = 4.63:1, white on #dc2626 =
+     4.83:1, white on hover #b91c1c = 6.47:1. #dc2626 on the soft tint
+     below is only 4.41:1, so text that sits on --accent-soft uses
+     --accent-on-soft (#b91c1c, 5.91:1) instead. */
+  --accent: #dc2626;
+  --accent-hover: #b91c1c;
   --accent-foreground: #ffffff;
+  --accent-soft: #fef2f2;
+  --accent-on-soft: #b91c1c;
+  /* Filled primary button hover. Opacity-based hover (bg-primary/80)
+     would wash red out to pink and drop white text below AA. */
+  --primary-hover: var(--accent-hover);
 
   /* Cyan — reserved exclusively for AI / live / system-state signals, not
      a general-purpose secondary accent (Signal & Structure direction).
@@ -55,7 +68,9 @@
   --primary-foreground: var(--accent-foreground);
   --secondary: var(--surface);
   --secondary-foreground: var(--foreground);
-  --destructive: #a5382b;
+  /* Deeper than --accent so a destructive control never reads as the
+     primary one; destructive buttons/badges stay tinted, not solid. */
+  --destructive: #991b1b;
   --destructive-foreground: #ffffff;
   --card: var(--surface-raised);
   --card-foreground: var(--foreground);
@@ -63,6 +78,11 @@
   --popover-foreground: var(--foreground);
   --input: var(--border);
   --ring: var(--accent);
+
+  /* Neutral dark gray for the workload chart bars in light mode (red bars
+     read as "bad"). #4b5563 is 7.24:1 on --surface-raised, well over the
+     3:1 non-text minimum. */
+  --chart-bar: #4b5563;
 
   --status-backlog: #9aa0a3;
   --status-todo: #5b7a99;
@@ -123,6 +143,15 @@
   --accent: #a78bfa;
   --accent-hover: #8b6ef0;
   --accent-foreground: #0a0a0f;
+  /* Token indirection added for the light theme's white+red palette; each
+     value below reproduces exactly what dark mode rendered before the
+     tokens existed (bg-accent/10, text-accent, bg-primary/80, the
+     primary-colored chart bars, text-faint) so dark is unchanged. */
+  --accent-soft: color-mix(in oklab, var(--accent) 10%, transparent);
+  --accent-on-soft: var(--accent);
+  --primary-hover: color-mix(in oklab, var(--primary) 80%, transparent);
+  --chart-bar: var(--primary);
+  --text-subtle: var(--faint);
 
   /* Cyan, dark: vivid against near-black (10.9:1 as text on --background)
      but paired with a dark ink foreground, not white, when used as a
@@ -182,6 +211,11 @@
   --color-accent: var(--accent);
   --color-accent-hover: var(--accent-hover);
   --color-accent-foreground: var(--accent-foreground);
+  --color-accent-soft: var(--accent-soft);
+  --color-accent-on-soft: var(--accent-on-soft);
+  --color-primary-hover: var(--primary-hover);
+  --color-chart-bar: var(--chart-bar);
+  --color-subtle: var(--text-subtle);
   --color-ai: var(--ai);
   --color-ai-foreground: var(--ai-foreground);
 
@@ -265,6 +299,17 @@ body {
   background-image: radial-gradient(
     640px circle at 50% 0%,
     color-mix(in oklch, var(--color-accent) 16%, transparent),
+    transparent 70%
+  );
+}
+
+/* Light theme only: with a red accent the 16% wash above turns the whole
+   hero/CTA band salmon-pink. Scoped with :root:not(.dark) so the .dark
+   block (and dark's glow) is untouched. */
+:root:not(.dark) .bg-hero-glow {
+  background-image: radial-gradient(
+    640px circle at 50% 0%,
+    color-mix(in oklch, var(--color-accent) 6%, transparent),
     transparent 70%
   );
 }

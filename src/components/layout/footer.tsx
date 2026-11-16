@@ -18,7 +18,7 @@ export async function Footer() {
           <OrbitBrand />
           <p className="text-muted-foreground text-sm">{t("tagline")}</p>
         </div>
-        <p className="text-faint text-xs">
+        <p className="text-subtle text-xs">
           {t("copyright", { year: new Date().getFullYear() })}
         </p>
       </PageContainer>

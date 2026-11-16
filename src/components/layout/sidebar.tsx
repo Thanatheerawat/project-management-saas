@@ -29,7 +29,7 @@ interface SidebarProps {
 // Active state (Phase 2 — Signal & Structure): a 2px left accent rail,
 // always present but transparent when inactive, so the active item never
 // shifts layout relative to its neighbors. Paired with the existing soft
-// bg-accent/10 fill rather than replacing it — a "control surface" rail
+// bg-accent-soft fill rather than replacing it — a "control surface" rail
 // indicator plus a quiet tint, not a filled pill.
 //
 // Collapsed icon-only items previously had zero accessible name (the
@@ -56,7 +56,7 @@ function SidebarNavLinks({
         const linkClasses = cn(
           "flex items-center gap-2 rounded-md border-l-2 py-1.5 pr-2 pl-[calc(--spacing(2)-2px)] text-sm transition-colors",
           active
-            ? "border-accent bg-accent/10 text-accent font-medium"
+            ? "border-accent bg-accent-soft text-accent-on-soft font-medium"
             : "border-transparent text-muted-foreground hover:bg-muted hover:text-foreground",
         );
 

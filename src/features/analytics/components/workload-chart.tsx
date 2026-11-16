@@ -20,8 +20,8 @@ const MIN_HEIGHT = 120;
 // ISSUE_PRIORITY_COLOR.NONE (the existing muted/neutral token) for the
 // "Unassigned" bucket — same "no meaningful value" semantics as an
 // issue with no priority — rather than inventing a new gray. Every real
-// member shares the app's existing accent color; there's no per-member
-// color system elsewhere in the app to draw from.
+// member shares one --chart-bar color (neutral gray in light, the accent
+// in dark); there's no per-member color system elsewhere in the app.
 export function WorkloadChart({ data }: { data: WorkloadEntry[] }) {
   return (
     <ResponsiveContainer
@@ -45,7 +45,9 @@ export function WorkloadChart({ data }: { data: WorkloadEntry[] }) {
             <Cell
               key={entry.userId ?? "unassigned"}
               fill={
-                entry.userId === null ? ISSUE_PRIORITY_COLOR.NONE : "var(--color-primary)"
+                entry.userId === null
+                  ? ISSUE_PRIORITY_COLOR.NONE
+                  : "var(--color-chart-bar)"
               }
             />
           ))}
