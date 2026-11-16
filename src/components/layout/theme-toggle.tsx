@@ -7,10 +7,13 @@ import { useTheme } from "next-themes";
 import { Button } from "@/components/ui/button";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 
-// No mounted-state gate needed: resolvedTheme is undefined on both the
-// server render and the client's first paint (next-themes only resolves
-// it after its own effect runs), so there's nothing to mismatch — it
-// just renders Moon until the theme resolves, then re-renders normally.
+// Both icons are always rendered and CSS picks one from the `.dark` class
+// next-themes puts on <html> before hydration. Choosing the icon from
+// `resolvedTheme` in render caused a hydration mismatch (#418) whenever
+// the stored theme was dark: the client's first render already knew the
+// theme, the server's HTML did not. The `[.dark_&]` variant is used
+// instead of `dark:` because this project's `dark:` follows the OS
+// preference, not the class.
 export function ThemeToggle() {
   const { resolvedTheme, setTheme } = useTheme();
   const t = useTranslations("common");
@@ -25,11 +28,8 @@ export function ThemeToggle() {
           aria-label={label}
           onClick={() => setTheme(resolvedTheme === "dark" ? "light" : "dark")}
         >
-          {resolvedTheme === "dark" ? (
-            <Sun className="size-4" />
-          ) : (
-            <Moon className="size-4" />
-          )}
+          <Sun className="hidden size-4 [.dark_&]:block" />
+          <Moon className="block size-4 [.dark_&]:hidden" />
         </Button>
       </TooltipTrigger>
       <TooltipContent>{label}</TooltipContent>
